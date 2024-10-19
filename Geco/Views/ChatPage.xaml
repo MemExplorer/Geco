@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="Geco.Views.ChatPage">
+
+    <Grid RowDefinitions="*, auto"
+          Padding="10" RowSpacing="10">
+        <Border Stroke="LightGreen">
+            
+        </Border>
+        <Grid Grid.Row="1"
+              ColumnDefinitions="45*, 5*"
+              ColumnSpacing="10">
+            <Entry Grid.Column="0" />
+            <Button  Grid.Column="1"
+                     Text=">">
+                <Button.Behaviors>
+                    <toolkit:AnimationBehavior>
+                        <toolkit:AnimationBehavior.AnimationType>
+                            <toolkit:FadeAnimation Opacity="0.5" />
+                        </toolkit:AnimationBehavior.AnimationType>
+                    </toolkit:AnimationBehavior>
+                </Button.Behaviors>
+            </Button>
+        </Grid>
+    </Grid>
+
+</ContentPage>

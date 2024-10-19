@@ -12,7 +12,12 @@
     <Color x:Key="Secondary">#4a6362</Color>
     <Color x:Key="SecondaryDarkText">#b0ccca</Color>
     <Color x:Key="Tertiary">#4a607c</Color>
-    
+
+    <Color x:Key="ContainerLight">#e1edec</Color>
+    <Color x:Key="ContainerDark">#324b4a</Color>
+    <Color x:Key="ContainerTextLight">#051f1f</Color>
+    <Color x:Key="ContainerTextDark">#cce8e6</Color>
+
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>
     <Color x:Key="Magenta">#D600AA</Color>
