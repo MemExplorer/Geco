@@ -3,11 +3,19 @@
        xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
        xmlns:local="clr-namespace:Geco"
-       Shell.FlyoutBehavior="Disabled"
        Title="Geco">
-
-    <ShellContent Title="Home"
-                  ContentTemplate="{DataTemplate local:MainPage}"
-                  Route="MainPage" />
-
+    <Shell.TitleView>
+        <Label HorizontalOptions="Start"
+               VerticalOptions="Center"
+               FontFamily="Poppins"
+               FontSize="Title"
+               TextColor="{AppThemeBinding Light={StaticResource Secondary}, Dark={StaticResource SecondaryDarkText}}"
+               Text="Geco" />
+    </Shell.TitleView>
+    <FlyoutItem Title="Home">
+        <Tab>
+            <ShellContent ContentTemplate="{DataTemplate local:MainPage}"
+                          Title="Geco" />
+        </Tab>
+    </FlyoutItem>
 </Shell>
