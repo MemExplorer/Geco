@@ -5,20 +5,22 @@
              x:Class="Geco.Views.ChatPage">
 
     <Grid RowDefinitions="90*, 7*"
-          Padding="10" RowSpacing="10">
+          Padding="10"
+          RowSpacing="10">
         <Border Stroke="LightGreen">
-            
+
         </Border>
         <Grid Grid.Row="1"
               ColumnDefinitions="25*, 5*"
               ColumnSpacing="10">
             <Border Grid.Column="0"
                     StrokeShape="RoundRectangle 30,30,30,30"
-                    Stroke="White"
+                    Stroke="Transparent"
+                    BackgroundColor="{AppThemeBinding Light=#f2f2f2, Dark=#191919}"
                     Padding="5">
                 <Entry x:Name="chatEntry"
                        FontSize="18"
-                       Margin="7,0,7, 0">
+                       Margin="7,0,7,0">
                 </Entry>
             </Border>
 
