@@ -4,17 +4,29 @@
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="Geco.Views.ChatPage">
 
-    <Grid RowDefinitions="*, auto"
+    <Grid RowDefinitions="90*, 7*"
           Padding="10" RowSpacing="10">
         <Border Stroke="LightGreen">
             
         </Border>
         <Grid Grid.Row="1"
-              ColumnDefinitions="45*, 5*"
+              ColumnDefinitions="25*, 5*"
               ColumnSpacing="10">
-            <Entry Grid.Column="0" />
-            <Button  Grid.Column="1"
-                     Text=">">
+            <Border Grid.Column="0"
+                    StrokeShape="RoundRectangle 30,30,30,30"
+                    Stroke="White"
+                    Padding="5">
+                <Entry x:Name="chatEntry"
+                       FontSize="18"
+                       Margin="7,0,7, 0">
+                </Entry>
+            </Border>
+
+            <Button Grid.Column="1"
+                    CornerRadius="30"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center"
+                    Text=">">
                 <Button.Behaviors>
                     <toolkit:AnimationBehavior>
                         <toolkit:AnimationBehavior.AnimationType>
