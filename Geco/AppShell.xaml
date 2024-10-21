@@ -19,4 +19,25 @@
                           Title="Geco" />
         </Tab>
     </FlyoutItem>
+    
+    <FlyoutItem Title="Sustainable Shopping">
+        <Tab>
+            <ShellContent ContentTemplate="{DataTemplate local:ShopPage}"
+                      Title="Geco" />
+        </Tab>
+    </FlyoutItem>
+    
+    <FlyoutItem Title="Sustainable Transportation">
+        <Tab>
+            <ShellContent ContentTemplate="{DataTemplate local:TransportPage}"
+                      Title="Geco" />
+        </Tab>
+    </FlyoutItem>
+
+    <FlyoutItem Title="Sustainable Waste">
+        <Tab>
+            <ShellContent ContentTemplate="{DataTemplate local:WastePage}"
+                      Title="Geco" />
+        </Tab>
+    </FlyoutItem>
 </Shell>
