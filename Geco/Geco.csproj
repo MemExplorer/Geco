@@ -71,11 +71,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Models\" />
-	  <Folder Include="ViewModels\" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <Compile Update="Views\ChatPage.xaml.cs">
 	    <DependentUpon>ChatPage.xaml</DependentUpon>
 	  </Compile>

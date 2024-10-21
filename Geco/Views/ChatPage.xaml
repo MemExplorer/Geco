@@ -2,17 +2,52 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:vm="clr-namespace:Geco.ViewModels"
+             xmlns:model="clr-namespace:Geco.Models"
              x:Class="Geco.Views.ChatPage">
+    <ContentPage.BindingContext>
+        <vm:ChatViewModel />
+    </ContentPage.BindingContext>
 
     <Grid RowDefinitions="90*, 7*"
           Padding="10"
           RowSpacing="10">
-        <Border Stroke="LightGreen">
 
-        </Border>
+        <!-- Chat View -->
+        <CollectionView ItemsSource="{Binding ChatMessages}"
+                        VerticalOptions="EndAndExpand">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="model:ChatMessage">
+                    <Border Stroke="Transparent"
+                            Padding="0, 10">
+                        <Grid ColumnDefinitions="10*, 50*">
+                            <Border Grid.Column="0"
+                                    BackgroundColor="Black"
+                                    Grid.Row="1"
+                                    StrokeShape="RoundRectangle 10"
+                                    Stroke="Black"
+                                    Padding="5"
+                                    VerticalOptions="Start"
+                                    HorizontalOptions="Start">
+                                <Label HorizontalTextAlignment="Center"
+                                       VerticalTextAlignment="Center"
+                                       Text="{Binding Username}"
+                                       FontSize="18" />
+                            </Border>
+
+                            <Label Grid.Column="1"
+                                   Padding="10,5,15,0"
+                                   Text="{Binding MessageContent}" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
         <Grid Grid.Row="1"
               ColumnDefinitions="25*, 5*"
               ColumnSpacing="10">
+            <!-- ChatBox -->
             <Border Grid.Column="0"
                     StrokeShape="RoundRectangle 30,30,30,30"
                     Stroke="Transparent"
@@ -24,6 +59,7 @@
                 </Entry>
             </Border>
 
+            <!-- Chat Send Button -->
             <Button Grid.Column="1"
                     CornerRadius="30"
                     VerticalOptions="Center"
