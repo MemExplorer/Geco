@@ -20,23 +20,21 @@
                 <DataTemplate x:DataType="model:ChatMessage">
                     <Border Stroke="Transparent"
                             Padding="0, 10">
-                        <Grid ColumnDefinitions="10*, 50*">
+                        <Grid ColumnDefinitions="auto, *">
                             <Border Grid.Column="0"
                                     BackgroundColor="Black"
-                                    Grid.Row="1"
                                     StrokeShape="RoundRectangle 10"
                                     Stroke="Black"
                                     Padding="5"
-                                    VerticalOptions="Start"
-                                    HorizontalOptions="Start">
+                                    VerticalOptions="Start">
                                 <Label HorizontalTextAlignment="Center"
                                        VerticalTextAlignment="Center"
                                        Text="{Binding Username}"
+                                       WidthRequest="40"
                                        FontSize="18" />
                             </Border>
-
-                            <Label Grid.Column="1"
-                                   Padding="10,5,15,0"
+                            <Label Grid.Column="1" Padding="10,5,15,0"
+                                   VerticalOptions="FillAndExpand"
                                    Text="{Binding MessageContent}" />
                         </Grid>
                     </Border>
@@ -44,24 +42,24 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <Grid Grid.Row="1"
-              ColumnDefinitions="25*, 5*"
-              ColumnSpacing="10">
+        <StackLayout Grid.Row="1"
+                     Orientation="Horizontal"
+                     Spacing="10">
             <!-- ChatBox -->
-            <Border Grid.Column="0"
-                    StrokeShape="RoundRectangle 30,30,30,30"
+            <Border StrokeShape="RoundRectangle 30,30,30,30"
                     Stroke="Transparent"
                     BackgroundColor="{AppThemeBinding Light=#f2f2f2, Dark=#191919}"
-                    Padding="5">
+                    Padding="5"
+                    HorizontalOptions="FillAndExpand">
                 <Entry x:Name="chatEntry"
                        FontSize="18"
-                       Margin="7,0,7,0">
+                       Margin="7,0,7,0"
+                       HorizontalOptions="FillAndExpand">
                 </Entry>
             </Border>
 
             <!-- Chat Send Button -->
-            <Button Grid.Column="1"
-                    CornerRadius="30"
+            <Button CornerRadius="30"
                     VerticalOptions="Center"
                     HorizontalOptions="Center"
                     Text=">">
@@ -73,7 +71,7 @@
                     </toolkit:AnimationBehavior>
                 </Button.Behaviors>
             </Button>
-        </Grid>
+        </StackLayout>
     </Grid>
 
 </ContentPage>
