@@ -14,6 +14,6 @@ public readonly record struct GeminiModelResponse(
     [property: JsonPropertyName("maxTemperature")] float? MaxTemperature,
     [property: JsonPropertyName("topP")] float? TopP,
     [property: JsonPropertyName("topK")] float? TopK
-    )
+)
 {
 }

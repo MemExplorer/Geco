@@ -1,7 +1,8 @@
+namespace Geco.Core.Gemini.Rest;
 
-namespace Geco.Core.Gemini.Rest
+public readonly record struct RequestStatus<RequestType>(
+    bool Success,
+    RequestType? Content
+)
 {
-    public readonly record struct RequestStatus<RequestType>(bool Success, RequestType? Content)
-    {
-    }
 }
