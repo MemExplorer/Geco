@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:Geco.ViewModels"
-             xmlns:model="clr-namespace:Geco.Models"
+             xmlns:geco.core="clr-namespace:Geco.Core.Gemini;assembly=Geco.Core"
              x:Class="Geco.Views.ChatPage">
     <ContentPage.BindingContext>
         <vm:ChatViewModel />
@@ -15,9 +15,10 @@
 
         <!-- Chat View -->
         <CollectionView ItemsSource="{Binding ChatMessages}"
-                        VerticalOptions="EndAndExpand">
+                        VerticalOptions="EndAndExpand"
+                        ItemsUpdatingScrollMode="KeepLastItemInView">
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="model:ChatMessage">
+                <DataTemplate x:DataType="geco.core:ChatMessage">
                     <Border Stroke="Transparent"
                             Padding="0, 10">
                         <Grid ColumnDefinitions="auto, *">
@@ -29,13 +30,13 @@
                                     VerticalOptions="Start">
                                 <Label HorizontalTextAlignment="Center"
                                        VerticalTextAlignment="Center"
-                                       Text="{Binding Username}"
+                                       Text="{Binding Role}"
                                        WidthRequest="40"
                                        FontSize="18" />
                             </Border>
                             <Label Grid.Column="1" Padding="10,5,15,0"
                                    VerticalOptions="FillAndExpand"
-                                   Text="{Binding MessageContent}" />
+                                   Text="{Binding Text}" />
                         </Grid>
                     </Border>
                 </DataTemplate>
@@ -62,8 +63,15 @@
             <Button CornerRadius="30"
                     VerticalOptions="Center"
                     HorizontalOptions="Center"
-                    Text=">">
+                    Text=">"
+                    Command="{Binding ChatSendCommand}"
+                    CommandParameter="{x:Reference chatEntry}">
+                <Button.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ChatSendCommand}"
+                                          CommandParameter="{x:Reference chatEntry}" />
+                </Button.GestureRecognizers>
                 <Button.Behaviors>
+                    
                     <toolkit:AnimationBehavior>
                         <toolkit:AnimationBehavior.AnimationType>
                             <toolkit:FadeAnimation Opacity="0.5" />

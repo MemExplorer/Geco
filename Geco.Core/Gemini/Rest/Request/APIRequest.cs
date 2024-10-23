@@ -1,20 +1,20 @@
 using System.Text;
 using System.Text.Json;
 
-namespace Geco.Core.Gemini.Rest;
+namespace Geco.Core.Gemini.Rest.Request;
 
-internal class Request : IDisposable
+internal class APIRequest : IDisposable
 {
     private HttpClient _httpClient { get; }
 
-    internal Request()
+    internal APIRequest()
     {
         _httpClient = new HttpClient();
     }
 
     internal async Task<RequestStatus<ResponseType>> PostAsync<ResponseType>(string uri, string content)
     {
-        StringContent strContent = new StringContent(content, Encoding.UTF8, "application/json");
+        var strContent = new StringContent(content, Encoding.UTF8, "application/json");
         var response = await _httpClient.PostAsync(uri, strContent);
         return await ValidateResponse<ResponseType>(response);
     }

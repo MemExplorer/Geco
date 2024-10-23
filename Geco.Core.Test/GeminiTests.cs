@@ -7,7 +7,7 @@ namespace Geco.Core.Test;
 
 public class GeminiTests
 {
-    GeminiRestClient GeminiRC = new GeminiRestClient(Secrets.GEMINI_API_KEY);
+    GeminiRestClient GeminiRC = new GeminiRestClient(Secrets.GEMINI_API_KEY, "gemini-1.5-flash-latest");
 
     [Fact]
     public async Task TestWithHistory()

@@ -13,6 +13,12 @@ public readonly record struct MessageContent(
         var firstPart = Parts.First();
         return firstPart.Text;
     }
+
+    public ChatMessage ToChatMessage()
+    {
+        return ChatMessage.FromRestMessage(this);
+    }
+
     public static MessageContent ConstructMessage(string messageContent, string? role = null)
     {
         var msg = new MessagePart(messageContent);
