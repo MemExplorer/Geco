@@ -8,47 +8,47 @@ namespace Geco;
 
 public static class MauiProgram
 {
-    public static MauiApp CreateMauiApp()
-    {
-        var builder = MauiApp.CreateBuilder();
-        builder
-            .UseMauiApp<App>()
-            .UseMauiCommunityToolkit()
-            .ConfigureFonts(fonts =>
-            {
-                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                fonts.AddFont("Poppins-Regular.ttf", "Poppins");
-            });
+	public static MauiApp CreateMauiApp()
+	{
+		var builder = MauiApp.CreateBuilder();
+		builder
+			.UseMauiApp<App>()
+			.UseMauiCommunityToolkit()
+			.ConfigureFonts(fonts =>
+			{
+				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+				fonts.AddFont("Poppins-Regular.ttf", "Poppins");
+			});
 
-        builder.Services.AddTransient<ChatPage>();
-        builder.Services.AddTransient<ChatViewModel>();
-        builder.Services.AddSingleton<AppShellViewModel>();
+		builder.Services.AddTransient<ChatPage>();
+		builder.Services.AddTransient<ChatViewModel>();
+		builder.Services.AddSingleton<AppShellViewModel>();
 
 #if DEBUG
-        builder.Logging.AddDebug();
+		builder.Logging.AddDebug();
 #endif
-        // platform specific modifications
-        ApplyAndroidModifications();
+		// platform specific modifications
+		ApplyAndroidModifications();
 
-        return builder.Build();
-    }
+		return builder.Build();
+	}
 
-    private static void ApplyAndroidModifications()
-    {
+	private static void ApplyAndroidModifications()
+	{
 #if ANDROID
-        // Adjust header title position
-        Microsoft.Maui.Handlers.ToolbarHandler.Mapper.AppendToMapping("CustomNavigationView", (handler, view) =>
-        {
-            handler.PlatformView.ContentInsetStartWithNavigation = 0;
-        });
+		// Adjust header title position
+		Microsoft.Maui.Handlers.ToolbarHandler.Mapper.AppendToMapping("CustomNavigationView", (handler, view) =>
+		{
+			handler.PlatformView.ContentInsetStartWithNavigation = 0;
+		});
 
-        // Remove underscore in Entry Control
-        Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("NoUnderline", (h, v) =>
-        {
-            h.PlatformView.BackgroundTintList =
-                Android.Content.Res.ColorStateList.ValueOf(Colors.Transparent.ToPlatform());
-        });
+		// Remove underscore in Entry Control
+		Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("NoUnderline", (h, v) =>
+		{
+			h.PlatformView.BackgroundTintList =
+				Android.Content.Res.ColorStateList.ValueOf(Colors.Transparent.ToPlatform());
+		});
 #endif
-    }
+	}
 }

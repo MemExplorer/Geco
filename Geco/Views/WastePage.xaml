@@ -5,9 +5,8 @@
              x:Class="Geco.Views.WastePage"
              Title="WastePage">
     <VerticalStackLayout>
-        <Label 
-            Text="Sustainable Waste Info goes here"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
+        <Label Text="Sustainable Waste Info goes here"
+               VerticalOptions="Center"
+               HorizontalOptions="Center" />
     </VerticalStackLayout>
 </ContentPage>

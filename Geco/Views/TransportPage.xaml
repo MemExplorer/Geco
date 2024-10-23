@@ -5,9 +5,8 @@
              x:Class="Geco.Views.TransportPage"
              Title="TransportPage">
     <VerticalStackLayout>
-        <Label 
-            Text="Sustainable Transportation Info goes here"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
+        <Label Text="Sustainable Transportation Info goes here"
+               VerticalOptions="Center"
+               HorizontalOptions="Center" />
     </VerticalStackLayout>
 </ContentPage>

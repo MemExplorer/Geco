@@ -1,5 +1,5 @@
-using Geco.Core.Gemini;
 using System.Collections.ObjectModel;
+using Geco.Core.Gemini;
 
 namespace Geco.Models.Chat;
 

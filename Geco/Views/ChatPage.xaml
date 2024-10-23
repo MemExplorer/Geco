@@ -1,39 +1,40 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<ContentPage x:Class="Geco.Views.ChatPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-             xmlns:vm="clr-namespace:Geco.ViewModels"
              xmlns:geco.core="clr-namespace:Geco.Core.Gemini;assembly=Geco.Core"
-             x:Class="Geco.Views.ChatPage">
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:vm="clr-namespace:Geco.ViewModels">
 
-    <Grid RowDefinitions="90*, 7*"
-          Padding="10"
+    <Grid Padding="10"
+          RowDefinitions="90*, 7*"
           RowSpacing="10">
 
-        <!-- Chat View -->
+        <!--  Chat View  -->
         <CollectionView ItemsSource="{Binding ChatMessages}"
-                        VerticalOptions="EndAndExpand"
-                        ItemsUpdatingScrollMode="KeepLastItemInView">
+                        ItemsUpdatingScrollMode="KeepLastItemInView"
+                        VerticalOptions="EndAndExpand">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="geco.core:ChatMessage">
-                    <Border Stroke="Transparent"
-                            Padding="0, 10">
+                    <Border Padding="0,10"
+                            Stroke="Transparent">
                         <Grid ColumnDefinitions="auto, *">
                             <Border Grid.Column="0"
-                                    BackgroundColor="Black"
-                                    StrokeShape="RoundRectangle 10"
-                                    Stroke="Black"
                                     Padding="5"
+                                    BackgroundColor="Black"
+                                    Stroke="Black"
+                                    StrokeShape="RoundRectangle 10"
                                     VerticalOptions="Start">
-                                <Label HorizontalTextAlignment="Center"
-                                       VerticalTextAlignment="Center"
+                                <Label FontSize="18"
+                                       HorizontalTextAlignment="Center"
                                        Text="{Binding Role}"
-                                       WidthRequest="40"
-                                       FontSize="18" />
+                                       VerticalTextAlignment="Center"
+                                       WidthRequest="40" />
                             </Border>
-                            <Label Grid.Column="1" Padding="10,5,15,0"
-                                   VerticalOptions="FillAndExpand"
-                                   Text="{Binding Text}" />
+                            <Label Grid.Column="1"
+                                   Padding="10,5,15,0"
+                                   Text="{Binding Text}"
+                                   VerticalOptions="FillAndExpand" />
                         </Grid>
                     </Border>
                 </DataTemplate>
@@ -43,32 +44,32 @@
         <StackLayout Grid.Row="1"
                      Orientation="Horizontal"
                      Spacing="10">
-            <!-- ChatBox -->
-            <Border StrokeShape="RoundRectangle 30,30,30,30"
+            <!--  ChatBox  -->
+            <Border Padding="5"
+                    BackgroundColor="{AppThemeBinding Light=#f2f2f2,
+                                                  Dark=#191919}"
+                    HorizontalOptions="FillAndExpand"
                     Stroke="Transparent"
-                    BackgroundColor="{AppThemeBinding Light=#f2f2f2, Dark=#191919}"
-                    Padding="5"
-                    HorizontalOptions="FillAndExpand">
+                    StrokeShape="RoundRectangle 30,30,30,30">
                 <Entry x:Name="chatEntry"
-                       FontSize="18"
                        Margin="7,0,7,0"
-                       HorizontalOptions="FillAndExpand">
-                </Entry>
+                       FontSize="18"
+                       HorizontalOptions="FillAndExpand" />
             </Border>
 
-            <!-- Chat Send Button -->
-            <Button CornerRadius="30"
-                    VerticalOptions="Center"
+            <!--  Chat Send Button  -->
+            <Button Command="{Binding ChatSendCommand}"
+                    CommandParameter="{x:Reference chatEntry}"
+                    CornerRadius="30"
                     HorizontalOptions="Center"
-                    Text=">"
-                    Command="{Binding ChatSendCommand}"
-                    CommandParameter="{x:Reference chatEntry}">
+                    Text="&gt;"
+                    VerticalOptions="Center">
                 <Button.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding ChatSendCommand}"
                                           CommandParameter="{x:Reference chatEntry}" />
                 </Button.GestureRecognizers>
                 <Button.Behaviors>
-                    
+
                     <toolkit:AnimationBehavior>
                         <toolkit:AnimationBehavior.AnimationType>
                             <toolkit:FadeAnimation Opacity="0.5" />

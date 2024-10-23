@@ -5,9 +5,8 @@
              x:Class="Geco.Views.ShopPage"
              Title="ShopPage">
     <VerticalStackLayout>
-        <Label 
-            Text="Sustainable Shopping Info goes here"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
+        <Label Text="Sustainable Shopping Info goes here"
+               VerticalOptions="Center"
+               HorizontalOptions="Center" />
     </VerticalStackLayout>
 </ContentPage>
