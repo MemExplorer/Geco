@@ -13,31 +13,26 @@
                TextColor="{AppThemeBinding Light={StaticResource ContainerTextLight}, Dark={StaticResource ContainerTextDark}}"
                Text="Geco" />
     </Shell.TitleView>
-    <FlyoutItem Title="Chat">
+    <FlyoutItem Title="Chat"
+                Icon="chatbubble.png">
         <Tab>
             <ShellContent ContentTemplate="{DataTemplate local:ChatPage}"
                           Title="Geco" />
         </Tab>
     </FlyoutItem>
-    
-    <FlyoutItem Title="Sustainable Shopping">
+
+    <FlyoutItem Title="Search"
+            Icon="search.png">
         <Tab>
-            <ShellContent ContentTemplate="{DataTemplate local:ShopPage}"
-                      Title="Geco" />
-        </Tab>
-    </FlyoutItem>
-    
-    <FlyoutItem Title="Sustainable Transportation">
-        <Tab>
-            <ShellContent ContentTemplate="{DataTemplate local:TransportPage}"
+            <ShellContent ContentTemplate="{DataTemplate local:SearchPage}"
                       Title="Geco" />
         </Tab>
     </FlyoutItem>
 
-    <FlyoutItem Title="Sustainable Waste">
-        <Tab>
-            <ShellContent ContentTemplate="{DataTemplate local:WastePage}"
-                      Title="Geco" />
-        </Tab>
-    </FlyoutItem>
+    <MenuItem Text="History"
+              IconImageSource="history.png"
+              />
+    <MenuItem Text="Settings"
+          IconImageSource="settings.png"
+          />
 </Shell>
