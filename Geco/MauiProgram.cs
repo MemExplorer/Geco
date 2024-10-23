@@ -1,4 +1,6 @@
 using CommunityToolkit.Maui;
+using Geco.ViewModels;
+using Geco.Views;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Platform;
 
@@ -19,6 +21,10 @@ public static class MauiProgram
                 fonts.AddFont("Poppins-Regular.ttf", "Poppins");
             });
 
+        builder.Services.AddTransient<ChatPage>();
+        builder.Services.AddTransient<ChatViewModel>();
+        builder.Services.AddSingleton<AppShellViewModel>();
+
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
@@ -28,7 +34,7 @@ public static class MauiProgram
         return builder.Build();
     }
 
-    static void ApplyAndroidModifications()
+    private static void ApplyAndroidModifications()
     {
 #if ANDROID
         // Adjust header title position

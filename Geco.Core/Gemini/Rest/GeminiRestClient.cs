@@ -4,21 +4,13 @@ using Geco.Core.Gemini.Rest.Request;
 
 namespace Geco.Core.Gemini.Rest;
 
-public class GeminiRestClient
+public class GeminiRestClient(string apiKey, string model, string instructions = "")
 {
-    APIRequest RequestInstance { get; }
-    string API_KEY { get; }
-    string SystemInstructions { get; }
-    string SelectedModel { get; set; }
-    const string BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
-
-    public GeminiRestClient(string apiKey, string model, string instructions = "")
-    {
-        RequestInstance = new APIRequest();
-        API_KEY = apiKey;
-        SelectedModel = model;
-        SystemInstructions = instructions;
-    }
+    private APIRequest RequestInstance { get; } = new APIRequest();
+    private string API_KEY { get; } = apiKey;
+    private string SystemInstructions { get; } = instructions;
+    private string SelectedModel { get; set; } = model;
+    private const string BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
 
     public async Task<GeminiModelResponse[]?> GetModels()
     {
@@ -36,7 +28,7 @@ public class GeminiRestClient
         var message = MessageContent.ConstructMessage(text);
         history.Add(message);
 
-        var envelopeMsg = GeminiMessageEnvelope.WrapMessage(history, SystemInstructions);
+        string envelopeMsg = GeminiMessageEnvelope.WrapMessage(history, SystemInstructions);
         var promptResult = await RequestInstance.PostAsync<GeminiMessage>($"{BASE_URL}/models/{SelectedModel}:generateContent?key={API_KEY}", envelopeMsg);
         if (!promptResult.Success)
         {

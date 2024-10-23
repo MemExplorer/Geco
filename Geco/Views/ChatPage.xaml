@@ -5,9 +5,6 @@
              xmlns:vm="clr-namespace:Geco.ViewModels"
              xmlns:geco.core="clr-namespace:Geco.Core.Gemini;assembly=Geco.Core"
              x:Class="Geco.Views.ChatPage">
-    <ContentPage.BindingContext>
-        <vm:ChatViewModel />
-    </ContentPage.BindingContext>
 
     <Grid RowDefinitions="90*, 7*"
           Padding="10"

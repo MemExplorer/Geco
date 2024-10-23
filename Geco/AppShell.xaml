@@ -3,8 +3,15 @@
        xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
        xmlns:local="clr-namespace:Geco.Views"
+       xmlns:vm="clr-namespace:Geco.ViewModels"
+       xmlns:model="clr-namespace:Geco.Models.Chat"
+       Shell.TabBarIsVisible="False"
        Shell.BackgroundColor="{AppThemeBinding Light={StaticResource ContainerLight}, Dark={StaticResource ContainerDark}}"
        Title="Geco">
+    <Shell.BindingContext>
+        <vm:AppShellViewModel />
+    </Shell.BindingContext>
+    
     <Shell.TitleView>
         <Label HorizontalOptions="Start"
                VerticalOptions="Center"
@@ -13,26 +20,17 @@
                TextColor="{AppThemeBinding Light={StaticResource ContainerTextLight}, Dark={StaticResource ContainerTextDark}}"
                Text="Geco" />
     </Shell.TitleView>
-    <FlyoutItem Title="Chat"
-                Icon="chatbubble.png">
-        <Tab>
-            <ShellContent ContentTemplate="{DataTemplate local:ChatPage}"
-                          Title="Geco" />
-        </Tab>
+    <FlyoutItem FlyoutDisplayOptions="AsMultipleItems">
+        <ShellContent ContentTemplate="{DataTemplate local:ChatPage}"
+                      Title="Chat"
+                      ClassId="ChatPage"
+                      Icon="chatbubble.png" />
+        <ShellContent ContentTemplate="{DataTemplate local:SearchPage}"
+                      Title="Search"
+                      Icon="search.png" />
+    </FlyoutItem>
+    <FlyoutItem x:Name="ChatHistoryFlyout"
+                FlyoutDisplayOptions="AsMultipleItems">
     </FlyoutItem>
 
-    <FlyoutItem Title="Search"
-            Icon="search.png">
-        <Tab>
-            <ShellContent ContentTemplate="{DataTemplate local:SearchPage}"
-                      Title="Geco" />
-        </Tab>
-    </FlyoutItem>
-
-    <MenuItem Text="History"
-              IconImageSource="history.png"
-              />
-    <MenuItem Text="Settings"
-          IconImageSource="settings.png"
-          />
 </Shell>
