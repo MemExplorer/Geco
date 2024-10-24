@@ -3,23 +3,41 @@ using Geco.Core.Gemini.Rest.Models.Message;
 
 namespace Geco.Core.Gemini;
 
+/// <summary>
+/// Provides high-level access to Google Gemini 
+/// while also allowing users to save conversations through chat history
+/// </summary>
+/// <param name="apiKey">Your Gemini API Key</param>
+/// <param name="instructions">Description about how the LLM should behave</param>
+/// <param name="model">Specify Gemini Model to use. <br></br>See available models in <see href="https://ai.google.dev/gemini-api/docs/models/gemini"/></param>
 public class GeminiClient(string apiKey, string instructions = "", string model = "gemini-1.5-flash-latest")
 {
 	private GeminiRestClient GeminiRC { get; } = new GeminiRestClient(apiKey, model, instructions);
-
 	private List<MessageContent> ChatHistory { get; } = [];
 
-	public void LoadHistory(List<ChatMessage> messages)
-	{
-		ChatHistory.AddRange(messages.Select(x => x.ToRestMessage()));
-	}
-
+	/// <summary>
+	/// Sends a prompt to Gemini
+	/// </summary>
+	/// <param name="message">Message to Gemini</param>
+	/// <returns>Gemini's repsons.</returns>
 	public async Task<ChatMessage> Prompt(string message)
 	{
 		await GeminiRC.TextPrompt(message, ChatHistory);
 		return ChatHistory.Last().ToChatMessage();
 	}
 
+	/// <summary>
+	/// Loads history from list of chat messages
+	/// </summary>
+	/// <param name="messages">The whole chat conversation</param>
+	public void LoadHistory(List<ChatMessage> messages)
+	{
+		ChatHistory.AddRange(messages.Select(x => x.ToRestMessage()));
+	}
+
+	/// <summary>
+	/// Clears chat history
+	/// </summary>
 	public void ClearHistory()
 	{
 		ChatHistory.Clear();

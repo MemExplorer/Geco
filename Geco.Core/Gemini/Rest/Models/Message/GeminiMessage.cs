@@ -6,7 +6,7 @@ public readonly record struct GeminiMessage(
 	[property: JsonPropertyName("candidates")] CandidateResponse[] CandidateResponses
 )
 {
-	public MessageContent ExtractMessageContent()
+	internal MessageContent ExtractMessageContent()
 	{
 		// Always pick the first candidate response
 		var candResp = CandidateResponses.First();

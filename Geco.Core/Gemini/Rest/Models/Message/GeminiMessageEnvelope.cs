@@ -8,7 +8,7 @@ public readonly record struct GeminiMessageEnvelope(
 	[property: JsonPropertyName("systemInstruction")] MessageContent SystemInstructions
 )
 {
-	public static string WrapMessage(List<MessageContent> messages, string instructions)
+	internal static string WrapMessage(List<MessageContent> messages, string instructions)
 	{
 		var wrappedMsg = new GeminiMessageEnvelope(messages, MessageContent.ConstructMessage(instructions));
 		return JsonSerializer.Serialize(wrappedMsg);

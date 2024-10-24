@@ -3,25 +3,23 @@ using System.Text.Json;
 
 namespace Geco.Core.Gemini.Rest.Request;
 
-internal class APIRequest : IDisposable
+/// <summary>
+/// Class responsible for creating web requests
+/// </summary>
+internal class APIRequest
 {
-	private HttpClient _httpClient { get; }
-
-	internal APIRequest()
-	{
-		_httpClient = new HttpClient();
-	}
-
 	internal async Task<RequestStatus<ResponseType>> PostAsync<ResponseType>(string uri, string content)
 	{
 		var strContent = new StringContent(content, Encoding.UTF8, "application/json");
-		var response = await _httpClient.PostAsync(uri, strContent);
+		using var httpClient = new HttpClient();
+		var response = await httpClient.PostAsync(uri, strContent);
 		return await ValidateResponse<ResponseType>(response);
 	}
 
 	internal async Task<RequestStatus<ResponseType>> GetAsync<ResponseType>(string uri)
 	{
-		var response = await _httpClient.GetAsync(uri);
+		using var httpClient = new HttpClient();
+		var response = await httpClient.GetAsync(uri);
 		return await ValidateResponse<ResponseType>(response);
 	}
 
@@ -40,11 +38,5 @@ internal class APIRequest : IDisposable
 		}
 
 		return new(true, deserializedResponse);
-	}
-
-	public void Dispose()
-	{
-		if (_httpClient != null)
-			_httpClient.Dispose();
 	}
 }

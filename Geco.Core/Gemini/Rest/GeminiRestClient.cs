@@ -4,15 +4,27 @@ using Geco.Core.Gemini.Rest.Request;
 
 namespace Geco.Core.Gemini.Rest;
 
-public class GeminiRestClient(string apiKey, string model, string instructions = "")
+/// <summary>
+/// Low-level access to Google Gemini API
+/// </summary>
+/// <param name="apiKey"></param>
+/// <param name="model"></param>
+/// <param name="instructions"></param>
+internal class GeminiRestClient(string apiKey, string model, string instructions = "")
 {
+	private const string BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
 	private APIRequest RequestInstance { get; } = new APIRequest();
 	private string API_KEY { get; } = apiKey;
 	private string SystemInstructions { get; } = instructions;
 	private string SelectedModel { get; set; } = model;
-	private const string BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
 
-	public async Task<GeminiModelResponse[]?> GetModels()
+	/// <summary>
+	/// Gets all the available model including its details
+	/// </summary>
+	/// <returns>A list of Gemini model including its description, 
+	/// limitations, and parameters</returns>
+	/// <exception cref="Exception"></exception>
+	internal async Task<GeminiModelResponse[]?> GetModels()
 	{
 		var getModelsResult = await RequestInstance.GetAsync<GeminiModelsResponse>($"{BASE_URL}/models?key={API_KEY}");
 		if (!getModelsResult.Success)
@@ -23,7 +35,13 @@ public class GeminiRestClient(string apiKey, string model, string instructions =
 		return getModelsResult.Content.Models;
 	}
 
-	public async Task TextPrompt(string text, List<MessageContent> history)
+	/// <summary>
+	/// Sends a prompt to Gemini
+	/// </summary>
+	/// <param name="text">Message to Gemini</param>
+	/// <param name="history">Contents of chat history</param>
+	/// <exception cref="Exception"></exception>
+	internal async Task TextPrompt(string text, List<MessageContent> history)
 	{
 		var message = MessageContent.ConstructMessage(text);
 		history.Add(message);
