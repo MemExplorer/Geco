@@ -44,7 +44,7 @@
         <StackLayout Grid.Row="1"
                      Orientation="Horizontal"
                      Spacing="10">
-            <!--  ChatBox  -->
+            <!--  Chat Entry/Input  -->
             <Border Padding="5"
                     BackgroundColor="{AppThemeBinding Light=#f2f2f2,
                                                   Dark=#191919}"

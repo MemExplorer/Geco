@@ -18,13 +18,15 @@ public partial class AppShell : Shell
 
 	private async void ChatHistoryList_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
 	{
+		// This event is triggered when a user creates a new instace of chat and sends a chat
 		if (e.Action == NotifyCollectionChangedAction.Add)
 		{
 			if (e.NewItems == null)
 				return;
 
+			// only one item is added
 			var firstItem = (ChatHistory)e.NewItems[0]!;
-			var c = new ShellContent()
+			var newChatPage = new ShellContent()
 			{
 				ClassId = firstItem.Id,
 				Route = firstItem.Id,
@@ -33,7 +35,10 @@ public partial class AppShell : Shell
 				Icon = "chatbubble.png"
 			};
 
-			ChatHistoryFlyout.Items.Insert(0, c);
+			// Insert newest chats at the top
+			ChatHistoryFlyout.Items.Insert(0, newChatPage);
+
+			// redirect user to the new chat page
 			await GoToAsync("//" + firstItem.Id);
 		}
 	}

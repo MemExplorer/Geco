@@ -11,7 +11,8 @@
     <Shell.BindingContext>
         <vm:AppShellViewModel />
     </Shell.BindingContext>
-    
+
+    <!-- Geco Title -->
     <Shell.TitleView>
         <Label HorizontalOptions="Start"
                VerticalOptions="Center"
@@ -20,6 +21,8 @@
                TextColor="{AppThemeBinding Light={StaticResource ContainerTextLight}, Dark={StaticResource ContainerTextDark}}"
                Text="Geco" />
     </Shell.TitleView>
+
+    <!-- Default flyout Items (Chat, Search)-->
     <FlyoutItem FlyoutDisplayOptions="AsMultipleItems">
         <ShellContent ContentTemplate="{DataTemplate local:ChatPage}"
                       Title="Chat"
@@ -29,8 +32,11 @@
                       Title="Search"
                       Icon="search.png" />
     </FlyoutItem>
+
+    <!-- Chat History -->
     <FlyoutItem x:Name="ChatHistoryFlyout"
                 FlyoutDisplayOptions="AsMultipleItems">
+        <!-- Chat History gets added inside here -->
     </FlyoutItem>
 
 </Shell>
