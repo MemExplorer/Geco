@@ -1,15 +1,15 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Geco.Core.Database;
 using Geco.Core.Gemini;
-using Geco.Models.Chat;
 
 namespace Geco.ViewModels;
 
 public partial class ChatViewModel : ObservableObject
 {
 	private GeminiClient GeminiClient { get; }
-	private bool LoadedFromHistory { get; set; }
+	private string? HistoryId { get; set; }
 
 	[ObservableProperty]
 	private ObservableCollection<ChatMessage> chatMessages;
@@ -18,7 +18,7 @@ public partial class ChatViewModel : ObservableObject
 	{
 		chatMessages = [];
 		GeminiClient = new GeminiClient("API_KEY");
-		LoadedFromHistory = false;
+		HistoryId = null;
 	}
 
 	public void LoadHistory(ChatHistory history)
@@ -26,31 +26,39 @@ public partial class ChatViewModel : ObservableObject
 		ChatMessages = history.Messages;
 		GeminiClient.ClearHistory();
 		GeminiClient.LoadHistory([.. history.Messages]);
-		LoadedFromHistory = true;
+		HistoryId = history.Id;
 	}
 
 	public void Reset()
 	{
 		ChatMessages = [];
 		GeminiClient.ClearHistory();
-		LoadedFromHistory = false;
+		HistoryId = null;
 	}
 
 	[RelayCommand]
 	private async Task ChatSend(Entry inputEntry)
 	{
+		var currentShell = ((AppShell)Shell.Current);
+		var chatRepo = currentShell.SvcProvider.GetService<ChatRepository>();
+
 		// do not send an empty message
 		if (string.IsNullOrWhiteSpace(inputEntry.Text))
-		{
 			return;
-		}
+
+		// hide keyboard after sending a message
+		await inputEntry.HideSoftInputAsync(CancellationToken.None);
 
 		// saves new instance of a chat
-		if (ChatMessages.Count == 0 && !LoadedFromHistory)
+		bool newChat = ChatMessages.Count == 0 && HistoryId == null;
+		if (newChat)
 		{
-			var shellViewModel = (AppShellViewModel)Shell.Current.BindingContext;
+			var shellViewModel = (AppShellViewModel)currentShell.BindingContext;
 			string chatTitle = CreateChatTitle(inputEntry.Text);
-			shellViewModel.ChatHistoryList.Add(new(Guid.NewGuid().ToString(), chatTitle, ChatMessages));
+			var historyInstance = new ChatHistory(Guid.NewGuid().ToString(), chatTitle, DateTimeOffset.UtcNow.ToUnixTimeSeconds(), ChatMessages);
+			shellViewModel.ChatHistoryList.Add(historyInstance);
+			await chatRepo!.AppendHistory(historyInstance);
+			HistoryId = historyInstance.Id;
 		}
 
 		// set input to empty string after sending a message
@@ -58,11 +66,22 @@ public partial class ChatViewModel : ObservableObject
 		inputEntry.Text = string.Empty;
 
 		// Add user's message to message list
-		ChatMessages.Add(new(inputContent, "User"));
+		ulong currentMsgId = (ulong)ChatMessages.Count;
+		var userMsg = new ChatMessage(currentMsgId, inputContent, "User");
+		ChatMessages.Add(userMsg);
+
 
 		// send user message to Gemini and append its response
-		var response = await GeminiClient.Prompt(inputContent);
-		ChatMessages.Add(response);
+		var rawResponse = await GeminiClient.Prompt(inputContent);
+		var chatResponse = rawResponse.ToChatMessage(currentMsgId + 1);
+		ChatMessages.Add(chatResponse);
+
+		// save chat to database
+		await chatRepo!.AppendChat(HistoryId!, userMsg);
+		await chatRepo!.AppendChat(HistoryId!, chatResponse);
+
+		if (newChat)
+			await currentShell.GoToAsync("//" + HistoryId);
 	}
 
 	private static string CreateChatTitle(string message)
@@ -70,12 +89,8 @@ public partial class ChatViewModel : ObservableObject
 		// For now, I think 17 is a good max length for a title
 		const uint MAX_TITLE_LEN = 17;
 		if (message.Length <= MAX_TITLE_LEN)
-		{
 			return message.Trim() + "...";
-		}
 		else
-		{
 			return message[..17].Trim() + "...";
-		}
 	}
 }

@@ -13,6 +13,7 @@
         <UseMaui>true</UseMaui>
 		<OutputType>Exe</OutputType>
 		<RootNamespace>Geco</RootNamespace>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
 		<!-- Display name -->
 		<ApplicationTitle>Geco</ApplicationTitle>
@@ -76,6 +77,10 @@
 	  <MauiXaml Update="Views\WastePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Models\" />
 	</ItemGroup>
 
 </Project>

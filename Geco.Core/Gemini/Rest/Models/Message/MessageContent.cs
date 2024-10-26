@@ -14,10 +14,7 @@ public readonly record struct MessageContent(
 		return firstPart.Text;
 	}
 
-	internal ChatMessage ToChatMessage()
-	{
-		return ChatMessage.FromRestMessage(this);
-	}
+	public ChatMessage ToChatMessage(ulong currentId) => ChatMessage.FromRestMessage(currentId, this);
 
 	internal static MessageContent ConstructMessage(string messageContent, string? role = null)
 	{

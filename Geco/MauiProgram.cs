@@ -1,4 +1,5 @@
 using CommunityToolkit.Maui;
+using Geco.Core.Database;
 using Geco.ViewModels;
 using Geco.Views;
 using Microsoft.Extensions.Logging;
@@ -21,9 +22,13 @@ public static class MauiProgram
 				fonts.AddFont("Poppins-Regular.ttf", "Poppins");
 			});
 
+		// page and view model instances
+		builder.Services.AddSingleton<AppShellViewModel>();
 		builder.Services.AddTransient<ChatPage>();
 		builder.Services.AddTransient<ChatViewModel>();
-		builder.Services.AddSingleton<AppShellViewModel>();
+
+		// data repository instances
+		builder.Services.AddSingleton<ChatRepository>();
 
 #if DEBUG
 		builder.Logging.AddDebug();

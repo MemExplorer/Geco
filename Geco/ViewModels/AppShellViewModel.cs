@@ -1,7 +1,7 @@
 
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Geco.Models.Chat;
+using Geco.Core.Gemini;
 
 namespace Geco.ViewModels;
 
