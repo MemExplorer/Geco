@@ -10,7 +10,7 @@ namespace Geco.Core.Gemini.Rest;
 /// <param name="apiKey"></param>
 /// <param name="model"></param>
 /// <param name="instructions"></param>
-internal class GeminiRestClient(string apiKey, string model, string instructions = "")
+internal class GeminiRestClient(string apiKey, string model, string instructions = "", GenerationConfig? GenConfig = null)
 {
 	private const string BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
 	private APIRequest RequestInstance { get; } = new APIRequest();
@@ -46,7 +46,7 @@ internal class GeminiRestClient(string apiKey, string model, string instructions
 		var message = MessageContent.ConstructMessage(text);
 		history.Add(message);
 
-		string envelopeMsg = GeminiMessageEnvelope.WrapMessage(history, SystemInstructions);
+		string envelopeMsg = GeminiMessageEnvelope.WrapMessage(history, SystemInstructions, GenConfig);
 		var promptResult = await RequestInstance.PostAsync<GeminiMessage>($"{BASE_URL}/models/{SelectedModel}:generateContent?key={API_KEY}", envelopeMsg);
 		if (!promptResult.Success)
 		{

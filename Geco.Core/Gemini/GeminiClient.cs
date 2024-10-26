@@ -10,9 +10,9 @@ namespace Geco.Core.Gemini;
 /// <param name="apiKey">Your Gemini API Key</param>
 /// <param name="instructions">Description about how the LLM should behave</param>
 /// <param name="model">Specify Gemini Model to use. <br></br>See available models in <see href="https://ai.google.dev/gemini-api/docs/models/gemini"/></param>
-public class GeminiClient(string apiKey, string instructions = "", string model = "gemini-1.5-flash-latest")
+public class GeminiClient(string apiKey, string instructions = "", string model = "gemini-1.5-flash-latest", GenerationConfig? GenConfig = null)
 {
-	private GeminiRestClient GeminiRC { get; } = new GeminiRestClient(apiKey, model, instructions);
+	private GeminiRestClient GeminiRC { get; } = new GeminiRestClient(apiKey, model, instructions, GenConfig);
 	private List<MessageContent> ChatHistory { get; } = [];
 
 	/// <summary>
