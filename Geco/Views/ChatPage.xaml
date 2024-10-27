@@ -58,9 +58,7 @@
             </Border>
 
             <!--  Chat Send Button  -->
-            <Button Command="{Binding ChatSendCommand}"
-                    CommandParameter="{x:Reference chatEntry}"
-                    CornerRadius="30"
+            <Button CornerRadius="30"
                     HorizontalOptions="Center"
                     Text="&gt;"
                     VerticalOptions="Center">

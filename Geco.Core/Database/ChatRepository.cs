@@ -92,4 +92,13 @@ public class ChatRepository
 			history.Messages.Add(chatEntry);
 		}
 	}
+
+	public async Task DeleteHistory(string historyId)
+	{
+		await InitializeTables();
+
+		using var db = await SqliteDB.GetTransient();
+		await db.ExecuteNonQuery("DELETE FROM TblChatHistory WHERE Id = ?", historyId);
+		await db.ExecuteNonQuery("DELETE FROM TblChatMessage WHERE HistoryId = ?", historyId);
+	}
 }
