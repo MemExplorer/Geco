@@ -18,11 +18,27 @@ public partial class AppShellViewModel : ObservableObject
 	[ObservableProperty]
 	private bool isChatInstance;
 
+	[ObservableProperty]
+	private string pageTitle;
+
 	public AppShellViewModel()
 	{
 		ChatHistoryList = [];
 		IsChatPage = false;
 		IsChatInstance = false;
+		PageTitle = "Geco";
+	}
+
+	[RelayCommand]
+	public async Task GotoSettings()
+	{
+		var currentShell = ((AppShell)Shell.Current);
+
+		// close flyout
+		currentShell.FlyoutIsPresented = false;
+
+		// navigate to settings
+		await Shell.Current.GoToAsync("SettingsPage");
 	}
 
 	[RelayCommand]

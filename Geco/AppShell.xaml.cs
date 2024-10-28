@@ -13,10 +13,14 @@ public partial class AppShell : Shell
 	public AppShell(IServiceProvider provider)
 	{
 		InitializeComponent();
+
 		SvcProvider = provider;
 		Context = (AppShellViewModel)BindingContext;
 		Context.ChatHistoryList.CollectionChanged += ChatHistoryList_CollectionChanged;
 		Navigated += AppShell_Navigated;
+
+		// register routes
+		Routing.RegisterRoute(nameof(SettingsPage), typeof(SettingsPage));
 
 		// Adding an item to the Context.ChatHistoryList triggers an event that executes code to create 
 		// a new flyout item using the details from the chat history entry.
@@ -26,9 +30,19 @@ public partial class AppShell : Shell
 
 	private void AppShell_Navigated(object? sender, ShellNavigatedEventArgs e)
 	{
-		var currShellContent = (ShellContent)CurrentPage.Parent;
-		Context.IsChatPage = CurrentPage is ChatPage;
-		Context.IsChatInstance = Context.IsChatPage && currShellContent.ClassId != "ChatPage";
+		if (CurrentPage.Parent is ShellContent currShellContent)
+		{
+			Context.IsChatPage = CurrentPage is ChatPage;
+			Context.IsChatInstance = Context.IsChatPage && currShellContent.ClassId != "ChatPage";
+		}
+		else
+		{
+			Context.IsChatPage = false;
+			Context.IsChatInstance = false;
+		}
+
+		// update current page title
+		Context.PageTitle = CurrentPage.Title;
 	}
 
 	private void ChatHistoryList_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

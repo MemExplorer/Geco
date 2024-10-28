@@ -21,7 +21,7 @@
                    FontSize="Title"
                    Margin="0,3,0,0"
                    TextColor="{AppThemeBinding Light={StaticResource ContainerTextLight}, Dark={StaticResource ContainerTextDark}}"
-                   Text="Geco" />
+                   Text="{Binding PageTitle}" />
             <Label HorizontalOptions="Start"
                    VerticalOptions="Center"
                    FontFamily="Poppins"
@@ -36,7 +36,7 @@
             </Label>
         </StackLayout>
     </Shell.TitleView>
-
+    
     <!-- Default flyout Items (Chat, Search)-->
     <FlyoutItem FlyoutDisplayOptions="AsMultipleItems">
         <ShellContent ContentTemplate="{DataTemplate local:ChatPage}"
@@ -44,9 +44,6 @@
                       ClassId="ChatPage"
                       Icon="chatbubble.png"
                       Route="ChatPage" />
-        <ShellContent ContentTemplate="{DataTemplate local:SearchPage}"
-                      Title="Search"
-                      Icon="search.png" />
     </FlyoutItem>
 
     <!-- Chat History -->
@@ -54,5 +51,24 @@
                 FlyoutDisplayOptions="AsMultipleItems">
         <!-- Chat History gets added inside here -->
     </FlyoutItem>
-
+    <Shell.FlyoutFooterTemplate>
+        <DataTemplate>
+            <StackLayout Orientation="Horizontal">
+                <Border HorizontalOptions="FillAndExpand">
+                    <Label HorizontalTextAlignment="Center"
+                           VerticalTextAlignment="Center"
+                           Text="Add something here..." />
+                </Border>
+                <Border HorizontalOptions="End">
+                    <Button BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource ContainerTextLight}, Dark={StaticResource ContainerTextDark}}"
+                            Text="S">
+                        <Button.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GotoSettingsCommand}" />
+                        </Button.GestureRecognizers>
+                    </Button>
+                </Border>
+            </StackLayout>
+        </DataTemplate>
+    </Shell.FlyoutFooterTemplate>
 </Shell>
