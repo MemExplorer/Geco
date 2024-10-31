@@ -42,8 +42,13 @@
         <ShellContent ContentTemplate="{DataTemplate local:ChatPage}"
                       Title="Chat"
                       ClassId="ChatPage"
-                      Icon="chatbubble.png"
+                      Icon="chat_icon.svg"
                       Route="ChatPage" />
+        <ShellContent ContentTemplate="{DataTemplate local:SearchPage}"
+                      Title="Search"
+                      ClassId="SearchPage"
+                      Route="SearchPage">
+        </ShellContent>
     </FlyoutItem>
 
     <!-- Chat History -->

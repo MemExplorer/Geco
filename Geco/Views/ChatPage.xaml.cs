@@ -27,17 +27,6 @@ public partial class ChatPage : ContentPage
 		 * - Basically, this code mimics the creation of new instance of chat
 		 */
 
-		// temporary solution for theme bug
-		bool isDarkTheme = Application.Current!.RequestedTheme == AppTheme.Dark;
-		foreach (var currentBtn in BtnSelection.Children)
-		{
-			if (currentBtn is not SelectableButton sb)
-				continue;
-
-			sb.UnselectedColor = isDarkTheme ? Color.FromArgb("#FF262626") : Colors.LightGray;
-			sb.SelectedColor = isDarkTheme ? Color.FromArgb("#FF141414") : Color.FromArgb("#FFb5b5b5");
-		}
-
 		var ctx = (ChatViewModel)BindingContext;
 		if (Parent.ClassId == "ChatPage")
 		{

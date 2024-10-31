@@ -64,7 +64,7 @@ public partial class ChatViewModel : ObservableObject
 
 
 		// send user message to Gemini and append its response
-		var rawResponse = await GeminiClient.Prompt(inputContent);
+		var rawResponse = await GeminiClient.Prompt(inputContent, true);
 		var chatResponse = rawResponse.ToChatMessage(currentMsgId + 1);
 		ChatMessages.Add(chatResponse);
 

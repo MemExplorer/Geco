@@ -26,11 +26,13 @@ public class GeminiClient(
 	///     Sends a prompt to Gemini
 	/// </summary>
 	/// <param name="message">Message to Gemini</param>
+	/// <param name="conversational">Is the prompt conversational</param>
 	/// <returns>Gemini's response.</returns>
-	public async Task<MessageContent> Prompt(string message)
+	public async Task<MessageContent> Prompt(string message, bool conversational = false)
 	{
-		await GeminiRc.TextPrompt(message, ChatHistory);
-		return ChatHistory.Last();
+		var conversation = conversational ? ChatHistory : [];
+		await GeminiRc.TextPrompt(message, conversation);
+		return conversation.Last();
 	}
 
 	/// <summary>
