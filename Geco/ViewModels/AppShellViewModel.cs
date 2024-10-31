@@ -1,4 +1,3 @@
-
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -9,17 +8,13 @@ namespace Geco.ViewModels;
 
 public partial class AppShellViewModel : ObservableObject
 {
-	[ObservableProperty]
-	private ObservableCollection<ChatHistory> chatHistoryList;
+	[ObservableProperty] ObservableCollection<ChatHistory> _chatHistoryList;
 
-	[ObservableProperty]
-	private bool isChatPage;
+	[ObservableProperty] bool _isChatInstance;
 
-	[ObservableProperty]
-	private bool isChatInstance;
+	[ObservableProperty] bool _isChatPage;
 
-	[ObservableProperty]
-	private string pageTitle;
+	[ObservableProperty] string _pageTitle;
 
 	public AppShellViewModel()
 	{
@@ -30,9 +25,9 @@ public partial class AppShellViewModel : ObservableObject
 	}
 
 	[RelayCommand]
-	public async Task GotoSettings()
+	async Task GotoSettings()
 	{
-		var currentShell = ((AppShell)Shell.Current);
+		var currentShell = (AppShell)Shell.Current;
 
 		// close flyout
 		currentShell.FlyoutIsPresented = false;
@@ -42,18 +37,20 @@ public partial class AppShellViewModel : ObservableObject
 	}
 
 	[RelayCommand]
-	public async Task DeleteChat()
+	async Task DeleteChat()
 	{
-		var currentShell = ((AppShell)Shell.Current);
+		var currentShell = (AppShell)Shell.Current;
 
 		// delete confirmation dialog
-		var deleteAns = await currentShell.DisplayAlert("", "Are you sure you want to delete this conversation?", "Yes", "No");
+		bool deleteAns =
+			await currentShell.DisplayAlert("", "Are you sure you want to delete this conversation?", "Yes", "No");
+
 		if (!deleteAns)
 			return;
 
 		// get selected chat
 		var chatRepo = currentShell.SvcProvider.GetService<ChatRepository>();
-		var currentPageId = currentShell.CurrentPage.Parent.ClassId;
+		string? currentPageId = currentShell.CurrentPage.Parent.ClassId;
 		var selectedChat = ChatHistoryList.First(x => x.Id == currentPageId);
 
 		// delete history in flyout

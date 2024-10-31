@@ -4,39 +4,39 @@ using System.Text.Json;
 namespace Geco.Core.Gemini.Rest.Request;
 
 /// <summary>
-/// Class responsible for creating web requests
+///     Class responsible for creating web requests
 /// </summary>
-internal class APIRequest
+class ApiRequest
 {
-	internal async Task<RequestStatus<ResponseType>> PostAsync<ResponseType>(string uri, string content)
+	internal async Task<RequestStatus<TResponseType>> PostAsync<TResponseType>(string uri, string content)
 	{
 		var strContent = new StringContent(content, Encoding.UTF8, "application/json");
 		using var httpClient = new HttpClient();
 		var response = await httpClient.PostAsync(uri, strContent);
-		return await ValidateResponse<ResponseType>(response);
+		return await ValidateResponse<TResponseType>(response);
 	}
 
-	internal async Task<RequestStatus<ResponseType>> GetAsync<ResponseType>(string uri)
+	internal async Task<RequestStatus<TResponseType>> GetAsync<TResponseType>(string uri)
 	{
 		using var httpClient = new HttpClient();
 		var response = await httpClient.GetAsync(uri);
-		return await ValidateResponse<ResponseType>(response);
+		return await ValidateResponse<TResponseType>(response);
 	}
 
-	private async Task<RequestStatus<ResponseType>> ValidateResponse<ResponseType>(HttpResponseMessage? response)
+	async Task<RequestStatus<TResponseType>> ValidateResponse<TResponseType>(HttpResponseMessage? response)
 	{
-		if (response == null || !response.IsSuccessStatusCode)
+		if (response is not { IsSuccessStatusCode: true })
 		{
 			return default; // assume new(false, default(ResponseType))
 		}
 
-		var strJsonResponse = await response.Content.ReadAsStringAsync();
-		var deserializedResponse = JsonSerializer.Deserialize<ResponseType>(strJsonResponse);
+		string strJsonResponse = await response.Content.ReadAsStringAsync();
+		var deserializedResponse = JsonSerializer.Deserialize<TResponseType>(strJsonResponse);
 		if (deserializedResponse == null)
 		{
 			return default; // assume new(false, default(ResponseType))
 		}
 
-		return new(true, deserializedResponse);
+		return new RequestStatus<TResponseType>(true, deserializedResponse);
 	}
 }

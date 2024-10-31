@@ -1,19 +1,19 @@
-
 using System.Text;
 
 namespace Geco.Core.Database.SqliteModel;
-internal readonly record struct TblField(string Name, TblFieldType FieldType, bool IsPrimaryKey = false)
+
+readonly record struct TblField(string Name, TblFieldType FieldType, bool IsPrimaryKey = false)
 {
 	internal string ToQueryPart()
 	{
 		var sb = new StringBuilder();
-		var fieldTypeStr = FieldType switch
+		string fieldTypeStr = FieldType switch
 		{
-			TblFieldType.NULL => "NULL",
-			TblFieldType.INTEGER => "INTEGER",
-			TblFieldType.REAL => "REAL",
-			TblFieldType.TEXT => "TEXT",
-			TblFieldType.BLOB => "BLOB",
+			TblFieldType.Null => "NULL",
+			TblFieldType.Integer => "INTEGER",
+			TblFieldType.Real => "REAL",
+			TblFieldType.Text => "TEXT",
+			TblFieldType.Blob => "BLOB",
 			_ => throw new NotSupportedException()
 		};
 

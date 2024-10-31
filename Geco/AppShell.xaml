@@ -1,12 +1,12 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
+
 <Shell x:Class="Geco.AppShell"
        xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
        xmlns:local="clr-namespace:Geco.Views"
        xmlns:vm="clr-namespace:Geco.ViewModels"
-       xmlns:geco="clr-namespace:Geco"
        Shell.TabBarIsVisible="False"
-       Shell.BackgroundColor="{AppThemeBinding Light={StaticResource ContainerLight}, Dark={StaticResource ContainerDark}}"
+       BackgroundColor="{AppThemeBinding Light={StaticResource ContainerLight}, Dark={StaticResource ContainerDark}}"
        Title="Geco">
     <Shell.BindingContext>
         <vm:AppShellViewModel />
@@ -36,7 +36,7 @@
             </Label>
         </StackLayout>
     </Shell.TitleView>
-    
+
     <!-- Default flyout Items (Chat, Search)-->
     <FlyoutItem FlyoutDisplayOptions="AsMultipleItems">
         <ShellContent ContentTemplate="{DataTemplate local:ChatPage}"

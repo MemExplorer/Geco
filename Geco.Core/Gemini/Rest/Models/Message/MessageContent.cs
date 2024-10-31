@@ -19,6 +19,6 @@ public readonly record struct MessageContent(
 	internal static MessageContent ConstructMessage(string messageContent, string? role = null)
 	{
 		var msg = new MessagePart(messageContent);
-		return new([msg], role ?? "User");
+		return new MessageContent([msg], role ?? "User");
 	}
 }

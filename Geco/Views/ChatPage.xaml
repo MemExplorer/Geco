@@ -1,16 +1,16 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
+
 <ContentPage x:Class="Geco.Views.ChatPage"
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:geco.core="clr-namespace:Geco.Core.Gemini;assembly=Geco.Core"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
-             xmlns:vm="clr-namespace:Geco.ViewModels"
              Title="Geco">
 
     <StackLayout Padding="10"
                  Spacing="10">
-        
+
         <!-- Sustainable Chips (TODO: Disappear after chatting) -->
         <StackLayout Orientation="Vertical">
             <input:SelectionView x:Name="BtnSelection"
@@ -70,7 +70,7 @@
                     HorizontalOptions="FillAndExpand"
                     Stroke="Transparent"
                     StrokeShape="RoundRectangle 30,30,30,30">
-                <Entry x:Name="chatEntry"
+                <Entry x:Name="ChatEntry"
                        Margin="7,0,7,0"
                        FontSize="18"
                        HorizontalOptions="FillAndExpand" />
@@ -83,7 +83,7 @@
                     VerticalOptions="Center">
                 <Button.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding ChatSendCommand}"
-                                          CommandParameter="{x:Reference chatEntry}" />
+                                          CommandParameter="{x:Reference ChatEntry}" />
                 </Button.GestureRecognizers>
                 <Button.Behaviors>
 

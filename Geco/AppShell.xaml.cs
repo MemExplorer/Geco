@@ -8,8 +8,6 @@ namespace Geco;
 
 public partial class AppShell : Shell
 {
-	private AppShellViewModel Context { get; }
-	internal IServiceProvider SvcProvider { get; }
 	public AppShell(IServiceProvider provider)
 	{
 		InitializeComponent();
@@ -28,7 +26,10 @@ public partial class AppShell : Shell
 		chatRepo!.LoadHistory(Context.ChatHistoryList).Wait();
 	}
 
-	private void AppShell_Navigated(object? sender, ShellNavigatedEventArgs e)
+	AppShellViewModel Context { get; }
+	internal IServiceProvider SvcProvider { get; }
+
+	void AppShell_Navigated(object? sender, ShellNavigatedEventArgs e)
 	{
 		if (CurrentPage.Parent is ShellContent currShellContent)
 		{
@@ -42,10 +43,10 @@ public partial class AppShell : Shell
 		}
 
 		// update current page title
-		Context.PageTitle = CurrentPage.Title;
+		Context.PageTitle = CurrentPage.Title ?? String.Empty;
 	}
 
-	private void ChatHistoryList_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+	void ChatHistoryList_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
 	{
 		// This event is triggered when a user creates a new instance of chat and sends a chat
 		if (e.Action == NotifyCollectionChangedAction.Add)
@@ -55,7 +56,7 @@ public partial class AppShell : Shell
 
 			// only one item is added at a time
 			var firstItem = (ChatHistory)e.NewItems[0]!;
-			var newChatPage = new ShellContent()
+			var newChatPage = new ShellContent
 			{
 				ClassId = firstItem.Id,
 				Route = firstItem.Id,
@@ -64,7 +65,7 @@ public partial class AppShell : Shell
 				Icon = "chatbubble.png"
 			};
 
-			// Insert newest chats at the top
+			// Insert the newest chats at the top
 			ChatHistoryFlyout.Items.Insert(0, newChatPage);
 		}
 		else if (e.Action == NotifyCollectionChangedAction.Remove)

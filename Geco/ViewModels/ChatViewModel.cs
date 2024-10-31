@@ -8,18 +8,9 @@ namespace Geco.ViewModels;
 
 public partial class ChatViewModel : ObservableObject
 {
-	private GeminiClient GeminiClient { get; }
-	private string? HistoryId { get; set; }
-
-	[ObservableProperty]
-	private ObservableCollection<ChatMessage> chatMessages;
-
-	public ChatViewModel()
-	{
-		chatMessages = [];
-		GeminiClient = new GeminiClient("API_KEY");
-		HistoryId = null;
-	}
+	[ObservableProperty] ObservableCollection<ChatMessage> _chatMessages = [];
+	GeminiClient GeminiClient { get; } = new("API_KEY");
+	string? HistoryId { get; set; }
 
 	public void LoadHistory(ChatHistory history)
 	{
@@ -37,9 +28,9 @@ public partial class ChatViewModel : ObservableObject
 	}
 
 	[RelayCommand]
-	private async Task ChatSend(Entry inputEntry)
+	async Task ChatSend(Entry inputEntry)
 	{
-		var currentShell = ((AppShell)Shell.Current);
+		var currentShell = (AppShell)Shell.Current;
 		var chatRepo = currentShell.SvcProvider.GetService<ChatRepository>();
 
 		// do not send an empty message
@@ -55,7 +46,8 @@ public partial class ChatViewModel : ObservableObject
 		{
 			var shellViewModel = (AppShellViewModel)currentShell.BindingContext;
 			string chatTitle = CreateChatTitle(inputEntry.Text);
-			var historyInstance = new ChatHistory(Guid.NewGuid().ToString(), chatTitle, DateTimeOffset.UtcNow.ToUnixTimeSeconds(), ChatMessages);
+			var historyInstance = new ChatHistory(Guid.NewGuid().ToString(), chatTitle,
+				DateTimeOffset.UtcNow.ToUnixTimeSeconds(), ChatMessages);
 			shellViewModel.ChatHistoryList.Add(historyInstance);
 			await chatRepo!.AppendHistory(historyInstance);
 			HistoryId = historyInstance.Id;
@@ -78,19 +70,18 @@ public partial class ChatViewModel : ObservableObject
 
 		// save chat to database
 		await chatRepo!.AppendChat(HistoryId!, userMsg);
-		await chatRepo!.AppendChat(HistoryId!, chatResponse);
+		await chatRepo.AppendChat(HistoryId!, chatResponse);
 
 		if (newChat)
 			await currentShell.GoToAsync("//" + HistoryId);
 	}
 
-	private static string CreateChatTitle(string message)
+	static string CreateChatTitle(string message)
 	{
 		// For now, I think 17 is a good max length for a title
-		const uint MAX_TITLE_LEN = 17;
-		if (message.Length <= MAX_TITLE_LEN)
+		const uint maxTitleLen = 17;
+		if (message.Length <= maxTitleLen)
 			return message.Trim() + "...";
-		else
-			return message[..17].Trim() + "...";
+		return message[..17].Trim() + "...";
 	}
 }

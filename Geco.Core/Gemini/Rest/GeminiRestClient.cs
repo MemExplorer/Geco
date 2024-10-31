@@ -5,28 +5,34 @@ using Geco.Core.Gemini.Rest.Request;
 namespace Geco.Core.Gemini.Rest;
 
 /// <summary>
-/// Low-level access to Google Gemini API
+///     Low-level access to Google Gemini API
 /// </summary>
 /// <param name="apiKey"></param>
 /// <param name="model"></param>
 /// <param name="instructions"></param>
-internal class GeminiRestClient(string apiKey, string model, string instructions = "", GenerationConfig? GenConfig = null)
+class GeminiRestClient(
+	string apiKey,
+	string model,
+	string instructions = "",
+	GenerationConfig? genConfig = null)
 {
-	private const string BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
-	private APIRequest RequestInstance { get; } = new APIRequest();
-	private string API_KEY { get; } = apiKey;
-	private string SystemInstructions { get; } = instructions;
-	private string SelectedModel { get; set; } = model;
+	const string BaseUrl = "https://generativelanguage.googleapis.com/v1beta";
+	ApiRequest RequestInstance { get; } = new();
+	string ApiKey { get; } = apiKey;
+	string SystemInstructions { get; } = instructions;
+	string SelectedModel { get; } = model;
 
 	/// <summary>
-	/// Gets all the available model including its details
+	///     Gets all the available model including its details
 	/// </summary>
-	/// <returns>A list of Gemini model including its description, 
-	/// limitations, and parameters</returns>
+	/// <returns>
+	///     A list of Gemini model including its description,
+	///     limitations, and parameters
+	/// </returns>
 	/// <exception cref="Exception"></exception>
 	internal async Task<GeminiModelResponse[]?> GetModels()
 	{
-		var getModelsResult = await RequestInstance.GetAsync<GeminiModelsResponse>($"{BASE_URL}/models?key={API_KEY}");
+		var getModelsResult = await RequestInstance.GetAsync<GeminiModelsResponse>($"{BaseUrl}/models?key={ApiKey}");
 		if (!getModelsResult.Success)
 		{
 			throw new Exception("Failed to fetch models!");
@@ -36,7 +42,7 @@ internal class GeminiRestClient(string apiKey, string model, string instructions
 	}
 
 	/// <summary>
-	/// Sends a prompt to Gemini
+	///     Sends a prompt to Gemini
 	/// </summary>
 	/// <param name="text">Message to Gemini</param>
 	/// <param name="history">Contents of chat history</param>
@@ -46,8 +52,10 @@ internal class GeminiRestClient(string apiKey, string model, string instructions
 		var message = MessageContent.ConstructMessage(text);
 		history.Add(message);
 
-		string envelopeMsg = GeminiMessageEnvelope.WrapMessage(history, SystemInstructions, GenConfig);
-		var promptResult = await RequestInstance.PostAsync<GeminiMessage>($"{BASE_URL}/models/{SelectedModel}:generateContent?key={API_KEY}", envelopeMsg);
+		string envelopeMsg = GeminiMessageEnvelope.WrapMessage(history, SystemInstructions, genConfig);
+		var promptResult =
+			await RequestInstance.PostAsync<GeminiMessage>(
+				$"{BaseUrl}/models/{SelectedModel}:generateContent?key={ApiKey}", envelopeMsg);
 		if (!promptResult.Success)
 		{
 			throw new Exception("Prompt Failed!");

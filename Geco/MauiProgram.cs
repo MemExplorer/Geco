@@ -48,7 +48,7 @@ public static class MauiProgram
 		return builder.Build();
 	}
 
-	private static void ApplyAndroidModifications()
+	static void ApplyAndroidModifications()
 	{
 #if ANDROID
 		// Adjust header title position
