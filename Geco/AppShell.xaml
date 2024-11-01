@@ -5,6 +5,7 @@
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
        xmlns:local="clr-namespace:Geco.Views"
        xmlns:vm="clr-namespace:Geco.ViewModels"
+       xmlns:helpers="clr-namespace:Geco.Views.Helpers"
        Shell.TabBarIsVisible="False"
        BackgroundColor="{AppThemeBinding Light={StaticResource ContainerLight}, Dark={StaticResource ContainerDark}}"
        Title="Geco">
@@ -24,11 +25,11 @@
                    Text="{Binding PageTitle}" />
             <Label HorizontalOptions="Start"
                    VerticalOptions="Center"
-                   FontFamily="Poppins"
+                   FontFamily="FontAwesome"
                    FontSize="Title"
                    Margin="0,3,15,0"
                    TextColor="{AppThemeBinding Light={StaticResource ContainerTextLight}, Dark={StaticResource ContainerTextDark}}"
-                   Text="D"
+                   Text="{x:Static helpers:IconFont.TrashCan}"
                    IsVisible="{Binding IsChatInstance}">
                 <Label.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding DeleteChatCommand}" />
@@ -42,12 +43,22 @@
         <ShellContent ContentTemplate="{DataTemplate local:ChatPage}"
                       Title="Chat"
                       ClassId="ChatPage"
-                      Icon="chat_icon.svg"
-                      Route="ChatPage" />
+                      Route="ChatPage">
+            <ShellContent.Icon>
+                <FontImageSource Color="{AppThemeBinding Light=#262626, Dark=#D3D3D3}"
+                                 FontFamily="FontAwesome"
+                                 Glyph="{x:Static helpers:IconFont.MessagePlus}" />
+            </ShellContent.Icon>
+        </ShellContent>
         <ShellContent ContentTemplate="{DataTemplate local:SearchPage}"
                       Title="Search"
                       ClassId="SearchPage"
                       Route="SearchPage">
+            <ShellContent.Icon>
+                <FontImageSource Color="{AppThemeBinding Light=#262626, Dark=#D3D3D3}"
+                                 FontFamily="FontAwesome"
+                                 Glyph="{x:Static helpers:IconFont.MagnifyingGlass}" />
+            </ShellContent.Icon>
         </ShellContent>
     </FlyoutItem>
 
@@ -67,7 +78,9 @@
                 <Border HorizontalOptions="End">
                     <Button BackgroundColor="Transparent"
                             TextColor="{AppThemeBinding Light={StaticResource ContainerTextLight}, Dark={StaticResource ContainerTextDark}}"
-                            Text="S">
+                            FontFamily="FontAwesome"
+                            FontSize="20"
+                            Text="{x:Static helpers:IconFont.Gear}">
                         <Button.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding GotoSettingsCommand}" />
                         </Button.GestureRecognizers>

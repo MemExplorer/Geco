@@ -3,6 +3,7 @@ using Geco.Core.Database;
 using Geco.Core.Gemini;
 using Geco.ViewModels;
 using Geco.Views;
+using Geco.Views.Helpers;
 
 namespace Geco;
 
@@ -56,13 +57,16 @@ public partial class AppShell : Shell
 
 			// only one item is added at a time
 			var firstItem = (ChatHistory)e.NewItems[0]!;
+			var iconSrc = new FontImageSource() { FontFamily = "FontAwesome", Glyph = IconFont.MessageLines };
+			iconSrc.SetAppThemeColor(FontImageSource.ColorProperty, Color.Parse("#262626"), Color.Parse("#D3D3D3"));
+
 			var newChatPage = new ShellContent
 			{
 				ClassId = firstItem.Id,
 				Route = firstItem.Id,
 				Title = firstItem.Title,
 				Content = SvcProvider.GetService<ChatPage>(),
-				Icon = "chatbubble.png"
+				Icon = iconSrc
 			};
 
 			// Insert the newest chats at the top

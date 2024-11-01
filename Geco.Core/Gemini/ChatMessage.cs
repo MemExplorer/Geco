@@ -11,6 +11,8 @@ public readonly record struct ChatMessage(ulong MessageId, string Text, string R
 {
 	internal MessageContent ToRestMessage() => MessageContent.ConstructMessage(Text, Role);
 
+	public bool IsBot => Role == "model";
+
 	internal static ChatMessage FromRestMessage(ulong id, MessageContent msg) =>
 		new(id, msg.ExtractMessage(), msg.Role);
 }
