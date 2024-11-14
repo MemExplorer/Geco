@@ -17,8 +17,7 @@
             <Image MaximumHeightRequest="100" MaximumWidthRequest="100" Source="geco_logo.png" />
             <Label HorizontalTextAlignment="Center" FontFamily="Poppins" FontSize="Title"
                    TextColor="{AppThemeBinding Light={StaticResource ContainerTextLight}, Dark={StaticResource ContainerTextDark}}"
-                   Text="Geco">
-            </Label>
+                   Text="Geco" />
         </StackLayout>
 
         <!-- Search Bar -->

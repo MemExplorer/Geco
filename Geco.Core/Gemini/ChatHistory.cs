@@ -7,6 +7,7 @@ namespace Geco.Core.Gemini;
 /// </summary>
 /// <param name="Id">Unique identifier for chat history (GUID)</param>
 /// <param name="Title">Chat title</param>
+/// <param name="DateCreated">Creation date of chat in unix timestamp</param>
 /// <param name="Messages">All the message in the conversation</param>
 public readonly record struct ChatHistory(
 	string Id,

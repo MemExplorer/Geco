@@ -1,4 +1,5 @@
-﻿using Android.App;
+using Android.App;
+using Android.Content;
 using Android.Content.PM;
 
 namespace Geco
@@ -8,5 +9,12 @@ namespace Geco
 		                       ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.Density)]
 	public class MainActivity : MauiAppCompatActivity
 	{
+		public static event EventHandler<NewIntentEvent>? OnNewIntentEvent;
+
+		protected override void OnNewIntent(Intent? intent)
+		{
+			OnNewIntentEvent?.Invoke(this, new(intent));
+			base.OnNewIntent(intent);
+		}
 	}
 }

@@ -9,17 +9,14 @@ namespace Geco.Core.Gemini.Rest;
 /// </summary>
 /// <param name="apiKey"></param>
 /// <param name="model"></param>
-/// <param name="instructions"></param>
 class GeminiRestClient(
 	string apiKey,
-	string model,
-	string instructions = "",
-	GenerationConfig? genConfig = null)
+	string model
+)
 {
 	const string BaseUrl = "https://generativelanguage.googleapis.com/v1beta";
 	ApiRequest RequestInstance { get; } = new();
 	string ApiKey { get; } = apiKey;
-	string SystemInstructions { get; } = instructions;
 	string SelectedModel { get; } = model;
 
 	/// <summary>
@@ -46,13 +43,15 @@ class GeminiRestClient(
 	/// </summary>
 	/// <param name="text">Message to Gemini</param>
 	/// <param name="history">Contents of chat history</param>
+	/// <param name="config">Gemini configuration</param>
 	/// <exception cref="Exception"></exception>
-	internal async Task TextPrompt(string text, List<MessageContent> history)
+	internal async Task TextPrompt(string text, List<MessageContent> history, GeminiConfig config)
 	{
-		var message = MessageContent.ConstructMessage(text);
+		var message = MessageContent.ConstructMessage(text, config.Role);
 		history.Add(message);
 
-		string envelopeMsg = GeminiMessageEnvelope.WrapMessage(history, SystemInstructions, genConfig);
+		string envelopeMsg =
+			GeminiMessageEnvelope.WrapMessage(history, config.SystemInstructions, config.GenerationConfig);
 		var promptResult =
 			await RequestInstance.PostAsync<GeminiMessage>(
 				$"{BaseUrl}/models/{SelectedModel}:generateContent?key={ApiKey}", envelopeMsg);

@@ -1,5 +1,6 @@
 using CommunityToolkit.Maui;
 using Geco.Core.Database;
+using Geco.Models.Notifications;
 using Geco.ViewModels;
 using Geco.Views;
 using InputKit.Handlers;
@@ -36,6 +37,10 @@ public static class MauiProgram
 
 		// data repository instances
 		builder.Services.AddSingleton<ChatRepository>();
+
+#if ANDROID
+		builder.Services.AddTransient<INotificationManagerService, NotificationManagerService>();
+#endif
 
 		// settings
 		SelectionView.GlobalSetting.CornerRadius = 10;

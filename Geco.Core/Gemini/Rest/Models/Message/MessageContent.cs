@@ -4,7 +4,9 @@ namespace Geco.Core.Gemini.Rest.Models.Message;
 
 public readonly record struct MessageContent(
 	[property: JsonPropertyName("parts")] List<MessagePart> Parts,
-	[property: JsonPropertyName("role")] string Role
+	[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+	[property: JsonPropertyName("role")]
+	string? Role
 )
 {
 	internal string ExtractMessage()
@@ -16,9 +18,9 @@ public readonly record struct MessageContent(
 
 	public ChatMessage ToChatMessage(ulong currentId) => ChatMessage.FromRestMessage(currentId, this);
 
-	internal static MessageContent ConstructMessage(string messageContent, string? role = null)
+	internal static MessageContent ConstructMessage(string messageContent, string? role)
 	{
 		var msg = new MessagePart(messageContent);
-		return new MessageContent([msg], role ?? "User");
+		return new MessageContent([msg], role);
 	}
 }

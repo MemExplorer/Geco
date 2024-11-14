@@ -39,7 +39,7 @@
     </Shell.TitleView>
 
     <!-- Default flyout Items (Chat, Search)-->
-    <FlyoutItem FlyoutDisplayOptions="AsMultipleItems">
+    <FlyoutItem x:Name="MainFlyout" FlyoutDisplayOptions="AsMultipleItems">
         <ShellContent ContentTemplate="{DataTemplate local:ChatPage}"
                       Title="Chat"
                       ClassId="ChatPage"
@@ -67,6 +67,7 @@
                 FlyoutDisplayOptions="AsMultipleItems">
         <!-- Chat History gets added inside here -->
     </FlyoutItem>
+    
     <Shell.FlyoutFooterTemplate>
         <DataTemplate>
             <StackLayout Orientation="Horizontal">

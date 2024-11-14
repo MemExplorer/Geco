@@ -3,19 +3,17 @@ using Geco.Core.Gemini;
 
 namespace Geco.Core.Database;
 
-public class ChatRepository
+public class ChatRepository : DbRepositoryBase
 {
-	bool _initialized;
-
 	// Database table blueprint
-	TblSchema[] TableSchemas { get; } =
+	internal override TblSchema[]? TableSchemas =>
 	[
-		new("TblChatHistory", [
+		new TblSchema("TblChatHistory", [
 			new TblField("Id", TblFieldType.Text, true),
 			new TblField("Title", TblFieldType.Integer),
 			new TblField("DateCreated", TblFieldType.Integer)
 		]),
-		new("TblChatMessage", [
+		new TblSchema("TblChatMessage", [
 			new TblField("HistoryId", TblFieldType.Text),
 			new TblField("MessageId", TblFieldType.Integer),
 			new TblField("Content", TblFieldType.Text),
@@ -23,35 +21,9 @@ public class ChatRepository
 		])
 	];
 
-	/// <summary>
-	///     Creates tables from the blueprint if they don't exist
-	/// </summary>
-	async Task InitializeTables()
-	{
-		// check is only performed once
-		if (_initialized)
-			return;
-
-		using var db = await SqliteDb.GetTransient();
-		foreach (var tblSchema in TableSchemas)
-		{
-			// check if current table name exists
-			long tblExistsQry =
-				await db.ExecuteScalar<long>("SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' and tbl_name = ?",
-					tblSchema.Name);
-			if (tblExistsQry != 0)
-				continue;
-
-			string tblCreateQry = tblSchema.BuildQuery();
-			await db.ExecuteNonQuery(tblCreateQry);
-		}
-
-		_initialized = true;
-	}
-
 	public async Task AppendHistory(ChatHistory history)
 	{
-		await InitializeTables();
+		await Initialize();
 
 		using var db = await SqliteDb.GetTransient();
 		await db.ExecuteNonQuery("INSERT INTO TblChatHistory VALUES(?, ?, ?)", history.Id, history.Title,
@@ -62,16 +34,16 @@ public class ChatRepository
 
 	public async Task AppendChat(string historyId, ChatMessage message)
 	{
-		await InitializeTables();
+		await Initialize();
 
 		using var db = await SqliteDb.GetTransient();
 		await db.ExecuteNonQuery("INSERT INTO TblChatMessage VALUES(?, ?, ?, ?)", historyId, message.MessageId,
-			message.Text, message.Role);
+			message.Text, message.Role ?? "");
 	}
 
 	public async Task LoadHistory(ICollection<ChatHistory> historyData)
 	{
-		await InitializeTables();
+		await Initialize();
 
 		using var db = await SqliteDb.GetTransient();
 		await using var historyReader = await db.ExecuteReader("SELECT * FROM TblChatHistory ORDER BY DateCreated ASC");
@@ -85,7 +57,7 @@ public class ChatRepository
 
 	public async Task LoadChats(ChatHistory history)
 	{
-		await InitializeTables();
+		await Initialize();
 
 		// ensure history has no messages
 		history.Messages.Clear();
@@ -105,10 +77,19 @@ public class ChatRepository
 
 	public async Task DeleteHistory(string historyId)
 	{
-		await InitializeTables();
+		await Initialize();
 
 		using var db = await SqliteDb.GetTransient();
 		await db.ExecuteNonQuery("DELETE FROM TblChatHistory WHERE Id = ?", historyId);
 		await db.ExecuteNonQuery("DELETE FROM TblChatMessage WHERE HistoryId = ?", historyId);
+	}
+
+	public async Task DeleteAllHistory()
+	{
+		await Initialize();
+
+		using var db = await SqliteDb.GetTransient();
+		await db.ExecuteNonQuery("DELETE FROM TblChatHistory");
+		await db.ExecuteNonQuery("DELETE FROM TblChatMessage");
 	}
 }

@@ -23,6 +23,9 @@
                            Text="Clears all your conversation" />
                 </StackLayout>
             </StackLayout>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ClearHistoryCommand}" />
+            </Border.GestureRecognizers>
         </Border>
 
         <!-- Toggle Dark Mode -->
@@ -36,7 +39,7 @@
                     <Label FontSize="Caption"
                            Text="Changes the user interface to a darker color scheme" />
                 </StackLayout>
-                <Switch HorizontalOptions="End">
+                <Switch x:Name="DarkModeSwt" HorizontalOptions="End">
                     <Switch.Behaviors>
                         <toolkit:EventToCommandBehavior EventName="Toggled"
                                                         x:TypeArguments="ToggledEventArgs"
@@ -57,7 +60,13 @@
                     <Label FontSize="Caption"
                            Text="Geco will monitor and give insights about your habits" />
                 </StackLayout>
-                <Switch HorizontalOptions="End" />
+                <Switch x:Name="MonitorSwt" HorizontalOptions="End">
+                    <Switch.Behaviors>
+                        <toolkit:EventToCommandBehavior EventName="Toggled"
+                                                        x:TypeArguments="ToggledEventArgs"
+                                                        Command="{Binding ToggleMonitorCommand}" />
+                    </Switch.Behaviors>
+                </Switch>
             </StackLayout>
         </Border>
 
@@ -72,7 +81,7 @@
                     <Label FontSize="Caption"
                            Text="Geco will notify you about your habits" />
                 </StackLayout>
-                <Switch HorizontalOptions="End" />
+                <Switch x:Name="NotificationSwt" HorizontalOptions="End" Toggled="NotificationToggle_Toggled" />
             </StackLayout>
         </Border>
     </VerticalStackLayout>

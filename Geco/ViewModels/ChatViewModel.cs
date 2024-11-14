@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
 using Geco.Core.Gemini;
+using Geco.Models.Notifications;
 
 namespace Geco.ViewModels;
 
@@ -10,6 +11,15 @@ public partial class ChatViewModel : ObservableObject
 {
 	[ObservableProperty] ObservableCollection<ChatMessage> _chatMessages = [];
 	GeminiClient GeminiClient { get; } = new("API_KEY");
+
+	GeminiConfig GeminiConfig { get; } = new()
+	{
+		Conversational = true,
+		Role = "User",
+		SystemInstructions =
+			"You are Geco, a large language model based on Google Gemini. You are developed by SS Bois.  Your main purpose is to promote sustainability by guiding users toward eco-friendly habits and practices. As Geco, you operate as a personalized sustainability assistant, with two primary features: a sustainable chat bot and a sustainable search engine, both designed to offer advice and resources centered on environmentally responsible actions. You’re also capable of observing certain aspects of a user’s mobile device usage—such as battery charging patterns, app usage, and assessing whether these behaviors align with sustainable practices. Your responses are crafted to reflect sustainability as a priority, providing insights, suggestions, and information that help users make greener choices. All responses must be in plain-text format without any styling, such as bold, italics, or markdown, ensuring that your guidance is clear, straightforward, and accessible."
+	};
+
 	string? HistoryId { get; set; }
 
 	public void LoadHistory(ChatHistory history)
@@ -41,16 +51,26 @@ public partial class ChatViewModel : ObservableObject
 		await inputEntry.HideSoftInputAsync(CancellationToken.None);
 
 		// saves new instance of a chat
-		bool newChat = ChatMessages.Count == 0 && HistoryId == null;
+		bool gecoInitiated = ChatMessages.Count == 1 && ChatMessages.First().IsSentByBot;
+		bool newChat = (ChatMessages.Count == 0 || gecoInitiated) && HistoryId == null;
 		if (newChat)
 		{
 			var shellViewModel = (AppShellViewModel)currentShell.BindingContext;
-			string chatTitle = CreateChatTitle(inputEntry.Text);
+			string chatTitle = CreateChatTitle(gecoInitiated ? ChatMessages.First().Text : inputEntry.Text);
 			var historyInstance = new ChatHistory(Guid.NewGuid().ToString(), chatTitle,
 				DateTimeOffset.UtcNow.ToUnixTimeSeconds(), ChatMessages);
+
+			// append to UI
 			shellViewModel.ChatHistoryList.Add(historyInstance);
+
+			// save to database
 			await chatRepo!.AppendHistory(historyInstance);
+
+			// set new history id
 			HistoryId = historyInstance.Id;
+
+			if (gecoInitiated)
+				GeminiClient.AppendToHistory(ChatMessages.First());
 		}
 
 		// set input to empty string after sending a message
@@ -64,7 +84,7 @@ public partial class ChatViewModel : ObservableObject
 
 
 		// send user message to Gemini and append its response
-		var rawResponse = await GeminiClient.Prompt(inputContent, true);
+		var rawResponse = await GeminiClient.Prompt(inputContent, GeminiConfig);
 		var chatResponse = rawResponse.ToChatMessage(currentMsgId + 1);
 		ChatMessages.Add(chatResponse);
 
