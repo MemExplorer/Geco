@@ -1,0 +1,16 @@
+using System.Text.Json.Serialization;
+
+namespace Geco.Core.Gemini.Rest.Models.Message;
+
+public readonly record struct GeminiMessage(
+	[property: JsonPropertyName("candidates")]
+	CandidateResponse[] CandidateResponses
+)
+{
+	internal MessageContent ExtractMessageContent()
+	{
+		// Always pick the first candidate response
+		var candidateResponse = CandidateResponses.First();
+		return candidateResponse.Content;
+	}
+}

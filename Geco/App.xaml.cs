@@ -1,15 +1,9 @@
-﻿namespace Geco
-{
-    public partial class App : Application
-    {
-        public App()
-        {
-            InitializeComponent();
-        }
+namespace Geco;
 
-        protected override Window CreateWindow(IActivationState? activationState)
-        {
-            return new Window(new AppShell());
-        }
-    }
+public partial class App : Application
+{
+	public App() => InitializeComponent();
+
+	protected override Window CreateWindow(IActivationState? activationState) =>
+		new(new AppShell(activationState!.Context.Services));
 }

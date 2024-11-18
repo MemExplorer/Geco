@@ -1,0 +1,19 @@
+using Geco.Core.Gemini.Rest.Models.Message;
+
+namespace Geco.Core.Gemini;
+
+/// <summary>
+///     Information about a single chat message
+/// </summary>
+/// <param name="MessageId">Unique ID that can be used to determine the order of messages</param>
+/// <param name="Text">Contains contents of a message</param>
+/// <param name="Role">Role of the sender</param>
+public readonly record struct ChatMessage(ulong MessageId, string Text, string? Role)
+{
+	internal MessageContent ToRestMessage() => MessageContent.ConstructMessage(Text, Role);
+
+	public bool IsSentByBot => Role == "model";
+
+	internal static ChatMessage FromRestMessage(ulong id, MessageContent msg) =>
+		new(id, msg.ExtractMessage(), msg.Role);
+}

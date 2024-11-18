@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Geco.Views.SettingsPage"
+             xmlns:vm="clr-namespace:Geco.ViewModels"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             Title="Settings"
+             Shell.FlyoutBehavior="Disabled">
+    <ContentPage.BindingContext>
+        <vm:SettingsViewModel />
+    </ContentPage.BindingContext>
+
+    <VerticalStackLayout>
+        <!-- Clear History -->
+        <Border Stroke="Black">
+            <StackLayout Orientation="Horizontal"
+                         Padding="10">
+                <StackLayout Orientation="Vertical">
+                    <Label FontSize="18"
+                           Text="Clear History" />
+                    <Label FontSize="Caption"
+                           Text="Clears all your conversation" />
+                </StackLayout>
+            </StackLayout>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ClearHistoryCommand}" />
+            </Border.GestureRecognizers>
+        </Border>
+
+        <!-- Toggle Dark Mode -->
+        <Border Stroke="Black">
+            <StackLayout Orientation="Horizontal"
+                         Padding="10">
+                <StackLayout Orientation="Vertical"
+                             HorizontalOptions="StartAndExpand">
+                    <Label FontSize="18"
+                           Text="Dark Mode" />
+                    <Label FontSize="Caption"
+                           Text="Changes the user interface to a darker color scheme" />
+                </StackLayout>
+                <Switch x:Name="DarkModeSwt" HorizontalOptions="End">
+                    <Switch.Behaviors>
+                        <toolkit:EventToCommandBehavior EventName="Toggled"
+                                                        x:TypeArguments="ToggledEventArgs"
+                                                        Command="{Binding ToggleDarkModeCommand}" />
+                    </Switch.Behaviors>
+                </Switch>
+            </StackLayout>
+        </Border>
+
+        <!-- Monitor habits -->
+        <Border Stroke="Black">
+            <StackLayout Orientation="Horizontal"
+                         Padding="10">
+                <StackLayout Orientation="Vertical"
+                             HorizontalOptions="StartAndExpand">
+                    <Label FontSize="18"
+                           Text="Monitor Habits" />
+                    <Label FontSize="Caption"
+                           Text="Geco will monitor and give insights about your habits" />
+                </StackLayout>
+                <Switch x:Name="MonitorSwt" HorizontalOptions="End">
+                    <Switch.Behaviors>
+                        <toolkit:EventToCommandBehavior EventName="Toggled"
+                                                        x:TypeArguments="ToggledEventArgs"
+                                                        Command="{Binding ToggleMonitorCommand}" />
+                    </Switch.Behaviors>
+                </Switch>
+            </StackLayout>
+        </Border>
+
+        <!-- Notifications -->
+        <Border Stroke="Black">
+            <StackLayout Orientation="Horizontal"
+                         Padding="10">
+                <StackLayout Orientation="Vertical"
+                             HorizontalOptions="StartAndExpand">
+                    <Label FontSize="18"
+                           Text="Notifications" />
+                    <Label FontSize="Caption"
+                           Text="Geco will notify you about your habits" />
+                </StackLayout>
+                <Switch x:Name="NotificationSwt" HorizontalOptions="End" Toggled="NotificationToggle_Toggled" />
+            </StackLayout>
+        </Border>
+    </VerticalStackLayout>
+</ContentPage>

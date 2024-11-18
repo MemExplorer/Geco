@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage x:Class="Geco.Views.ChatPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:geco.core="clr-namespace:Geco.Core.Gemini;assembly=Geco.Core"
+             xmlns:helpers="clr-namespace:Geco.Views.Helpers"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             Title="Chat">
+    <ContentPage.Resources>
+        <helpers:ChatAlignmentConverter x:Key="ChatAlignmentConverter" />
+    </ContentPage.Resources>
+
+    <StackLayout Padding="10"
+                 Spacing="10">
+        <!--  Chat View  -->
+        <CollectionView ItemsSource="{Binding ChatMessages}"
+                        ItemsUpdatingScrollMode="KeepLastItemInView"
+                        VerticalOptions="EndAndExpand">
+            <CollectionView.EmptyView>
+                <StackLayout Orientation="Vertical" Padding="0, 80">
+                    <Label Text="Geco" FontFamily="Poppins" FontAttributes="Bold" FontSize="50"
+                           HorizontalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                    <Label FontSize="10" Margin="0,-20,0,10" FontFamily="Poppins" HorizontalOptions="Center"
+                           Text="your sustainability habit companion" />
+                    <Label HorizontalOptions="Center" HorizontalTextAlignment="Center"
+                           FontFamily="Poppins"
+                           Padding="50, 0"
+                           FontSize="15" FontAttributes="Bold"
+                           Text="Let's talk about sustainability! How can I help you today?" />
+                </StackLayout>
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="geco.core:ChatMessage">
+                    <Border Padding="0,10"
+                            Stroke="Transparent">
+                        <Grid ColumnDefinitions="auto, *">
+                            <Image Grid.Column="0"
+                                   Source="geco_logo.png"
+                                   MaximumWidthRequest="50"
+                                   MaximumHeightRequest="50"
+                                   Margin="5"
+                                   VerticalOptions="Start"
+                                   IsVisible="{Binding IsSentByBot}" />
+                            <Label Grid.Column="1"
+                                   Padding="10,15,15,0"
+                                   Text="{Binding Text}"
+                                   VerticalOptions="FillAndExpand"
+                                   HorizontalOptions="{Binding IsSentByBot, Converter={StaticResource ChatAlignmentConverter}}" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Border Padding="5"
+                BackgroundColor="{AppThemeBinding Light=#e3e3e3,
+                                                  Dark=#191919}"
+                HorizontalOptions="FillAndExpand"
+                Stroke="Transparent"
+                StrokeShape="RoundRectangle 30,30,30,30">
+            <StackLayout
+                Orientation="Horizontal"
+                Spacing="5">
+                <!--  Chat Entry/Input  -->
+                <Entry x:Name="ChatEntry"
+                       Margin="20,0,7,0"
+                       FontSize="18"
+                       HorizontalOptions="FillAndExpand" />
+
+                <!--  Chat Send Button  -->
+                <Button CornerRadius="30"
+                        HorizontalOptions="Center"
+                        FontFamily="FontAwesome"
+                        Text="{x:Static helpers:IconFont.PaperPlaneTop}"
+                        Margin="3"
+                        VerticalOptions="Center">
+                    <Button.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ChatSendCommand}"
+                                              CommandParameter="{x:Reference ChatEntry}" />
+                    </Button.GestureRecognizers>
+                    <Button.Behaviors>
+
+                        <toolkit:AnimationBehavior>
+                            <toolkit:AnimationBehavior.AnimationType>
+                                <toolkit:FadeAnimation Opacity="0.5" />
+                            </toolkit:AnimationBehavior.AnimationType>
+                        </toolkit:AnimationBehavior>
+                    </Button.Behaviors>
+                </Button>
+            </StackLayout>
+        </Border>
+    </StackLayout>
+
+</ContentPage>

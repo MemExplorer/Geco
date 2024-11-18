@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Geco.Views.SearchPage"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:helpers="clr-namespace:Geco.Views.Helpers"
+             xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
+             Title="Search">
+    <Grid Padding="10"
+          ColumnSpacing="10"
+          RowSpacing="10"
+          RowDefinitions="*, auto, auto, *">
+
+        <!-- Geco Logo and Title -->
+        <StackLayout Grid.Row="0" Orientation="Vertical" VerticalOptions="Center">
+            <Image MaximumHeightRequest="100" MaximumWidthRequest="100" Source="geco_logo.png" />
+            <Label HorizontalTextAlignment="Center" FontFamily="Poppins" FontSize="Title"
+                   TextColor="{AppThemeBinding Light={StaticResource ContainerTextLight}, Dark={StaticResource ContainerTextDark}}"
+                   Text="Geco" />
+        </StackLayout>
+
+        <!-- Search Bar -->
+        <Border Grid.Row="1"
+                Padding="5"
+                BackgroundColor="{AppThemeBinding Light=#e3e3e3,
+                                                  Dark=#191919}"
+                HorizontalOptions="FillAndExpand"
+                Stroke="Transparent"
+                StrokeShape="RoundRectangle 30,30,30,30">
+            <StackLayout
+                Orientation="Horizontal"
+                Spacing="5">
+                <!--  Search Entry/Input  -->
+                <Entry x:Name="SearchEntry"
+                       Margin="20,0,7,0"
+                       FontSize="18"
+                       HorizontalOptions="FillAndExpand" />
+
+                <!--  Search Send Button  -->
+                <Button CornerRadius="30"
+                        HorizontalOptions="Center"
+                        FontFamily="FontAwesome"
+                        Text="{x:Static helpers:IconFont.MagnifyingGlass}"
+                        Margin="3"
+                        VerticalOptions="Center">
+                    <Button.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SearchCommand}"
+                                              CommandParameter="{x:Reference SearchEntry}" />
+                    </Button.GestureRecognizers>
+                    <Button.Behaviors>
+
+                        <toolkit:AnimationBehavior>
+                            <toolkit:AnimationBehavior.AnimationType>
+                                <toolkit:FadeAnimation Opacity="0.5" />
+                            </toolkit:AnimationBehavior.AnimationType>
+                        </toolkit:AnimationBehavior>
+                    </Button.Behaviors>
+                </Button>
+            </StackLayout>
+        </Border>
+
+        <!-- Sustainable Chips (TODO: Disappear after chatting) -->
+        <input:SelectionView x:Name="BtnSelection"
+                             Grid.Row="2"
+                             ColumnNumber="2"
+                             ColumnSpacing="5"
+                             RowSpacing="5"
+                             Padding="50,20,50,50"
+                             BackgroundColor="{AppThemeBinding Light=#D3D3D3, Dark=#262626}"
+                             Color="{AppThemeBinding Light=#b5b5b5, Dark=#141414}">
+            <input:SelectionView.ItemsSource>
+                <x:Array Type="{x:Type x:String}">
+                    <x:String>⚡ Energy</x:String>
+                    <x:String>🗑 Waste</x:String>
+                    <x:String>👗 Fashion</x:String>
+                    <x:String>🚗 Transport</x:String>
+                </x:Array>
+            </input:SelectionView.ItemsSource>
+        </input:SelectionView>
+    </Grid>
+</ContentPage>
