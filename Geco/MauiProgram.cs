@@ -7,6 +7,7 @@ using InputKit.Handlers;
 using InputKit.Shared.Controls;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Platform;
+using Syncfusion.Maui.Toolkit.Hosting;
 
 namespace Geco;
 
@@ -18,6 +19,7 @@ public static class MauiProgram
 		builder
 			.UseMauiApp<App>()
 			.UseMauiCommunityToolkit()
+			.ConfigureSyncfusionToolkit()
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

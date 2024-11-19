@@ -35,8 +35,8 @@ public class NotificationManagerService : INotificationManagerService, IDisposab
 		if (e.Intent == null || e.Intent.Action != IntentActionName)
 			return;
 
-		var msgContent = e.Intent.GetStringExtra("message");
-		OnNotificationClick?.Invoke(this, new(msgContent!));
+		string? msgContent = e.Intent.GetStringExtra("message");
+		OnNotificationClick?.Invoke(this, new GecoTriggerEventMessage(msgContent!));
 	}
 
 	public void SendNotification(string title, string message)
@@ -55,7 +55,7 @@ public class NotificationManagerService : INotificationManagerService, IDisposab
 		intent.SetAction(IntentActionName);
 		intent.PutExtra("message", message);
 
-		var pendingIntentFlags = (Build.VERSION.SdkInt >= BuildVersionCodes.S)
+		var pendingIntentFlags = Build.VERSION.SdkInt >= BuildVersionCodes.S
 #pragma warning disable CA1416
 			? PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable
 			: PendingIntentFlags.UpdateCurrent;

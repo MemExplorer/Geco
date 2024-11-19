@@ -57,7 +57,7 @@ public partial class AppShell : Shell
 		}
 
 		// update current page title
-		Context.PageTitle = CurrentPage.Title ?? String.Empty;
+		Context.PageTitle = CurrentPage.Title ?? string.Empty;
 	}
 
 	void ChatHistoryList_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

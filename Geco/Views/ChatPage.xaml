@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <ContentPage x:Class="Geco.Views.ChatPage"
+             x:DataType="vm:ChatViewModel"
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:geco.core="clr-namespace:Geco.Core.Gemini;assembly=Geco.Core"
              xmlns:helpers="clr-namespace:Geco.Views.Helpers"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:vm="clr-namespace:Geco.ViewModels"
              Title="Chat">
     <ContentPage.Resources>
         <helpers:ChatAlignmentConverter x:Key="ChatAlignmentConverter" />
