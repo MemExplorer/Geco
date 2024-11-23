@@ -14,6 +14,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Geco</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
 
     <!-- Display name -->
     <ApplicationTitle>Geco</ApplicationTitle>
