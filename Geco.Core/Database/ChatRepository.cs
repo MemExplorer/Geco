@@ -5,6 +5,10 @@ namespace Geco.Core.Database;
 
 public class ChatRepository : DbRepositoryBase
 {
+	public ChatRepository(string databaseDir) : base(databaseDir)
+	{
+	}
+	
 	// Database table blueprint
 	internal override TblSchema[]? TableSchemas =>
 	[
@@ -25,7 +29,7 @@ public class ChatRepository : DbRepositoryBase
 	{
 		await Initialize();
 
-		using var db = await SqliteDb.GetTransient();
+		using var db = await SqliteDb.GetTransient(DatabaseDir);
 		await db.ExecuteNonQuery("INSERT INTO TblChatHistory VALUES(?, ?, ?)", history.Id, history.Title,
 			history.DateCreated);
 		foreach (var message in history.Messages)
@@ -36,7 +40,7 @@ public class ChatRepository : DbRepositoryBase
 	{
 		await Initialize();
 
-		using var db = await SqliteDb.GetTransient();
+		using var db = await SqliteDb.GetTransient(DatabaseDir);
 		await db.ExecuteNonQuery("INSERT INTO TblChatMessage VALUES(?, ?, ?, ?)", historyId, message.MessageId,
 			message.Text, message.Role ?? "");
 	}
@@ -45,7 +49,7 @@ public class ChatRepository : DbRepositoryBase
 	{
 		await Initialize();
 
-		using var db = await SqliteDb.GetTransient();
+		using var db = await SqliteDb.GetTransient(DatabaseDir);
 		await using var historyReader = await db.ExecuteReader("SELECT * FROM TblChatHistory ORDER BY DateCreated ASC");
 		while (historyReader.Read())
 		{
@@ -63,7 +67,7 @@ public class ChatRepository : DbRepositoryBase
 		history.Messages.Clear();
 
 		// fetch messages from database
-		using var db = await SqliteDb.GetTransient();
+		using var db = await SqliteDb.GetTransient(DatabaseDir);
 		await using var chatReader =
 			await db.ExecuteReader("SELECT * FROM TblChatMessage WHERE HistoryId = ? ORDER BY MessageId ASC",
 				history.Id);
@@ -79,7 +83,7 @@ public class ChatRepository : DbRepositoryBase
 	{
 		await Initialize();
 
-		using var db = await SqliteDb.GetTransient();
+		using var db = await SqliteDb.GetTransient(DatabaseDir);
 		await db.ExecuteNonQuery("DELETE FROM TblChatHistory WHERE Id = ?", historyId);
 		await db.ExecuteNonQuery("DELETE FROM TblChatMessage WHERE HistoryId = ?", historyId);
 	}
@@ -88,7 +92,7 @@ public class ChatRepository : DbRepositoryBase
 	{
 		await Initialize();
 
-		using var db = await SqliteDb.GetTransient();
+		using var db = await SqliteDb.GetTransient(DatabaseDir);
 		await db.ExecuteNonQuery("DELETE FROM TblChatHistory");
 		await db.ExecuteNonQuery("DELETE FROM TblChatMessage");
 	}

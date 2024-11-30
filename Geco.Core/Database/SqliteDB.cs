@@ -48,10 +48,10 @@ public partial class SqliteDb : IDisposable
 	[GeneratedRegex("(?<!\\?)\\?(?!\\?)(?=(?:[^']*'[^']*')*[^']*$)")]
 	private static partial Regex GetPlaceHolderPattern();
 
-	public static async Task<SqliteDb> GetTransient()
+	public static async Task<SqliteDb> GetTransient(string databaseDir)
 	{
 		// initialize database connection
-		string dbPath = Path.Combine(FileSystem.AppDataDirectory, Filename);
+		string dbPath = Path.Combine(databaseDir, Filename);
 		var instance = new SqliteDb { Connection = new SqliteConnection($"Data Source={dbPath}") };
 
 		// create db connection

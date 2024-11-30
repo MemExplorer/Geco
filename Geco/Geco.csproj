@@ -9,8 +9,10 @@
     The Mac App Store will NOT accept apps with ONLY maccatalyst-arm64 indicated;
     either BOTH runtimes must be indicated or ONLY macatalyst-x64. -->
     <!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
+    <TargetFrameworks>net9.0-android</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
     <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
     <OutputType>Exe</OutputType>
     <RootNamespace>Geco</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

@@ -38,7 +38,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<ChatViewModel>();
 
 		// data repository instances
-		builder.Services.AddSingleton<ChatRepository>();
+		builder.Services.AddSingleton(new ChatRepository(FileSystem.AppDataDirectory));
 
 #if ANDROID
 		builder.Services.AddTransient<INotificationManagerService, NotificationManagerService>();

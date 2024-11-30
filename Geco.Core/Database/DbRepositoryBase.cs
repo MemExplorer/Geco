@@ -5,6 +5,9 @@ namespace Geco.Core.Database;
 public abstract class DbRepositoryBase
 {
 	bool _initialized;
+	protected string DatabaseDir { get; }
+	protected DbRepositoryBase(string databaseDir) =>
+		DatabaseDir = databaseDir;
 
 	// Database table blueprint
 	internal abstract TblSchema[]? TableSchemas { get; }
@@ -14,7 +17,7 @@ public abstract class DbRepositoryBase
 	/// </summary>
 	protected virtual async Task InitializeTables()
 	{
-		using var db = await SqliteDb.GetTransient();
+		using var db = await SqliteDb.GetTransient(DatabaseDir);
 		foreach (var tblSchema in TableSchemas!)
 		{
 			// check if current table name exists
