@@ -1,5 +1,5 @@
 using Geco.Core.Database.SqliteModel;
-using Geco.Core.Gemini;
+using Microsoft.Extensions.AI;
 
 namespace Geco.Core.Database;
 
@@ -25,7 +25,7 @@ public class ChatRepository : DbRepositoryBase
 		])
 	];
 
-	public async Task AppendHistory(ChatHistory history)
+	public async Task AppendHistory(GecoChatHistory history)
 	{
 		await Initialize();
 
@@ -41,11 +41,18 @@ public class ChatRepository : DbRepositoryBase
 		await Initialize();
 
 		using var db = await SqliteDb.GetTransient(DatabaseDir);
-		await db.ExecuteNonQuery("INSERT INTO TblChatMessage VALUES(?, ?, ?, ?)", historyId, message.MessageId,
-			message.Text, message.Role ?? "");
+		var additionalProperties = message.AdditionalProperties;
+		if (additionalProperties == null)
+			throw new NullReferenceException("Additional properties cannot be null");
+		if (!additionalProperties.TryGetValue("id", out ulong? msgId))
+			throw new NullReferenceException("MessageId cannot be null");
+		if (message.Text == null)
+			throw new NullReferenceException("Text cannot be null");
+		await db.ExecuteNonQuery("INSERT INTO TblChatMessage VALUES(?, ?, ?, ?)", historyId, msgId,
+			message.Text, message.Role.Value);
 	}
 
-	public async Task LoadHistory(ICollection<ChatHistory> historyData)
+	public async Task LoadHistory(ICollection<GecoChatHistory> historyData)
 	{
 		await Initialize();
 
@@ -53,13 +60,13 @@ public class ChatRepository : DbRepositoryBase
 		await using var historyReader = await db.ExecuteReader("SELECT * FROM TblChatHistory ORDER BY DateCreated ASC");
 		while (historyReader.Read())
 		{
-			var historyEntry = new ChatHistory((string)historyReader["Id"], (string)historyReader["Title"],
+			var historyEntry = new GecoChatHistory((string)historyReader["Id"], (string)historyReader["Title"],
 				(long)historyReader["DateCreated"], []);
 			historyData.Add(historyEntry);
 		}
 	}
 
-	public async Task LoadChats(ChatHistory history)
+	public async Task LoadChats(GecoChatHistory history)
 	{
 		await Initialize();
 
@@ -73,8 +80,18 @@ public class ChatRepository : DbRepositoryBase
 				history.Id);
 		while (chatReader.Read())
 		{
-			var chatEntry = new ChatMessage((ulong)(long)chatReader["MessageId"], (string)chatReader["Content"],
-				(string)chatReader["Role"]);
+			var msgId = (ulong)(long)chatReader["MessageId"];
+			var chatContent = (string)chatReader["Content"];
+			var chatRole = (string)chatReader["Role"];
+			var chatEntry = new ChatMessage()
+			{
+				Text = chatContent,
+				Role = new ChatRole(chatRole),
+				AdditionalProperties = new AdditionalPropertiesDictionary()
+				{
+					["id"] = msgId
+				}
+			};
 			history.Messages.Add(chatEntry);
 		}
 	}

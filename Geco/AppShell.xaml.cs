@@ -1,6 +1,5 @@
 using System.Collections.Specialized;
 using Geco.Core.Database;
-using Geco.Core.Gemini;
 using Geco.Models;
 using Geco.ViewModels;
 using Geco.Views;
@@ -69,7 +68,7 @@ public partial class AppShell : Shell
 				return;
 
 			// only one item is added at a time
-			var firstItem = (ChatHistory)e.NewItems[0]!;
+			var firstItem = (GecoChatHistory)e.NewItems[0]!;
 			var iconSrc = new FontImageSource() { FontFamily = "FontAwesome", Glyph = IconFont.MessageLines };
 			iconSrc.SetAppThemeColor(FontImageSource.ColorProperty, Color.Parse("#262626"), Color.Parse("#D3D3D3"));
 
@@ -91,7 +90,7 @@ public partial class AppShell : Shell
 				return;
 
 			// only one item is removed at a time
-			var firstItem = (ChatHistory)e.OldItems[0]!;
+			var firstItem = (GecoChatHistory)e.OldItems[0]!;
 			var selectedShell = ChatHistoryFlyout.Items.First(x => x.Route == "IMPL_" + firstItem.Id);
 			ChatHistoryFlyout.Items.Remove(selectedShell);
 		}

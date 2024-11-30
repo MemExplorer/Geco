@@ -2,31 +2,43 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
-using Geco.Core.Gemini;
 using Geco.Models.Notifications;
+using GoogleGeminiSDK;
+using Microsoft.Extensions.AI;
 
 namespace Geco.ViewModels;
 
 public partial class ChatViewModel : ObservableObject
 {
 	[ObservableProperty] ObservableCollection<ChatMessage> _chatMessages = [];
-	GeminiClient GeminiClient { get; } = new("API_KEY");
+	GeminiChat GeminiClient { get; } = new("API_KEY", "gemini-1.5-flash-latest");
 
-	GeminiConfig GeminiConfig { get; } = new()
+	GeminiSettings GeminiConfig { get; } = new()
 	{
-		Conversational = true,
-		Role = "User",
 		SystemInstructions =
 			"You are Geco, a large language model based on Google Gemini. You are developed by SS Bois.  Your main purpose is to promote sustainability by guiding users toward eco-friendly habits and practices. As Geco, you operate as a personalized sustainability assistant, with two primary features: a sustainable chat bot and a sustainable search engine, both designed to offer advice and resources centered on environmentally responsible actions. You’re also capable of observing certain aspects of a user’s mobile device usage—such as battery charging patterns, app usage, and assessing whether these behaviors align with sustainable practices. Your responses are crafted to reflect sustainability as a priority, providing insights, suggestions, and information that help users make greener choices. All responses must be in plain-text format without any styling, such as bold, italics, or markdown, ensuring that your guidance is clear, straightforward, and accessible."
 	};
 
 	string? HistoryId { get; set; }
 
-	public void LoadHistory(ChatHistory history)
+	public ChatViewModel() => 
+		GeminiClient.OnChatReceive += async (s, e) => 
+		await GeminiClientOnChatReceive(s, e);
+
+	async Task GeminiClientOnChatReceive(object? sender, ChatReceiveEventArgs e)
+	{
+		var currentShell = (AppShell)Shell.Current;
+		var chatRepo = currentShell.SvcProvider.GetService<ChatRepository>();
+		ChatMessages.Add(e.Message);
+		
+		// save chat to database
+		await chatRepo!.AppendChat(HistoryId!, e.Message);
+	}
+
+	public void LoadHistory(GecoChatHistory history)
 	{
 		ChatMessages = history.Messages;
-		GeminiClient.ClearHistory();
-		GeminiClient.LoadHistory([.. history.Messages]);
+		GeminiClient.LoadHistory(history.Messages);
 		HistoryId = history.Id;
 	}
 
@@ -51,13 +63,13 @@ public partial class ChatViewModel : ObservableObject
 		await inputEntry.HideSoftInputAsync(CancellationToken.None);
 
 		// saves new instance of a chat
-		bool gecoInitiated = ChatMessages.Count == 1 && ChatMessages.First().IsSentByBot;
+		bool gecoInitiated = ChatMessages.Count == 1 && ChatMessages.First().Role != ChatRole.User;
 		bool newChat = (ChatMessages.Count == 0 || gecoInitiated) && HistoryId == null;
 		if (newChat)
 		{
 			var shellViewModel = (AppShellViewModel)currentShell.BindingContext;
-			string chatTitle = CreateChatTitle(gecoInitiated ? ChatMessages.First().Text : inputEntry.Text);
-			var historyInstance = new ChatHistory(Guid.NewGuid().ToString(), chatTitle,
+			string chatTitle = CreateChatTitle(gecoInitiated ? ChatMessages.First().Text! : inputEntry.Text);
+			var historyInstance = new GecoChatHistory(Guid.NewGuid().ToString(), chatTitle,
 				DateTimeOffset.UtcNow.ToUnixTimeSeconds(), ChatMessages);
 
 			// append to UI
@@ -77,20 +89,8 @@ public partial class ChatViewModel : ObservableObject
 		string inputContent = inputEntry.Text;
 		inputEntry.Text = string.Empty;
 
-		// Add user's message to message list
-		ulong currentMsgId = (ulong)ChatMessages.Count;
-		var userMsg = new ChatMessage(currentMsgId, inputContent, "User");
-		ChatMessages.Add(userMsg);
-
-
 		// send user message to Gemini and append its response
-		var rawResponse = await GeminiClient.Prompt(inputContent, GeminiConfig);
-		var chatResponse = rawResponse.ToChatMessage(currentMsgId + 1);
-		ChatMessages.Add(chatResponse);
-
-		// save chat to database
-		await chatRepo!.AppendChat(HistoryId!, userMsg);
-		await chatRepo.AppendChat(HistoryId!, chatResponse);
+		await GeminiClient.SendMessage(inputContent, settings: GeminiConfig);
 
 		if (newChat)
 			await currentShell.GoToAsync("//" + HistoryId);
