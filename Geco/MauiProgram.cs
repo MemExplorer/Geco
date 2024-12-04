@@ -1,5 +1,6 @@
 using CommunityToolkit.Maui;
 using Geco.Core.Database;
+using Geco.Models.Monitor;
 using Geco.Models.Notifications;
 using Geco.ViewModels;
 using Geco.Views;
@@ -42,6 +43,9 @@ public static class MauiProgram
 
 #if ANDROID
 		builder.Services.AddTransient<INotificationManagerService, NotificationManagerService>();
+
+		// monitor service
+		builder.Services.AddSingleton<IMonitorManagerService,DeviceUsageMonitorService>();
 #endif
 
 		// settings

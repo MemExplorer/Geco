@@ -3,11 +3,15 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
 using Geco.Models;
+using Geco.Models.Monitor;
 
 namespace Geco.ViewModels;
 
 public partial class SettingsViewModel : ObservableObject
 {
+	private bool _isProgrammaticChange = false;
+
+
 	[RelayCommand]
 	async Task ClearHistory()
 	{
@@ -34,25 +38,36 @@ public partial class SettingsViewModel : ObservableObject
 		Preferences.Set(nameof(GecoSettings.DarkMode), isDark);
 	}
 
-	[RelayCommand]
-	void ToggleMonitor(ToggledEventArgs e) => Preferences.Set(nameof(GecoSettings.Monitor), e.Value);
 
+#pragma warning restore 1998
 #pragma warning disable 1998
 	public async void LoadSettings(Switch themeToggle, Switch monitorToggle, Switch notificationToggle)
 	{
 		themeToggle.IsToggled = Preferences.Get(nameof(GecoSettings.DarkMode), false);
-		monitorToggle.IsToggled = Preferences.Get(nameof(GecoSettings.Monitor), false);
 
 #if ANDROID
-		var permStats = await Permissions.CheckStatusAsync<NotificationPermission>();
-		if (permStats != PermissionStatus.Granted)
+		var permNotifStats = await Permissions.CheckStatusAsync<Permissions.PostNotifications>();
+		var permBattStats = await Permissions.CheckStatusAsync<Permissions.Battery>();
+
+		if (permNotifStats != PermissionStatus.Granted)
 		{
 			notificationToggle.IsToggled = false;
 			return;
 		}
+
+		if (permBattStats != PermissionStatus.Granted)
+		{
+			monitorToggle.IsToggled = false;
+			return;
+		}
+
 #endif
 
+		_isProgrammaticChange = true; 
 		notificationToggle.IsToggled = Preferences.Get(nameof(GecoSettings.Notifications), false);
+		monitorToggle.IsToggled = Preferences.Get(nameof(GecoSettings.Monitor), false);
+		_isProgrammaticChange = false; // Reset flag
+
 	}
 #pragma warning restore 1998
 #pragma warning disable 1998
@@ -61,12 +76,13 @@ public partial class SettingsViewModel : ObservableObject
 		if (e.Value)
 		{
 #if ANDROID
-			var permStats = await Permissions.RequestAsync<NotificationPermission>();
+			var permStats = await Permissions.RequestAsync<Permissions.PostNotifications>();
 			if (permStats != PermissionStatus.Granted)
 			{
 				sender.IsToggled = false;
 				await Toast.Make("Please allow notification permissions in settings").Show();
 				return;
+				
 			}
 
 #endif
@@ -75,4 +91,41 @@ public partial class SettingsViewModel : ObservableObject
 		Preferences.Set(nameof(GecoSettings.Notifications), e.Value);
 	}
 #pragma warning restore 1998
+
+#pragma warning disable 1998
+	public async void ToggleMonitor(Switch sender, ToggledEventArgs e, IMonitorManagerService monitorManagerService)
+	{
+		if (_isProgrammaticChange)
+			return; // Skip execution for programmatic changes
+
+		if (e.Value)
+		{
+#if ANDROID
+			var permBattStats = await Permissions.CheckStatusAsync<Permissions.Battery>();
+
+			if (permBattStats != PermissionStatus.Granted)
+			{
+				sender.IsToggled = false;
+				await Toast.Make("Please allow both battery and network state permissions in settings").Show();
+				return;
+			}
+			else
+			{
+				monitorManagerService.Start();
+			}
+		}
+		else
+		{
+			monitorManagerService.Stop();
+#endif
+		}
+
+
+		Preferences.Set(nameof(GecoSettings.Monitor), e.Value);
+	}
+#pragma warning restore 1998
+
+
+
+
 }

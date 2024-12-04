@@ -39,17 +39,19 @@ public class NotificationManagerService : INotificationManagerService, IDisposab
 		OnNotificationClick?.Invoke(this, new GecoTriggerEventMessage(msgContent!));
 	}
 
-	public void SendNotification(string title, string message)
+	public void SendNotification(string title, string message, bool isForeground)
 	{
 		if (!_channelInitialized)
 		{
 			CreateNotificationChannel();
 		}
 
-		Show(title, message);
+		var notif = Show(title, message, isForeground);
+
+		_compatManager.Notify(_messageId++, notif);
 	}
 
-	public void Show(string title, string message)
+	public Notification Show(string title, string message, bool isForeground)
 	{
 		var intent = new Intent(Platform.AppContext, typeof(MainActivity));
 		intent.SetAction(IntentActionName);
@@ -61,6 +63,10 @@ public class NotificationManagerService : INotificationManagerService, IDisposab
 			: PendingIntentFlags.UpdateCurrent;
 #pragma warning restore CA1416
 
+
+		bool autoCancel = isForeground ? false : true;
+		bool onGoing = isForeground ? true : false;
+
 		var pendingIntent =
 			PendingIntent.GetActivity(Platform.AppContext, _pendingIntentId++, intent, pendingIntentFlags);
 		var builder = new NotificationCompat.Builder(Platform.AppContext, ChannelId)
@@ -71,10 +77,11 @@ public class NotificationManagerService : INotificationManagerService, IDisposab
 			.SetLargeIcon(BitmapFactory.DecodeResource(Platform.AppContext.Resources,
 				ResourceConstant.Drawable.geco_logo))
 			.SetStyle(new NotificationCompat.BigTextStyle().BigText(message))
-			.SetAutoCancel(true);
+			.SetAutoCancel(autoCancel)
+			.SetOngoing(onGoing);
 
 		var notification = builder.Build();
-		_compatManager.Notify(_messageId++, notification);
+		return notification;
 	}
 
 	void CreateNotificationChannel()

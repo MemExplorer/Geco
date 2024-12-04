@@ -35,7 +35,7 @@ public partial class AppShell : Shell
 		bool isDark = Preferences.Get(nameof(GecoSettings.DarkMode), false);
 		Application.Current!.UserAppTheme = isDark ? AppTheme.Dark : AppTheme.Light;
 #if ANDROID
-		await Permissions.RequestAsync<NotificationPermission>();
+		await Permissions.RequestAsync<DevicePermissions>();
 
 #endif
 	}
