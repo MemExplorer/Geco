@@ -57,6 +57,7 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 
 	private void StartMonitoringActions()
 	{
+		CheckBatteryStatus();
 		Battery.Default.BatteryInfoChanged += OnBatteryInfoChanged;
 
 		//Add more action monitoring here
@@ -95,7 +96,7 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 		bool isCharging = Battery.Default.State == BatteryState.Charging;
 
 		// Check if the battery percentage when charging is outside the range of 20-80%
-		if (isCharging && (chargeLevel < 20 || chargeLevel > 80))
+		if (isCharging && Battery.Default.PowerSource != BatteryPowerSource.Battery && (chargeLevel < 20 || chargeLevel > 80))
 		{
 			// Temporary Notification to test trigger
 			NotificationSvc.SendNotification("Unsustainable Charging", "Charging range outside sustainable range of 20-80%");
