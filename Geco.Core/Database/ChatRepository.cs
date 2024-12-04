@@ -8,7 +8,7 @@ public class ChatRepository : DbRepositoryBase
 	public ChatRepository(string databaseDir) : base(databaseDir)
 	{
 	}
-	
+
 	// Database table blueprint
 	internal override TblSchema[]? TableSchemas =>
 	[

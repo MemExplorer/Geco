@@ -35,7 +35,7 @@ public partial class AppShell : Shell
 		bool isDark = Preferences.Get(nameof(GecoSettings.DarkMode), false);
 		Application.Current!.UserAppTheme = isDark ? AppTheme.Dark : AppTheme.Light;
 #if ANDROID
-		await Permissions.RequestAsync<DevicePermissions>();
+		await Permissions.RequestAsync<NotificationPermission>();
 
 #endif
 	}
@@ -57,7 +57,7 @@ public partial class AppShell : Shell
 		}
 
 		// update current page title
-		Context.PageTitle = CurrentPage.Title ?? string.Empty;
+		Context.PageTitle = CurrentPage.Title ?? String.Empty;
 	}
 
 	void ChatHistoryList_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

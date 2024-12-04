@@ -1,6 +1,5 @@
 using Geco.Core.Database;
 using Geco.ViewModels;
-using static InputKit.Shared.Controls.SelectionView;
 
 namespace Geco.Views;
 

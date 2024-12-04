@@ -1,48 +1,54 @@
 using Android.App;
 using Android.Content;
 using Android.OS;
-using Geco.Models.Monitor;
 using Android.Runtime;
+using Geco.Models.Monitor;
+using Geco.Models.Notifications;
 
 namespace Geco;
 
-[Service]
-public class DeviceUsageMonitorService: Service, IMonitorManagerService
+[Service(Name = "com.ssbois.geco.DeviceUsageMonitorService")]
+public class DeviceUsageMonitorService : Service, IMonitorManagerService
 {
-	private readonly NotificationManagerService _notificationManagerService = new();
-	int foregroundID = 1000;
-	bool _isMonitoringEnabled = false;
-
-	public override IBinder OnBind(Intent? intent)
-	{
-		throw new NotImplementedException();
-	}
+	int _serviceId = 1000;
+	bool _monitoring = false;
+	private INotificationManagerService NotificationSvc { get; } = App.Current?.Handler.MauiContext?.Services.GetService<INotificationManagerService>()!;
 
 	[return: GeneratedEnum]
 	public override StartCommandResult OnStartCommand(Intent? intent, [GeneratedEnum] StartCommandFlags flags, int startId)
 	{
 		if (intent?.Action == "START_SERVICE")
 		{
-			if (!_isMonitoringEnabled)
+			if (!_monitoring)
 			{
-				var notification = _notificationManagerService.Show("Monitoring Mobile Actions", "Geco is currenly monitoring your mobile actions in the background", true);
+				_monitoring = true;
+				if (NotificationSvc is NotificationManagerService nms)
+				{
+					var notification = nms.Show("Monitoring Mobile Actions", "Geco is currenly monitoring your mobile actions in the background");
+					notification.Flags = NotificationFlags.OngoingEvent;
+					if (OperatingSystem.IsAndroidVersionAtLeast(29))
+						StartForeground(_serviceId, notification, Android.Content.PM.ForegroundService.TypeDataSync);
+					else
+						StartForeground(_serviceId, notification);
 
-				StartForeground(foregroundID, notification);
-
-				StartMonitoringActions();
+					StartMonitoringActions();
+				}
 			}
 
 		}
 		else if (intent?.Action == "STOP_SERVICE")
 		{
-			if (Build.VERSION.SdkInt < BuildVersionCodes.Tiramisu)
+			if (_monitoring)
 			{
-#pragma warning disable CA1422
-				StopForeground(true);
-#pragma warning restore CA1422
+				_monitoring = false;
+				if (OperatingSystem.IsAndroidVersionAtLeast(33))
+					StopForeground(StopForegroundFlags.Remove);
+				else
+					StopForeground(true);
+
+				StopMonitoringActions();
+				StopSelfResult(startId);
 			}
-			StopMonitoringActions();
-			StopSelfResult(startId);
 		}
 
 		return StartCommandResult.Sticky;
@@ -51,7 +57,6 @@ public class DeviceUsageMonitorService: Service, IMonitorManagerService
 
 	private void StartMonitoringActions()
 	{
-		CheckBatteryStatus();
 		Battery.Default.BatteryInfoChanged += OnBatteryInfoChanged;
 
 		//Add more action monitoring here
@@ -66,18 +71,16 @@ public class DeviceUsageMonitorService: Service, IMonitorManagerService
 
 	public void Start()
 	{
-#pragma warning disable CS8604
-		Intent startService = new Intent(MainActivity.ActivityCurrent, typeof(DeviceUsageMonitorService));
-#pragma warning restore CS8604
+		Intent startService = new Intent(Platform.AppContext, this.Class);
 		startService.SetAction("START_SERVICE");
-		MainActivity.ActivityCurrent.StartService(startService);
+		Platform.CurrentActivity?.StartService(startService);
 	}
 
 	public void Stop()
 	{
-		Intent stopIntent = new Intent(MainActivity.ActivityCurrent, this.Class);
+		Intent stopIntent = new Intent(Platform.AppContext, this.Class);
 		stopIntent.SetAction("STOP_SERVICE");
-		MainActivity.ActivityCurrent?.StartService(stopIntent);
+		Platform.CurrentActivity?.StartService(stopIntent);
 	}
 
 	private void OnBatteryInfoChanged(object? sender, BatteryInfoChangedEventArgs e)
@@ -95,8 +98,9 @@ public class DeviceUsageMonitorService: Service, IMonitorManagerService
 		if (isCharging && (chargeLevel < 20 || chargeLevel > 80))
 		{
 			// Temporary Notification to test trigger
-			_notificationManagerService.SendNotification("Unsustainable Charging", "Charging range outside sustainable range of 20-80%", false);
+			NotificationSvc.SendNotification("Unsustainable Charging", "Charging range outside sustainable range of 20-80%");
 		}
 	}
 
+	public override IBinder? OnBind(Intent? intent) => null;
 }

@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
 using Geco.Core.Gemini;
-using Geco.Models.Notifications;
 
 namespace Geco.ViewModels;
 

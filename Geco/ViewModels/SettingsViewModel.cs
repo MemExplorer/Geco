@@ -9,8 +9,7 @@ namespace Geco.ViewModels;
 
 public partial class SettingsViewModel : ObservableObject
 {
-	private bool _isProgrammaticChange = false;
-
+	private bool _handlerLocked = false;
 
 	[RelayCommand]
 	async Task ClearHistory()
@@ -38,94 +37,59 @@ public partial class SettingsViewModel : ObservableObject
 		Preferences.Set(nameof(GecoSettings.DarkMode), isDark);
 	}
 
-
-#pragma warning restore 1998
-#pragma warning disable 1998
-	public async void LoadSettings(Switch themeToggle, Switch monitorToggle, Switch notificationToggle)
+	public void LoadSettings(Switch themeToggle, Switch monitorToggle, Switch notificationToggle)
 	{
 		themeToggle.IsToggled = Preferences.Get(nameof(GecoSettings.DarkMode), false);
-
-#if ANDROID
-		var permNotifStats = await Permissions.CheckStatusAsync<Permissions.PostNotifications>();
-		var permBattStats = await Permissions.CheckStatusAsync<Permissions.Battery>();
-
-		if (permNotifStats != PermissionStatus.Granted)
-		{
-			notificationToggle.IsToggled = false;
-			return;
-		}
-
-		if (permBattStats != PermissionStatus.Granted)
-		{
-			monitorToggle.IsToggled = false;
-			return;
-		}
-
-#endif
-
-		_isProgrammaticChange = true; 
 		notificationToggle.IsToggled = Preferences.Get(nameof(GecoSettings.Notifications), false);
+
+		_handlerLocked = true;
 		monitorToggle.IsToggled = Preferences.Get(nameof(GecoSettings.Monitor), false);
-		_isProgrammaticChange = false; // Reset flag
+		_handlerLocked = false; // Reset flag
 
 	}
-#pragma warning restore 1998
-#pragma warning disable 1998
+
 	public async void ToggleNotifications(Switch sender, ToggledEventArgs e)
 	{
-		if (e.Value)
+		if (OperatingSystem.IsAndroid() && e.Value)
 		{
-#if ANDROID
 			var permStats = await Permissions.RequestAsync<Permissions.PostNotifications>();
 			if (permStats != PermissionStatus.Granted)
 			{
 				sender.IsToggled = false;
 				await Toast.Make("Please allow notification permissions in settings").Show();
 				return;
-				
-			}
 
-#endif
+			}
 		}
 
 		Preferences.Set(nameof(GecoSettings.Notifications), e.Value);
 	}
-#pragma warning restore 1998
 
-#pragma warning disable 1998
 	public async void ToggleMonitor(Switch sender, ToggledEventArgs e, IMonitorManagerService monitorManagerService)
 	{
-		if (_isProgrammaticChange)
-			return; // Skip execution for programmatic changes
+		if (_handlerLocked)
+			return; // Skip execution when loading settings
 
 		if (e.Value)
 		{
-#if ANDROID
-			var permBattStats = await Permissions.CheckStatusAsync<Permissions.Battery>();
+			if (OperatingSystem.IsAndroid())
+			{
+				var permBattStats = await Permissions.CheckStatusAsync<Permissions.Battery>();
 
-			if (permBattStats != PermissionStatus.Granted)
-			{
-				sender.IsToggled = false;
-				await Toast.Make("Please allow both battery and network state permissions in settings").Show();
-				return;
+				if (permBattStats != PermissionStatus.Granted)
+				{
+					sender.IsToggled = false;
+					await Toast.Make("Please allow both battery and network state permissions in settings").Show();
+					return;
+				}
 			}
-			else
-			{
-				monitorManagerService.Start();
-			}
+
+			monitorManagerService.Start();
 		}
 		else
-		{
 			monitorManagerService.Stop();
-#endif
-		}
 
 
 		Preferences.Set(nameof(GecoSettings.Monitor), e.Value);
 	}
-#pragma warning restore 1998
-
-
-
-
 }

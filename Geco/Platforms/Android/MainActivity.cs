@@ -1,7 +1,6 @@
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
-using Android.OS;
 
 namespace Geco;
 
@@ -11,13 +10,6 @@ namespace Geco;
 public class MainActivity : MauiAppCompatActivity
 {
 	public static event EventHandler<NewIntentEvent>? OnNewIntentEvent;
-
-	public static MainActivity? ActivityCurrent { get; set; }
-
-	public MainActivity()
-	{
-		ActivityCurrent = this;
-	}
 
 	protected override void OnNewIntent(Intent? intent)
 	{

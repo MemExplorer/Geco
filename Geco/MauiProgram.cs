@@ -45,7 +45,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<INotificationManagerService, NotificationManagerService>();
 
 		// monitor service
-		builder.Services.AddSingleton<IMonitorManagerService,DeviceUsageMonitorService>();
+		builder.Services.AddSingleton<IMonitorManagerService, DeviceUsageMonitorService>();
 #endif
 
 		// settings

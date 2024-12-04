@@ -1,6 +1,5 @@
-using Geco.ViewModels;
-using Geco.Models;
 using Geco.Models.Monitor;
+using Geco.ViewModels;
 
 namespace Geco.Views;
 
@@ -30,6 +29,6 @@ public partial class SettingsPage : ContentPage
 	void MonitorSwt_Toggled(object sender, ToggledEventArgs e)
 	{
 		var bindingCtx = (SettingsViewModel)BindingContext;
-		bindingCtx.ToggleMonitor((Switch)sender, e, (IMonitorManagerService) _monitorService);
+		bindingCtx.ToggleMonitor((Switch)sender, e, (IMonitorManagerService)_monitorService);
 	}
 }
