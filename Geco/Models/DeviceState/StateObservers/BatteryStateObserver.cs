@@ -1,21 +1,14 @@
 
 using Geco.Core.Database;
-using Geco.Models.Monitor;
 
 namespace Geco.Models.DeviceState.StateObservers;
 internal class BatteryStateObserver : IDeviceStateObserver
 {
 	public event EventHandler<TriggerEventArgs>? OnStateChanged;
 
-	public void StartEventListener()
-	{
-		Battery.Default.BatteryInfoChanged += OnBatteryInfoChanged;
-	}
+	public void StartEventListener() => Battery.Default.BatteryInfoChanged += OnBatteryInfoChanged;
 
-	public void StopEventListener()
-	{
-		Battery.Default.BatteryInfoChanged -= OnBatteryInfoChanged;
-	}
+	public void StopEventListener() => Battery.Default.BatteryInfoChanged -= OnBatteryInfoChanged;
 
 	private void OnBatteryInfoChanged(object? sender, BatteryInfoChangedEventArgs e)
 	{

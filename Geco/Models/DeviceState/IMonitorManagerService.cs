@@ -1,4 +1,4 @@
-namespace Geco.Models.Monitor;
+namespace Geco.Models.DeviceState;
 
 public interface IMonitorManagerService
 {

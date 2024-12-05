@@ -1,9 +1,8 @@
 using CommunityToolkit.Maui;
 using Geco.Core.Database;
+using Geco.Models.DeviceState;
 using Geco.Models.DeviceState.StateObservers;
-using Geco.Models.Monitor;
 using Geco.Models.Notifications;
-using Geco.Platforms.Android;
 using Geco.ViewModels;
 using Geco.Views;
 using InputKit.Handlers;
@@ -49,6 +48,7 @@ public static class MauiProgram
 		// monitor service
 		builder.Services.AddSingleton<IMonitorManagerService, DeviceUsageMonitorService>();
 
+		// android triggers
 		builder.Services.AddSingleton<IDeviceStateObserver, NetworkStateObserver>();
 #endif
 
