@@ -41,7 +41,7 @@ public static class MauiProgram
 
 		// data repository instances
 		builder.Services.AddSingleton(new ChatRepository(FileSystem.AppDataDirectory));
-
+		builder.Services.AddSingleton(new TriggerRepository(FileSystem.AppDataDirectory));
 #if ANDROID
 		builder.Services.AddTransient<INotificationManagerService, NotificationManagerService>();
 
