@@ -4,13 +4,14 @@
              x:DataType="vm:ChatViewModel"
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:geco.core="clr-namespace:Geco.Core.Gemini;assembly=Geco.Core"
+             xmlns:mai="clr-namespace:Microsoft.Extensions.AI;assembly=Microsoft.Extensions.AI.Abstractions"
              xmlns:helpers="clr-namespace:Geco.Views.Helpers"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:Geco.ViewModels"
              Title="Chat">
     <ContentPage.Resources>
         <helpers:ChatAlignmentConverter x:Key="ChatAlignmentConverter" />
+        <helpers:IsModelToBooleanConverter x:Key="IsModelToBooleanConverter"/>
     </ContentPage.Resources>
 
     <StackLayout Padding="10"
@@ -34,7 +35,7 @@
                 </StackLayout>
             </CollectionView.EmptyView>
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="geco.core:ChatMessage">
+                <DataTemplate x:DataType="mai:ChatMessage">
                     <Border Padding="0,10"
                             Stroke="Transparent">
                         <Grid ColumnDefinitions="auto, *">
@@ -44,12 +45,12 @@
                                    MaximumHeightRequest="50"
                                    Margin="5"
                                    VerticalOptions="Start"
-                                   IsVisible="{Binding IsSentByBot}" />
+                                   IsVisible="{Binding Role, Converter={StaticResource IsModelToBooleanConverter}}" />
                             <Label Grid.Column="1"
                                    Padding="10,15,15,0"
                                    Text="{Binding Text}"
                                    VerticalOptions="FillAndExpand"
-                                   HorizontalOptions="{Binding IsSentByBot, Converter={StaticResource ChatAlignmentConverter}}" />
+                                   HorizontalOptions="{Binding Role, Converter={StaticResource ChatAlignmentConverter}}" />
                         </Grid>
                     </Border>
                 </DataTemplate>

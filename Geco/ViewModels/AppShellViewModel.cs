@@ -2,13 +2,12 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
-using Geco.Core.Gemini;
 
 namespace Geco.ViewModels;
 
 public partial class AppShellViewModel : ObservableObject
 {
-	[ObservableProperty] ObservableCollection<ChatHistory> _chatHistoryList;
+	[ObservableProperty] ObservableCollection<GecoChatHistory> _chatHistoryList;
 
 	[ObservableProperty] bool _isChatInstance;
 
