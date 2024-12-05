@@ -6,12 +6,9 @@ namespace Geco.Core.Test;
 
 public class DatabaseTest
 {
-	private readonly ITestOutputHelper output;
+	private readonly ITestOutputHelper _output;
 
-	public DatabaseTest(ITestOutputHelper output)
-	{
-		this.output = output;
-	}
+	public DatabaseTest(ITestOutputHelper output) => this._output = output;
 
 	[Fact]
 	async Task TriggerDatabaseTest()
@@ -31,11 +28,11 @@ public class DatabaseTest
 
 		foreach (var record in triggerData)
 		{
-			output.WriteLine($"Type: {record.Type}, Number of Records: {record.RawValue}");
+			_output.WriteLine($"Type: {record.Type}, Number of Records: {record.RawValue}");
 		}
 
-		var recentTriggerData = await triggerRepo.IsTriggerInCooldown(DeviceInteractionTrigger.ChargingUnsustainable);
-		output.WriteLine($"Is there recorded action trigger within 3 hours: {recentTriggerData}");
+		bool recentTriggerData = await triggerRepo.IsTriggerInCooldown(DeviceInteractionTrigger.ChargingUnsustainable);
+		_output.WriteLine($"Is there recorded action trigger within 3 hours: {recentTriggerData}");
 
 		await triggerRepo.PurgeTriggerData();
 		triggerData = await triggerRepo.FetchTriggerRecords();
