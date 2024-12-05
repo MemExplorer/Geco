@@ -1,6 +1,6 @@
 using Geco.Core.Database;
 
-namespace Geco.Models.Monitor;
+namespace Geco.Models.DeviceState;
 internal class TriggerEventArgs(DeviceInteractionTrigger triggerType, object eventData) : EventArgs
 {
 	internal DeviceInteractionTrigger TriggerType { get; } = triggerType;

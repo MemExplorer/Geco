@@ -1,11 +1,11 @@
-using Geco.Models.Monitor;
+using Geco.Models.DeviceState;
 using Geco.ViewModels;
 
 namespace Geco.Views;
 
 public partial class SettingsPage : ContentPage
 {
-	public readonly IMonitorManagerService _monitorService;
+	readonly IMonitorManagerService _monitorService;
 
 	public SettingsPage(IMonitorManagerService monitorManagerService)
 	{
@@ -29,6 +29,6 @@ public partial class SettingsPage : ContentPage
 	void MonitorSwt_Toggled(object sender, ToggledEventArgs e)
 	{
 		var bindingCtx = (SettingsViewModel)BindingContext;
-		bindingCtx.ToggleMonitor((Switch)sender, e, (IMonitorManagerService)_monitorService);
+		bindingCtx.ToggleMonitor((Switch)sender, e, _monitorService);
 	}
 }

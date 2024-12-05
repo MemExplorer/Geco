@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
 using Geco.Models;
-using Geco.Models.Monitor;
+using Geco.Models.DeviceState;
 
 namespace Geco.ViewModels;
 

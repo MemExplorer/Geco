@@ -1,22 +1,20 @@
 
 using Android.Net;
 using Geco.Core.Database;
-using Geco.Models.Monitor;
+using Geco.Models.DeviceState;
 
-namespace Geco.Platforms.Android;
+namespace Geco;
 internal class NetworkStateObserver : IDeviceStateObserver
 {
-	private NetworkCallbackHandler _networkCbHandler;
-	private ConnectivityManager _connectivityMgr;
+	private readonly NetworkCallbackHandler _networkCbHandler;
+	private readonly ConnectivityManager _connectivityMgr;
 	public event EventHandler<TriggerEventArgs>? OnStateChanged;
 
 	public NetworkStateObserver()
 	{
 		var connectivitySvc = (ConnectivityManager?)Platform.AppContext.GetSystemService("connectivity");
-		if (connectivitySvc == null)
-			throw new Exception("ConnectivityManager is null! That was unexpected.");
 
-		_connectivityMgr = connectivitySvc;
+		_connectivityMgr = connectivitySvc ?? throw new Exception("ConnectivityManager is null! That was unexpected.");
 		_networkCbHandler = new NetworkCallbackHandler(_connectivityMgr);
 	}
 
@@ -29,7 +27,7 @@ internal class NetworkStateObserver : IDeviceStateObserver
 	private void OnNetworkChange(object? sender, NetworkChangedEventArgs e)
 	{
 		DeviceInteractionTrigger triggerType;
-		if (OperatingSystem.IsAndroidVersionAtLeast(23))
+		if (OperatingSystem.IsAndroidVersionAtLeast(28))
 		{
 			var networkCapabilities = _connectivityMgr.GetNetworkCapabilities(e.Network);
 			triggerType = networkCapabilities != null && networkCapabilities.HasTransport(TransportType.Cellular) ?
@@ -51,26 +49,40 @@ internal class NetworkStateObserver : IDeviceStateObserver
 	}
 }
 
-public class NetworkChangedEventArgs(ConnectivityManager connectivity, Network network, bool lost) : EventArgs
+public class NetworkChangedEventArgs(ConnectivityManager connectivity, Network network) : EventArgs
 {
 	public Network Network { get; } = network;
 	public ConnectivityManager ConnectivityMgr { get; } = connectivity;
-	public bool Lost { get; } = lost;
 }
 
 class NetworkCallbackHandler(ConnectivityManager connectivity) : ConnectivityManager.NetworkCallback
 {
-	private ConnectivityManager _connectivityMgr = connectivity;
+	private readonly ConnectivityManager _connectivityMgr = connectivity;
 	public event EventHandler<NetworkChangedEventArgs>? OnNetworkChange;
 	public override void OnAvailable(Network network)
 	{
-		OnNetworkChange?.Invoke(null, new NetworkChangedEventArgs(_connectivityMgr, network, false));
+		OnNetworkChange?.Invoke(null, new NetworkChangedEventArgs(_connectivityMgr, network));
 		base.OnAvailable(network);
 	}
 
-	public override void OnLost(Network network)
+	public override async void OnLost(Network network)
 	{
-		OnNetworkChange?.Invoke(null, new NetworkChangedEventArgs(_connectivityMgr, network, true));
-		base.OnLost(network);
+		try
+		{
+			// wait 5 seconds to ensure _connectivityMgr.ActiveNetwork is not null
+			// and also wait for the device to connect to a new network
+			await Task.Delay(5000);
+			
+			var activeNetwork = _connectivityMgr.ActiveNetwork;
+			if (activeNetwork == null)
+				return;
+			
+			OnNetworkChange?.Invoke(null, new NetworkChangedEventArgs(_connectivityMgr, activeNetwork));
+			base.OnLost(network);
+		}
+		catch (Exception e)
+		{
+			Console.WriteLine(e);
+		}
 	}
 }
