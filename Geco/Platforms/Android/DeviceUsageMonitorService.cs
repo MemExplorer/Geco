@@ -98,6 +98,11 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 			// Temporary Notification to test trigger
 			NotificationSvc.SendNotification("Unsustainable Charging", "Charging range outside sustainable range of 20-80%");
 		}
+		else if (e.TriggerType == DeviceInteractionTrigger.NetworkUsageUnsustainable)
+		{
+			// Temporary Notification to test trigger
+			NotificationSvc.SendNotification("Unsustainable Network", "Please use wifi instead of cellular data.");
+		}
 	}
 
 	public override IBinder? OnBind(Intent? intent) => null;
