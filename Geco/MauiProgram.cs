@@ -1,5 +1,6 @@
 using CommunityToolkit.Maui;
 using Geco.Core.Database;
+using Geco.Models.DeviceState.StateObservers;
 using Geco.Models.Monitor;
 using Geco.Models.Notifications;
 using Geco.ViewModels;
@@ -47,6 +48,9 @@ public static class MauiProgram
 		// monitor service
 		builder.Services.AddSingleton<IMonitorManagerService, DeviceUsageMonitorService>();
 #endif
+
+		// triggers
+		builder.Services.AddSingleton<IDeviceStateObserver, BatteryStateObserver>();
 
 		// settings
 		SelectionView.GlobalSetting.CornerRadius = 10;

@@ -2,6 +2,7 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
+using Geco.Core.Database;
 using Geco.Models.Monitor;
 using Geco.Models.Notifications;
 
@@ -12,7 +13,17 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 {
 	int _serviceId = 1000;
 	bool _monitoring = false;
-	private INotificationManagerService NotificationSvc { get; } = App.Current?.Handler.MauiContext?.Services.GetService<INotificationManagerService>()!;
+
+	private IServiceProvider SvcProvider { get; }
+	private INotificationManagerService NotificationSvc { get; }
+	private IDeviceStateObserver[] Observers { get; }
+
+	public DeviceUsageMonitorService()
+	{
+		SvcProvider = App.Current?.Handler.MauiContext?.Services!;
+		NotificationSvc = SvcProvider.GetService<INotificationManagerService>()!;
+		Observers = [.. SvcProvider.GetServices<IDeviceStateObserver>()];
+	}
 
 	[return: GeneratedEnum]
 	public override StartCommandResult OnStartCommand(Intent? intent, [GeneratedEnum] StartCommandFlags flags, int startId)
@@ -31,7 +42,12 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 					else
 						StartForeground(_serviceId, notification);
 
-					StartMonitoringActions();
+					// start listening to device change events
+					foreach (var observer in Observers)
+					{
+						observer.OnStateChanged += OnDeviceStateChanged;
+						observer.StartEventListener();
+					}
 				}
 			}
 
@@ -46,27 +62,18 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 				else
 					StopForeground(true);
 
-				StopMonitoringActions();
+				// stop listening to device change events
+				foreach (var observer in Observers)
+				{
+					observer.OnStateChanged -= OnDeviceStateChanged;
+					observer.StopEventListener();
+				}
+
 				StopSelfResult(startId);
 			}
 		}
 
 		return StartCommandResult.Sticky;
-	}
-
-
-	private void StartMonitoringActions()
-	{
-		CheckBatteryStatus();
-		Battery.Default.BatteryInfoChanged += OnBatteryInfoChanged;
-
-		//Add more action monitoring here
-
-	}
-
-	private void StopMonitoringActions()
-	{
-		Battery.Default.BatteryInfoChanged -= OnBatteryInfoChanged;
 	}
 
 
@@ -84,19 +91,9 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 		Platform.CurrentActivity?.StartService(stopIntent);
 	}
 
-	private void OnBatteryInfoChanged(object? sender, BatteryInfoChangedEventArgs e)
+	private void OnDeviceStateChanged(object? sender, TriggerEventArgs e)
 	{
-		CheckBatteryStatus();
-	}
-
-	private void CheckBatteryStatus()
-	{
-		var batteryInfo = Battery.Default.ChargeLevel;
-		var chargeLevel = batteryInfo * 100;
-		bool isCharging = Battery.Default.State == BatteryState.Charging;
-
-		// Check if the battery percentage when charging is outside the range of 20-80%
-		if (isCharging && Battery.Default.PowerSource != BatteryPowerSource.Battery && (chargeLevel < 20 || chargeLevel > 80))
+		if (e.TriggerType == DeviceInteractionTrigger.ChargingUnsustainable)
 		{
 			// Temporary Notification to test trigger
 			NotificationSvc.SendNotification("Unsustainable Charging", "Charging range outside sustainable range of 20-80%");
