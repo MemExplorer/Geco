@@ -9,7 +9,7 @@ namespace Geco.ViewModels;
 
 public partial class SettingsViewModel : ObservableObject
 {
-	private bool _handlerLocked = false;
+	private bool _handlerLocked;
 
 	[RelayCommand]
 	async Task ClearHistory()
@@ -45,7 +45,6 @@ public partial class SettingsViewModel : ObservableObject
 		_handlerLocked = true;
 		monitorToggle.IsToggled = Preferences.Get(nameof(GecoSettings.Monitor), false);
 		_handlerLocked = false; // Reset flag
-
 	}
 
 	public async void ToggleNotifications(Switch sender, ToggledEventArgs e)
@@ -58,7 +57,6 @@ public partial class SettingsViewModel : ObservableObject
 				sender.IsToggled = false;
 				await Toast.Make("Please allow notification permissions in settings").Show();
 				return;
-
 			}
 		}
 

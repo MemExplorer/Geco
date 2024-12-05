@@ -62,7 +62,7 @@
                            Text="Geco will monitor and give insights about your habits" />
                 </StackLayout>
                 <Switch x:Name="MonitorSwt" HorizontalOptions="End" Toggled="MonitorSwt_Toggled" />
-                  
+
             </StackLayout>
         </Border>
 

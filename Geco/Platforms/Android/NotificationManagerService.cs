@@ -20,7 +20,7 @@ public class NotificationManagerService : INotificationManagerService, IDisposab
 	int _pendingIntentId = 0;
 	readonly NotificationManagerCompat _compatManager;
 
-	public event EventHandler<GecoTriggerEventMessage>? OnNotificationClick;
+	public event EventHandler<GecoNotificationMessageEvent>? OnNotificationClick;
 
 	public NotificationManagerService()
 	{
@@ -35,7 +35,7 @@ public class NotificationManagerService : INotificationManagerService, IDisposab
 			return;
 
 		string? msgContent = e.Intent.GetStringExtra("message");
-		OnNotificationClick?.Invoke(this, new GecoTriggerEventMessage(msgContent!));
+		OnNotificationClick?.Invoke(this, new GecoNotificationMessageEvent(msgContent!));
 	}
 
 	public void SendNotification(string title, string message)
@@ -45,9 +45,9 @@ public class NotificationManagerService : INotificationManagerService, IDisposab
 			CreateNotificationChannel();
 		}
 
-		var notif = Show(title, message);
+		var notificationInstance = Show(title, message);
 
-		_compatManager.Notify(_messageId++, notif);
+		_compatManager.Notify(_messageId++, notificationInstance);
 	}
 
 	public Notification Show(string title, string message)

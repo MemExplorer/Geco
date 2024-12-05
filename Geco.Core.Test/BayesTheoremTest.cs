@@ -1,7 +1,7 @@
-
 using System.Diagnostics;
 
 namespace Geco.Core.Test;
+
 public class BayesTheoremTest
 {
 	[Fact]

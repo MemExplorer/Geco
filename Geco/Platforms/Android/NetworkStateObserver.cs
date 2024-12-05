@@ -1,9 +1,9 @@
-
 using Android.Net;
 using Geco.Core.Database;
 using Geco.Models.DeviceState;
 
 namespace Geco;
+
 internal class NetworkStateObserver : IDeviceStateObserver
 {
 	private readonly NetworkCallbackHandler _networkCbHandler;
@@ -30,13 +30,15 @@ internal class NetworkStateObserver : IDeviceStateObserver
 		if (OperatingSystem.IsAndroidVersionAtLeast(28))
 		{
 			var networkCapabilities = _connectivityMgr.GetNetworkCapabilities(e.Network);
-			triggerType = networkCapabilities != null && networkCapabilities.HasTransport(TransportType.Cellular) ?
-				DeviceInteractionTrigger.NetworkUsageUnsustainable : DeviceInteractionTrigger.NetworkUsageSustainable;
+			triggerType = networkCapabilities != null && networkCapabilities.HasTransport(TransportType.Cellular)
+				? DeviceInteractionTrigger.NetworkUsageUnsustainable
+				: DeviceInteractionTrigger.NetworkUsageSustainable;
 		}
 		else
 		{
-			triggerType = _connectivityMgr.GetNetworkInfo(e.Network)?.Type == ConnectivityType.Mobile ?
-				DeviceInteractionTrigger.NetworkUsageUnsustainable : DeviceInteractionTrigger.NetworkUsageSustainable;
+			triggerType = _connectivityMgr.GetNetworkInfo(e.Network)?.Type == ConnectivityType.Mobile
+				? DeviceInteractionTrigger.NetworkUsageUnsustainable
+				: DeviceInteractionTrigger.NetworkUsageSustainable;
 		}
 
 		OnStateChanged?.Invoke(sender, new TriggerEventArgs(triggerType, e));
@@ -59,6 +61,7 @@ class NetworkCallbackHandler(ConnectivityManager connectivity) : ConnectivityMan
 {
 	private readonly ConnectivityManager _connectivityMgr = connectivity;
 	public event EventHandler<NetworkChangedEventArgs>? OnNetworkChange;
+
 	public override void OnAvailable(Network network)
 	{
 		OnNetworkChange?.Invoke(null, new NetworkChangedEventArgs(_connectivityMgr, network));
@@ -72,11 +75,11 @@ class NetworkCallbackHandler(ConnectivityManager connectivity) : ConnectivityMan
 			// wait 5 seconds to ensure _connectivityMgr.ActiveNetwork is not null
 			// and also wait for the device to connect to a new network
 			await Task.Delay(5000);
-			
+
 			var activeNetwork = _connectivityMgr.ActiveNetwork;
 			if (activeNetwork == null)
 				return;
-			
+
 			OnNetworkChange?.Invoke(null, new NetworkChangedEventArgs(_connectivityMgr, activeNetwork));
 			base.OnLost(network);
 		}

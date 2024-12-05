@@ -28,17 +28,12 @@ public partial class AppShell : Shell
 		chatRepo!.LoadHistory(Context.ChatHistoryList).Wait();
 	}
 
-#pragma warning disable 1998
-	async void AppShell_Loaded(object? sender, EventArgs e)
+	void AppShell_Loaded(object? sender, EventArgs e)
 	{
 		bool isDark = Preferences.Get(nameof(GecoSettings.DarkMode), false);
 		Application.Current!.UserAppTheme = isDark ? AppTheme.Dark : AppTheme.Light;
-#if ANDROID
-		await Permissions.RequestAsync<NotificationPermission>();
-
-#endif
 	}
-#pragma warning restore 1998
+
 	AppShellViewModel Context { get; }
 	internal IServiceProvider SvcProvider { get; }
 
@@ -56,7 +51,7 @@ public partial class AppShell : Shell
 		}
 
 		// update current page title
-		Context.PageTitle = CurrentPage.Title ?? String.Empty;
+		Context.PageTitle = CurrentPage.Title ?? string.Empty;
 	}
 
 	void ChatHistoryList_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -69,7 +64,7 @@ public partial class AppShell : Shell
 
 			// only one item is added at a time
 			var firstItem = (GecoChatHistory)e.NewItems[0]!;
-			var iconSrc = new FontImageSource() { FontFamily = "FontAwesome", Glyph = IconFont.MessageLines };
+			var iconSrc = new FontImageSource { FontFamily = "FontAwesome", Glyph = IconFont.MessageLines };
 			iconSrc.SetAppThemeColor(FontImageSource.ColorProperty, Color.Parse("#262626"), Color.Parse("#D3D3D3"));
 
 			var newChatPage = new ShellContent
