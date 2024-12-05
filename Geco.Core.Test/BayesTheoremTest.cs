@@ -1,6 +1,5 @@
 
 using System.Diagnostics;
-using Geco.Core;
 
 namespace Geco.Core.Test;
 public class BayesTheoremTest

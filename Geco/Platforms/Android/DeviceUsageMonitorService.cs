@@ -2,6 +2,7 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
+using Geco.Core.Database;
 using Geco.Models.Monitor;
 using Geco.Models.Notifications;
 
@@ -13,6 +14,7 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 	int _serviceId = 1000;
 	bool _monitoring = false;
 	private INotificationManagerService NotificationSvc { get; } = App.Current?.Handler.MauiContext?.Services.GetService<INotificationManagerService>()!;
+	private TriggerRepository triggerRepos { get; } = App.Current?.Handler.MauiContext?.Services.GetService<TriggerRepository>()!;
 
 	[return: GeneratedEnum]
 	public override StartCommandResult OnStartCommand(Intent? intent, [GeneratedEnum] StartCommandFlags flags, int startId)
@@ -89,17 +91,21 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 		CheckBatteryStatus();
 	}
 
-	private void CheckBatteryStatus()
+	private async void CheckBatteryStatus()
 	{
 		var batteryInfo = Battery.Default.ChargeLevel;
 		var chargeLevel = batteryInfo * 100;
 		bool isCharging = Battery.Default.State == BatteryState.Charging;
+		bool inCooldown = await triggerRepos.IsTriggerInCooldown(DeviceInteractionTrigger.ChargingUnsustainable);
 
 		// Check if the battery percentage when charging is outside the range of 20-80%
-		if (isCharging && Battery.Default.PowerSource != BatteryPowerSource.Battery && (chargeLevel < 20 || chargeLevel > 80))
+		if (!inCooldown && isCharging && Battery.Default.PowerSource != BatteryPowerSource.Battery && (chargeLevel < 20 || chargeLevel > 80))
 		{
 			// Temporary Notification to test trigger
 			NotificationSvc.SendNotification("Unsustainable Charging", "Charging range outside sustainable range of 20-80%");
+
+			//Store the action trigger in the database
+			await triggerRepos.LogTrigger(DeviceInteractionTrigger.ChargingUnsustainable, 1);
 		}
 	}
 

@@ -39,6 +39,18 @@ public class TriggerRepository : DbRepositoryBase
 		return triggers;
 	}
 
+	public async Task<bool> IsTriggerInCooldown(DeviceInteractionTrigger interactionTrigger)
+	{
+		await Initialize();
+
+		using var db = await SqliteDb.GetTransient(DatabaseDir);
+
+		// check if there is a record of the specified interaction trigger within 3 hours.
+		bool exists = await db.ExecuteScalar<long>($"SELECT EXISTS (SELECT 1 FROM TblTriggerLog WHERE Type = {(int)interactionTrigger} AND (unixepoch() - Timestamp) <= 10800)") == 1;
+
+		return exists;
+	}
+
 	public async Task PurgeWeeklyTriggerData()
 	{
 		await Initialize();
