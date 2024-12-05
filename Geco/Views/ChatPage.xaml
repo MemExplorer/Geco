@@ -11,7 +11,7 @@
              Title="Chat">
     <ContentPage.Resources>
         <helpers:ChatAlignmentConverter x:Key="ChatAlignmentConverter" />
-        <helpers:IsModelToBooleanConverter x:Key="IsModelToBooleanConverter"/>
+        <helpers:IsModelToBooleanConverter x:Key="IsModelToBooleanConverter" />
     </ContentPage.Resources>
 
     <StackLayout Padding="10"

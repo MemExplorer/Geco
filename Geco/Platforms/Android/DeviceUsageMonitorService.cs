@@ -24,16 +24,18 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 		NotificationSvc = SvcProvider.GetService<INotificationManagerService>()!;
 		Observers = [.. SvcProvider.GetServices<IDeviceStateObserver>()];
 	}
-	
-	public override StartCommandResult OnStartCommand(Intent? intent, [GeneratedEnum] StartCommandFlags flags, int startId)
+
+	public override StartCommandResult OnStartCommand(Intent? intent, [GeneratedEnum] StartCommandFlags flags,
+		int startId)
 	{
 		if (intent?.Action == "START_SERVICE" && !_monitoring)
 		{
 			_monitoring = true;
-			if (NotificationSvc is not NotificationManagerService nms) 
+			if (NotificationSvc is not NotificationManagerService nms)
 				return StartCommandResult.Sticky;
-				
-			var notification = nms.Show("Monitoring Mobile Actions", "Geco is currently monitoring your mobile actions in the background");
+
+			var notification = nms.Show("Monitoring Mobile Actions",
+				"Geco is currently monitoring your mobile actions in the background");
 			notification.Flags = NotificationFlags.OngoingEvent;
 			if (OperatingSystem.IsAndroidVersionAtLeast(29))
 				StartForeground(ServiceId, notification, Android.Content.PM.ForegroundService.TypeDataSync);
@@ -46,7 +48,6 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 				observer.OnStateChanged += OnDeviceStateChanged;
 				observer.StartEventListener();
 			}
-
 		}
 		else if (intent?.Action == "STOP_SERVICE" && _monitoring)
 		{
@@ -89,7 +90,8 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 		if (e.TriggerType == DeviceInteractionTrigger.ChargingUnsustainable)
 		{
 			// Temporary Notification to test trigger
-			NotificationSvc.SendNotification("Unsustainable Charging", "Charging range outside sustainable range of 20-80%");
+			NotificationSvc.SendNotification("Unsustainable Charging",
+				"Charging range outside sustainable range of 20-80%");
 		}
 		else if (e.TriggerType == DeviceInteractionTrigger.NetworkUsageUnsustainable)
 		{

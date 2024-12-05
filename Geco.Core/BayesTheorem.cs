@@ -1,12 +1,13 @@
 namespace Geco.Core;
 
 public record BayesTheoremAttribute(int Positive, int Negative);
+
 public class BayesTheorem
 {
-	Dictionary<string, BayesTheoremAttribute> _frequencyTbl = new Dictionary<string, BayesTheoremAttribute>();
+	readonly Dictionary<string, BayesTheoremAttribute> _frequencyTbl = new();
 
 	public void AppendData(string attrName, int positive, int negative) =>
-		_frequencyTbl.Add(attrName, new(positive, negative));
+		_frequencyTbl.Add(attrName, new BayesTheoremAttribute(positive, negative));
 
 	public (bool isPositive, double prob) Compute()
 	{
@@ -14,13 +15,13 @@ public class BayesTheorem
 		double totalNegativeAttr = _frequencyTbl.Values.Sum(attr => attr.Negative);
 		double sumTblFrequency = totalPositiveAttr + totalNegativeAttr;
 
-		var positivePoterior = _frequencyTbl.Values.Aggregate(1.0, (a, x) =>
+		double positivePosterior = _frequencyTbl.Values.Aggregate(1.0, (a, x) =>
 		{
 			double attrTotalFreq = x.Positive + x.Negative;
 			return a * (x.Positive / attrTotalFreq);
 		}) * (totalPositiveAttr / sumTblFrequency);
 
-		var negativePosterior = _frequencyTbl.Values.Aggregate(1.0, (a, x) =>
+		double negativePosterior = _frequencyTbl.Values.Aggregate(1.0, (a, x) =>
 		{
 			double attrTotalFreq = x.Positive + x.Negative;
 			return a * (x.Negative / attrTotalFreq);
@@ -28,13 +29,12 @@ public class BayesTheorem
 
 
 		// proportional probability
-		var posteriorSum = positivePoterior + negativePosterior;
-		var proportionalPositiveProb = positivePoterior / posteriorSum;
-		var proportionalNegativeProb = negativePosterior / posteriorSum;
+		double posteriorSum = positivePosterior + negativePosterior;
+		double proportionalPositiveProb = positivePosterior / posteriorSum;
+		double proportionalNegativeProb = negativePosterior / posteriorSum;
 
-		if (positivePoterior > negativePosterior)
-			return (true, proportionalPositiveProb);
-
-		return (false, proportionalNegativeProb);
+		return positivePosterior > negativePosterior
+			? (true, proportionalPositiveProb)
+			: (false, proportionalNegativeProb);
 	}
 }

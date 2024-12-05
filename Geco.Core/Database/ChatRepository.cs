@@ -80,17 +80,14 @@ public class ChatRepository : DbRepositoryBase
 				history.Id);
 		while (chatReader.Read())
 		{
-			var msgId = (ulong)(long)chatReader["MessageId"];
-			var chatContent = (string)chatReader["Content"];
-			var chatRole = (string)chatReader["Role"];
-			var chatEntry = new ChatMessage()
+			ulong msgId = (ulong)(long)chatReader["MessageId"];
+			string? chatContent = (string)chatReader["Content"];
+			string? chatRole = (string)chatReader["Role"];
+			var chatEntry = new ChatMessage
 			{
 				Text = chatContent,
 				Role = new ChatRole(chatRole),
-				AdditionalProperties = new AdditionalPropertiesDictionary()
-				{
-					["id"] = msgId
-				}
+				AdditionalProperties = new AdditionalPropertiesDictionary { ["id"] = msgId }
 			};
 			history.Messages.Add(chatEntry);
 		}

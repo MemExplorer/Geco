@@ -21,10 +21,10 @@ public partial class ChatViewModel : ObservableObject
 	string? HistoryId { get; set; }
 
 	public ChatViewModel() =>
-		GeminiClient.OnChatReceive += async (s, e) =>
-		await GeminiClientOnChatReceive(s, e);
+		GeminiClient.OnChatReceive += async (_, e) =>
+			await GeminiClientOnChatReceive(e);
 
-	async Task GeminiClientOnChatReceive(object? sender, ChatReceiveEventArgs e)
+	async Task GeminiClientOnChatReceive(ChatReceiveEventArgs e)
 	{
 		var currentShell = (AppShell)Shell.Current;
 		var chatRepo = currentShell.SvcProvider.GetService<ChatRepository>();

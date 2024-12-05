@@ -1,8 +1,8 @@
-
 using System.Diagnostics;
 using Geco.Core.Database;
 
 namespace Geco.Core.Test;
+
 public class DatabaseTest
 {
 	[Fact]
