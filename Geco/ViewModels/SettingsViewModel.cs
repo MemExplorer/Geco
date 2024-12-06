@@ -70,23 +70,28 @@ public partial class SettingsViewModel : ObservableObject
 
 		if (e.Value)
 		{
-			if (OperatingSystem.IsAndroid())
-			{
-				var permBattStats = await Permissions.CheckStatusAsync<Permissions.Battery>();
 
-				if (permBattStats != PermissionStatus.Granted)
+#if ANDROID
+
+			var alarmManager = (Android.App.AlarmManager?)Platform.AppContext.GetSystemService(Android.Content.Context.AlarmService);
+			if (alarmManager == null)
+				throw new Exception("alarmManager is unexpectedly null");
+
+			if (OperatingSystem.IsAndroidVersionAtLeast(31) && !alarmManager.CanScheduleExactAlarms())
+			{
+				var reqAlarm = await new SpecialPermissionWatcher(alarmManager.CanScheduleExactAlarms, Android.Provider.Settings.ActionRequestScheduleExactAlarm).RequestAsync();
+				if (!reqAlarm)
 				{
 					sender.IsToggled = false;
-					await Toast.Make("Please allow both battery and network state permissions in settings").Show();
+					await Toast.Make("Please allow schedule exact alarm permissions in settings").Show();
 					return;
 				}
 			}
-
+#endif
 			monitorManagerService.Start();
 		}
 		else
 			monitorManagerService.Stop();
-
 
 		Preferences.Set(nameof(GecoSettings.Monitor), e.Value);
 	}

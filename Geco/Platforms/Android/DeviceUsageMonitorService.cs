@@ -11,8 +11,9 @@ namespace Geco;
 [Service(Name = "com.ssbois.geco.DeviceUsageMonitorService")]
 public class DeviceUsageMonitorService : Service, IMonitorManagerService
 {
+	public const int TaskScheduleId = 84268154;
 	const int ServiceId = 1000;
-	bool _monitoring = false;
+	static bool hasStarted = false;
 
 	private IServiceProvider SvcProvider { get; }
 	private INotificationManagerService NotificationSvc { get; }
@@ -28,9 +29,8 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 	public override StartCommandResult OnStartCommand(Intent? intent, [GeneratedEnum] StartCommandFlags flags,
 		int startId)
 	{
-		if (intent?.Action == "START_SERVICE" && !_monitoring)
+		if (intent?.Action == "START_SERVICE" && hasStarted)
 		{
-			_monitoring = true;
 			if (NotificationSvc is not NotificationManagerService nms)
 				return StartCommandResult.Sticky;
 
@@ -48,14 +48,17 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 				observer.OnStateChanged += OnDeviceStateChanged;
 				observer.StartEventListener();
 			}
+
+			CreateDeviceUsageScheduledLogger();
 		}
-		else if (intent?.Action == "STOP_SERVICE" && _monitoring)
+		else if (intent?.Action == "STOP_SERVICE" && !hasStarted)
 		{
-			_monitoring = false;
 			if (OperatingSystem.IsAndroidVersionAtLeast(33))
 				StopForeground(StopForegroundFlags.Remove);
 			else
 				StopForeground(true);
+
+			CancelDeviceUsageScheduledLogger();
 
 			// stop listening to device change events
 			foreach (var observer in Observers)
@@ -70,9 +73,9 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 		return StartCommandResult.Sticky;
 	}
 
-
 	public void Start()
 	{
+		hasStarted = true;
 		var startService = new Intent(Platform.AppContext, this.Class);
 		startService.SetAction("START_SERVICE");
 		Platform.CurrentActivity?.StartService(startService);
@@ -80,9 +83,49 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 
 	public void Stop()
 	{
+		hasStarted = false;
 		var stopIntent = new Intent(Platform.AppContext, this.Class);
 		stopIntent.SetAction("STOP_SERVICE");
 		Platform.CurrentActivity?.StartService(stopIntent);
+	}
+
+	private void CancelDeviceUsageScheduledLogger() => 
+		InternalCancelScheduledTask("schedtaskcmd");
+
+	private void CreateDeviceUsageScheduledLogger() => 
+		InternalCreateScheduledTask("schedtaskcmd", DateTime.Now.Date.AddDays(1));
+
+	private void InternalCancelScheduledTask(string action)
+	{
+		var intent = new Intent(Platform.AppContext, typeof(ScheduledTaskReceiver));
+		intent.SetAction(action);
+		intent.SetFlags(ActivityFlags.ReceiverForeground);
+		var pendingIntent = PendingIntent.GetBroadcast(Platform.AppContext, TaskScheduleId, intent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
+		if (pendingIntent == null)
+			throw new Exception("pendingIntent is unexpectedly null");
+
+		var alarmManager = (AlarmManager?)Platform.AppContext.GetSystemService(Context.AlarmService);
+		if (alarmManager == null)
+			throw new Exception("alarmManager is unexpectedly null");
+
+		alarmManager.Cancel(pendingIntent);
+	}
+
+	private void InternalCreateScheduledTask(string action, DateTime scheduledDate)
+	{
+		var intent = new Intent(Platform.AppContext, typeof(ScheduledTaskReceiver));
+		intent.SetAction(action);
+		intent.SetFlags(ActivityFlags.ReceiverForeground);
+		var pendingIntent = PendingIntent.GetBroadcast(Platform.AppContext, TaskScheduleId, intent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
+		if (pendingIntent == null)
+			throw new Exception("pendingIntent is unexpectedly null");
+
+		var alarmManager = (AlarmManager?)Platform.AppContext.GetSystemService(Context.AlarmService);
+		if (alarmManager == null)
+			throw new Exception("alarmManager is unexpectedly null");
+
+		var triggerTimeInUnixTimeMs = ((DateTimeOffset)scheduledDate).ToUnixTimeMilliseconds();
+		alarmManager.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, triggerTimeInUnixTimeMs, pendingIntent);
 	}
 
 	private void OnDeviceStateChanged(object? sender, TriggerEventArgs e)
