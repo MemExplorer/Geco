@@ -89,10 +89,10 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 		Platform.CurrentActivity?.StartService(stopIntent);
 	}
 
-	private void CancelDeviceUsageScheduledLogger() => 
+	private void CancelDeviceUsageScheduledLogger() =>
 		InternalCancelScheduledTask("schedtaskcmd");
 
-	private void CreateDeviceUsageScheduledLogger() => 
+	private void CreateDeviceUsageScheduledLogger() =>
 		InternalCreateScheduledTask("schedtaskcmd", DateTime.Now.Date.AddDays(1));
 
 	private void InternalCancelScheduledTask(string action)
