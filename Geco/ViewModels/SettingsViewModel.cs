@@ -1,3 +1,4 @@
+
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -70,16 +71,54 @@ public partial class SettingsViewModel : ObservableObject
 
 		if (e.Value)
 		{
-
 #if ANDROID
 
+			// check location permission
+			var reqLocation = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+			if (reqLocation != PermissionStatus.Granted)
+			{
+				sender.IsToggled = false;
+				await Toast.Make("Please allow location permission").Show();
+				return;
+			}
+
+			// check usage stats permission
+			var appOpsMgr = (Android.App.AppOpsManager?)Platform.AppContext.GetSystemService(Android.Content.Context.AppOpsService);
+			if (appOpsMgr == null)
+				throw new Exception("appOpsMgr is unexpectedly null");
+
+			string currentAppPackageName = Platform.AppContext.PackageName!;
+
+			var checkUsageStatusPermissionFunc = bool () =>
+			{
+				Android.App.AppOpsManagerMode usageStatsPermissionResult;
+				if (OperatingSystem.IsAndroidVersionAtLeast(29))
+					usageStatsPermissionResult = appOpsMgr.UnsafeCheckOpNoThrow("android:get_usage_stats", Android.OS.Process.MyUid(), currentAppPackageName);
+				else
+					usageStatsPermissionResult = appOpsMgr.CheckOpNoThrow("android:get_usage_stats", Android.OS.Process.MyUid(), currentAppPackageName);
+
+				return usageStatsPermissionResult == Android.App.AppOpsManagerMode.Allowed;
+			};
+
+			if (!checkUsageStatusPermissionFunc())
+			{
+				var reqUsageStats = await new SpecialPermissionWatcher(checkUsageStatusPermissionFunc, Android.Provider.Settings.ActionUsageAccessSettings, currentAppPackageName).RequestAsync();
+				if (!reqUsageStats)
+				{
+					sender.IsToggled = false;
+					await Toast.Make("Please allow usage stats permission").Show();
+					return;
+				}
+			}
+
+			// check alarm manager permissions
 			var alarmManager = (Android.App.AlarmManager?)Platform.AppContext.GetSystemService(Android.Content.Context.AlarmService);
 			if (alarmManager == null)
 				throw new Exception("alarmManager is unexpectedly null");
 
 			if (OperatingSystem.IsAndroidVersionAtLeast(31) && !alarmManager.CanScheduleExactAlarms())
 			{
-				var reqAlarm = await new SpecialPermissionWatcher(alarmManager.CanScheduleExactAlarms, Android.Provider.Settings.ActionRequestScheduleExactAlarm).RequestAsync();
+				var reqAlarm = await new SpecialPermissionWatcher(alarmManager.CanScheduleExactAlarms, Android.Provider.Settings.ActionRequestScheduleExactAlarm, currentAppPackageName).RequestAsync();
 				if (!reqAlarm)
 				{
 					sender.IsToggled = false;

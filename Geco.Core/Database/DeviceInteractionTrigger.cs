@@ -7,11 +7,13 @@ namespace Geco.Core.Database;
 /// </summary>
 public enum DeviceInteractionTrigger
 {
-	NetworkUsageUnsustainable = -3,
+	LocationUsageUnsustainable = -4,
+	NetworkUsageUnsustainable,
 	DeviceUsageUnsustainable,
 	ChargingUnsustainable,
 	None, // DO NOT USE
 	ChargingSustainable,
 	DeviceUsageSustainable,
-	NetworkUsageSustainable
+	NetworkUsageSustainable,
+	LocationUsageSustainable
 }

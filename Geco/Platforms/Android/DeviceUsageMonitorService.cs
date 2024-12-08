@@ -89,10 +89,10 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 		Platform.CurrentActivity?.StartService(stopIntent);
 	}
 
-	private void CancelDeviceUsageScheduledLogger() => 
+	private void CancelDeviceUsageScheduledLogger() =>
 		InternalCancelScheduledTask("schedtaskcmd");
 
-	private void CreateDeviceUsageScheduledLogger() => 
+	private void CreateDeviceUsageScheduledLogger() =>
 		InternalCreateScheduledTask("schedtaskcmd", DateTime.Now.Date.AddDays(1));
 
 	private void InternalCancelScheduledTask(string action)
@@ -128,18 +128,40 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 		alarmManager.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, triggerTimeInUnixTimeMs, pendingIntent);
 	}
 
-	private void OnDeviceStateChanged(object? sender, TriggerEventArgs e)
+	private async void OnDeviceStateChanged(object? sender, TriggerEventArgs e)
 	{
-		if (e.TriggerType == DeviceInteractionTrigger.ChargingUnsustainable)
+		var triggerRepo = SvcProvider.GetService<TriggerRepository>();
+		if (triggerRepo == null)
+			throw new Exception("TriggerRepository should not be null!");
+
+		// don't notify if trigger is in cooldown
+		if (await triggerRepo.IsTriggerInCooldown(e.TriggerType))
+			return;
+
+		switch (e.TriggerType)
 		{
+		// only record charging
+		case DeviceInteractionTrigger.ChargingUnsustainable:
+
+			await triggerRepo.LogTrigger(e.TriggerType, 1);
 			// Temporary Notification to test trigger
 			NotificationSvc.SendNotification("Unsustainable Charging",
-				"Charging range outside sustainable range of 20-80%");
-		}
-		else if (e.TriggerType == DeviceInteractionTrigger.NetworkUsageUnsustainable)
-		{
-			// Temporary Notification to test trigger
+					"Charging range outside sustainable range of 20-80%");
+			break;
+		case DeviceInteractionTrigger.ChargingSustainable:
+			await triggerRepo.LogTrigger(e.TriggerType, 1);
+			break;
+
+		// don't count the triggers below
+		case DeviceInteractionTrigger.NetworkUsageUnsustainable:
+			await triggerRepo.LogTrigger(e.TriggerType, 0);
 			NotificationSvc.SendNotification("Unsustainable Network", "Please use wifi instead of cellular data.");
+			break;
+		case DeviceInteractionTrigger.LocationUsageUnsustainable:
+			await triggerRepo.LogTrigger(e.TriggerType, 0);
+			NotificationSvc.SendNotification("Unsustainable Location Services", "Please turn off location services.");
+			break;
+
 		}
 	}
 

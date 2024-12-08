@@ -50,6 +50,7 @@ public static class MauiProgram
 
 		// android triggers
 		builder.Services.AddSingleton<IDeviceStateObserver, NetworkStateObserver>();
+		builder.Services.AddSingleton<IDeviceStateObserver, LocationStateObserver>();
 #endif
 
 		// triggers
