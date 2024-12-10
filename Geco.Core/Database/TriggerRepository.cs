@@ -51,7 +51,7 @@ public class TriggerRepository : DbRepositoryBase
 
 		// check if there is a record of the specified interaction trigger within 3 hours.
 		return await db.ExecuteScalar<long>(
-				   $"SELECT EXISTS (SELECT 1 FROM TblTriggerLog WHERE Type = {(int)interactionTrigger} AND (unixepoch() - Timestamp) <= 10800)") ==
+				   $"SELECT EXISTS (SELECT 1 FROM TblTriggerLog WHERE (Type = {(int)interactionTrigger} OR Type = {-(int)interactionTrigger}) AND (unixepoch() - Timestamp) <= 10800)") ==
 			   1;
 	}
 
