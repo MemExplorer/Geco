@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Geco.Core;
@@ -6,21 +7,17 @@ internal partial class StringHelpers
 	[GeneratedRegex("\\{[A-Za-z_][A-Za-z0-9_]*\\}")]
 	private static partial Regex GetNamedPlaceholderPattern();
 
-	public static string FormatString(string template, object fields)
+	public static string FormatString(string template, object dataFields)
 	{
 		var pattern = GetNamedPlaceholderPattern();
-		var typeProperties = fields.GetType().GetProperties();
-		var typePropertyNames = typeProperties.Select(f => f.Name).ToList();
-		var typeValues = typeProperties.Select(f => f.GetValue(fields)).ToList();
-		for (int i = 0; i < typePropertyNames.Count; i++)
-			template = pattern.Replace(template, m =>
-			{
-				if (m.Value == $"{{{typePropertyNames[i]}}}")
-					return (string)(typeValues[i] ?? "");
+		var typeProperties = dataFields.GetType().GetProperties();
+		var typePropertyDict = typeProperties.ToDictionary(f => f.Name, f => f);
+		return pattern.Replace(template, m =>
+		{
+			if (typePropertyDict.TryGetValue(m.Value[1..(m.Value.Length - 1)], out PropertyInfo? propInfo))
+				return (string)(propInfo.GetValue(dataFields) ?? string.Empty);
 
-				return m.Value;
-			});
-
-		return template;
+			return m.Value;
+		});
 	}
 }

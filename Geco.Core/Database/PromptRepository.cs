@@ -17,6 +17,58 @@ public class PromptRepository : DbRepositoryBase
 
 	}
 
+	public async Task<string> GetPrompt(string userTopic) => await BuildPrompt(PromptCategory.SearchUserBasedTemp, new
+	{
+		UserTopic = userTopic
+	});
+
+	public async Task<string> GetPrompt(SearchPredefinedTopic predefinedTopic)
+	{
+		var promptCategory = GetPromptCategory(predefinedTopic);
+		string randomPromptRefinement = await FetchRandPromptRefinement(promptCategory);
+
+		return await BuildPrompt(PromptCategory.SearchCtgBasedTemp, new
+		{
+			PredefinedTopic = $"Sustainable {predefinedTopic}",
+			StoredPromptRefinement = randomPromptRefinement
+		});
+	}
+
+	public async Task<string> GetPrompt(DeviceInteractionTrigger interactionTrigger)
+	{
+		var promptCategory = GetPromptCategory(interactionTrigger);
+		string actionTrigger = GetUnsustainableAction(interactionTrigger);
+		string sustainableBaselineData = GetBaselineData(interactionTrigger);
+		string storedPromptRefinement = await FetchRandPromptRefinement(promptCategory);
+
+		return await BuildPrompt(PromptCategory.TriggerNotifTemp, new
+		{
+			ActionTrigger = actionTrigger,
+			SustainableBaselineData = sustainableBaselineData,
+			StoredPromptRefinement = storedPromptRefinement
+		});
+	}
+
+	public async Task<string> GetLikelihoodPrompt(string currentSustainabilityLikelihood, string currentLikelihoodComputation,
+		string currentFrequencyData) => await BuildPrompt(PromptCategory.LikelihoodNoPrevDataTemp, new
+		{
+			CurrentSustainabilityLikelihood = currentSustainabilityLikelihood,
+			CurrentLikelihoodComputation = currentLikelihoodComputation,
+			CurrentFrequencyData = currentFrequencyData
+		});
+
+	public async Task<string> GetLikelihoodWithHistoryPrompt(string currentSustainabilityLikelihood, string currentLikelihoodComputation,
+		string currentFrequencyData, string previousSustainabilityLikelihood, string previousLikelihoodComputation, string previousFrequencyData)
+		=> await BuildPrompt(PromptCategory.LikelihoodWithPrevDataTemp, new
+		{
+			CurrentSustainabilityLikelihood = currentSustainabilityLikelihood,
+			CurrentLikelihoodComputation = currentLikelihoodComputation,
+			CurrentFrequencyData = currentFrequencyData,
+			PreviousSustainabilityLikelihood = previousSustainabilityLikelihood,
+			PreviousLikelihoodComputation = previousLikelihoodComputation,
+			PreviousFrequencyData = previousFrequencyData
+		});
+
 	protected override async Task InitializeTables()
 	{
 		await base.InitializeTables();
@@ -174,56 +226,4 @@ public class PromptRepository : DbRepositoryBase
 		SearchPredefinedTopic.Transport => PromptCategory.TransportSearchRefinement,
 		_ => throw new Exception("Unknown Search Predefined Topic.")
 	};
-
-	public async Task<string> GetPrompt(string userTopic) => await BuildPrompt(PromptCategory.SearchUserBasedTemp, new
-	{
-		UserTopic = userTopic
-	});
-
-	public async Task<string> GetPrompt(SearchPredefinedTopic predefinedTopic)
-	{
-		var promptCategory = GetPromptCategory(predefinedTopic);
-		string randomPromptRefinement = await FetchRandPromptRefinement(promptCategory);
-
-		return await BuildPrompt(PromptCategory.SearchCtgBasedTemp, new
-		{
-			PredefinedTopic = $"Sustainable {predefinedTopic}",
-			StoredPromptRefinement = randomPromptRefinement
-		});
-	}
-
-	public async Task<string> GetPrompt(DeviceInteractionTrigger interactionTrigger)
-	{
-		var promptCategory = GetPromptCategory(interactionTrigger);
-		string actionTrigger = GetUnsustainableAction(interactionTrigger);
-		string sustainableBaselineData = GetBaselineData(interactionTrigger);
-		string storedPromptRefinement = await FetchRandPromptRefinement(promptCategory);
-
-		return await BuildPrompt(PromptCategory.TriggerNotifTemp, new
-		{
-			ActionTrigger = actionTrigger,
-			SustainableBaselineData = sustainableBaselineData,
-			StoredPromptRefinement = storedPromptRefinement
-		});
-	}
-
-	public async Task<string> GetLikelihoodPrompt(string currentSustainabilityLikelihood, string currentLikelihoodComputation,
-		string currentFrequencyData) => await BuildPrompt(PromptCategory.LikelihoodNoPrevDataTemp, new
-		{
-			CurrentSustainabilityLikelihood = currentSustainabilityLikelihood,
-			CurrentLikelihoodComputation = currentLikelihoodComputation,
-			CurrentFrequencyData = currentFrequencyData
-		});
-
-	public async Task<string> GetLikelihoodWithHistoryPrompt(string currentSustainabilityLikelihood, string currentLikelihoodComputation,
-		string currentFrequencyData, string previousSustainabilityLikelihood, string previousLikelihoodComputation, string previousFrequencyData)
-		=> await BuildPrompt(PromptCategory.LikelihoodWithPrevDataTemp, new
-		{
-			CurrentSustainabilityLikelihood = currentSustainabilityLikelihood,
-			CurrentLikelihoodComputation = currentLikelihoodComputation,
-			CurrentFrequencyData = currentFrequencyData,
-			PreviousSustainabilityLikelihood = previousSustainabilityLikelihood,
-			PreviousLikelihoodComputation = previousLikelihoodComputation,
-			PreviousFrequencyData = previousFrequencyData
-		});
 }
