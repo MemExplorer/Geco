@@ -3,11 +3,6 @@ using Geco.Core.Database.SqliteModel;
 namespace Geco.Core.Database;
 public class PromptRepository : DbRepositoryBase
 {
-	public PromptRepository(string databaseDir) : base(databaseDir)
-	{
-
-	}
-
 	// Database table blueprint
 	internal override TblSchema[]? TableSchemas =>
 	[
@@ -16,6 +11,11 @@ public class PromptRepository : DbRepositoryBase
 			new TblField("Content", TblFieldType.Text)
 		])
 	];
+
+	public PromptRepository(string databaseDir) : base(databaseDir)
+	{
+
+	}
 
 	protected override async Task InitializeTables()
 	{
@@ -29,11 +29,11 @@ public class PromptRepository : DbRepositoryBase
 
 		var prompts = new List<(int Category, string Content)>
 		{
-			((int)PromptCategory.SearchUserBasedTemp, "Based on the {userTopic}, generate three (3) responses and use a tone like that of a search engine."),
-			((int)PromptCategory.SearchCtgBasedTemp, "Using the tone of a search engine and based on the topic of {predefinedTopic}, generate three responses focusing on the {storedPromptRefinement}."),
-			((int)PromptCategory.TriggerNotifTemp, "Given the unsustainable action based on {actionTrigger}, the user overstepped the sustainable baseline data of {sustainableBaselineData}. Give a short notification-like message focusing on {storedPromptRefinement}."),
-			((int)PromptCategory.LikelihoodWithPrevDataTemp, "The current computed likelihood of sustainable use of mobile is {currentSustainabilityLikelihood}, the computation is as follows {currentLikelihoodComputation}. The values used are based on frequency, specifically: {currentFrequencyData}. The previous week computed likelihood of sustainable use of mobile is {previousSustainabilityLikelihood}, its computation is as follows {previousLikelihoodComputation}. The previous week computation made use of these frequencies: {previousFrequencyData}. Provide an analytical overview regarding the given sustainability data while including recommendations to improve involved sustainable practice. Also, if the previous week data is given, perform a comparison of the current and previous sustainability likelihood computation and value."),
-			((int)PromptCategory.LikelihoodNoPrevDataTemp, "The current computed likelihood of sustainable use of mobile is {currentSustainabilityLikelihood}, the computation is as follows {currentLikelihoodComputation}. The values used are based on frequency, specifically: {currentFrequencyData}. Provide an analytical overview regarding the given sustainability data while including recommendation to improve involved sustainable practice."),
+			((int)PromptCategory.SearchUserBasedTemp, "Based on the {UserTopic}, generate three (3) responses and use a tone like that of a search engine."),
+			((int)PromptCategory.SearchCtgBasedTemp, "Using the tone of a search engine and based on the topic of {predefinedTopic}, generate three responses focusing on the {StoredPromptRefinement}."),
+			((int)PromptCategory.TriggerNotifTemp, "Given the unsustainable action based on {ActionTrigger}, the user overstepped the sustainable baseline data of {SustainableBaselineData}. Give a short notification-like message focusing on {StoredPromptRefinement}."),
+			((int)PromptCategory.LikelihoodWithPrevDataTemp, "The current computed likelihood of sustainable use of mobile is {CurrentSustainabilityLikelihood}, the computation is as follows {CurrentLikelihoodComputation}. The values used are based on frequency, specifically: {CurrentFrequencyData}. The previous week computed likelihood of sustainable use of mobile is {PreviousSustainabilityLikelihood}, its computation is as follows {PreviousLikelihoodComputation}. The previous week computation made use of these frequencies: {PreviousFrequencyData}. Provide an analytical overview regarding the given sustainability data while including recommendations to improve involved sustainable practice. Also, if the previous week data is given, perform a comparison of the current and previous sustainability likelihood computation and value."),
+			((int)PromptCategory.LikelihoodNoPrevDataTemp, "The current computed likelihood of sustainable use of mobile is {CurrentSustainabilityLikelihood}, the computation is as follows {CurrentLikelihoodComputation}. The values used are based on frequency, specifically: {CurrentFrequencyData}. Provide an analytical overview regarding the given sustainability data while including recommendation to improve involved sustainable practice."),
 
 			((int)PromptCategory.EnergySearchRefinement, "Awareness and Advocacy"),
 			((int)PromptCategory.EnergySearchRefinement, "Comparative Analysis"),
@@ -91,9 +91,9 @@ public class PromptRepository : DbRepositoryBase
 		};
 
 		const string insertQuery = "INSERT INTO TblPrompt (Category, Content) VALUES (?, ?)";
-		foreach (var (category, content) in prompts)
+		foreach (var prompt in prompts)
 		{
-			await db.ExecuteNonQuery(insertQuery, category, content);
+			await db.ExecuteNonQuery(insertQuery, prompt.Category, prompt.Content);
 		}
 	}
 
@@ -102,14 +102,14 @@ public class PromptRepository : DbRepositoryBase
 		await Initialize();
 
 		// Check if categorized as refinement
-		if ((int)(promptCategory) < 5)
+		if ((int)promptCategory < 5)
 			throw new Exception("Invalid prompt category");
 
 		using var db = await SqliteDb.GetTransient(DatabaseDir);
 
 		// Randomly select stored prompt refinement
 		string? refinement = await db.ExecuteScalar<string>(
-				   $"SELECT Content FROM TblPrompt WHERE Category = {(int)promptCategory} ORDER BY RANDOM() LIMIT 1;");
+				   $"SELECT Content FROM TblPrompt WHERE Category = {(int)promptCategory} ORDER BY RANDOM() LIMIT 1");
 		return refinement ?? throw new Exception($"No prompt refinement found for category {promptCategory}");
 	}
 
@@ -124,24 +124,19 @@ public class PromptRepository : DbRepositoryBase
 		using var db = await SqliteDb.GetTransient(DatabaseDir);
 
 		string? promptTemplate = await db.ExecuteScalar<string>(
-				   $"SELECT Content FROM TblPrompt WHERE Category = {(int)promptCategory};");
+				   $"SELECT Content FROM TblPrompt WHERE Category = {(int)promptCategory}");
 		return promptTemplate ?? throw new Exception($"No prompt template found for category {promptCategory}");
 	}
 
-	private async Task<string> FillPrompt(PromptCategory promptCategory, Dictionary<string, string> promptSpecifics)
+	private async Task<string> BuildPrompt(PromptCategory promptCategory, object promptSpecifics)
 	{
 		string promptTemplate = await FetchPromptTemplate(promptCategory);
+		string promptResult = StringHelpers.FormatString(promptTemplate, promptSpecifics);
 
-		foreach (var placeholder in promptSpecifics)
-		{
-			string placeholderKey = "{" + placeholder.Key + "}";
-			promptTemplate = promptTemplate.Replace(placeholderKey, placeholder.Value);
-		}
-
-		return promptTemplate;
+		return promptResult;
 	}
 
-	public static string GetBaselineData(DeviceInteractionTrigger interactionTrigger) => interactionTrigger switch
+	private static string GetBaselineData(DeviceInteractionTrigger interactionTrigger) => interactionTrigger switch
 	{
 		DeviceInteractionTrigger.ChargingUnsustainable => "Let your battery naturally deplete to around 20% before charging to about 80%",
 		DeviceInteractionTrigger.DeviceUsageUnsustainable => "Spending 7 hours or more daily could potentially damage your eyes",
@@ -151,7 +146,7 @@ public class PromptRepository : DbRepositoryBase
 		_ => throw new Exception("Unknown Interaction Trigger.")
 	};
 
-	public static string GetUnsustainableAction(DeviceInteractionTrigger interactionTrigger) => interactionTrigger switch
+	private static string GetUnsustainableAction(DeviceInteractionTrigger interactionTrigger) => interactionTrigger switch
 	{
 		DeviceInteractionTrigger.ChargingUnsustainable => "Mobile charging",
 		DeviceInteractionTrigger.DeviceUsageUnsustainable => "Mobile device use or screen time",
@@ -161,7 +156,7 @@ public class PromptRepository : DbRepositoryBase
 		_ => throw new Exception("Unknown Interaction Trigger.")
 	};
 
-	public static PromptCategory GetPromptCategory(DeviceInteractionTrigger interactionTrigger) => interactionTrigger switch
+	private static PromptCategory GetPromptCategory(DeviceInteractionTrigger interactionTrigger) => interactionTrigger switch
 	{
 		DeviceInteractionTrigger.ChargingUnsustainable => PromptCategory.ChargingRefinement,
 		DeviceInteractionTrigger.DeviceUsageUnsustainable => PromptCategory.DeviceUsageRefinement,
@@ -171,64 +166,64 @@ public class PromptRepository : DbRepositoryBase
 		_ => throw new Exception("Unknown Interaction Trigger.")
 	};
 
-	public static PromptCategory GetPromptCategory(SearchPredefinedTopic predefinedTopic) => predefinedTopic switch
+	private static PromptCategory GetPromptCategory(SearchPredefinedTopic predefinedTopic) => predefinedTopic switch
 	{
 		SearchPredefinedTopic.Energy => PromptCategory.EnergySearchRefinement,
 		SearchPredefinedTopic.Waste => PromptCategory.WasteSearchRefinement,
 		SearchPredefinedTopic.Fashion => PromptCategory.FashionSearchRefinement,
 		SearchPredefinedTopic.Transport => PromptCategory.TransportSearchRefinement,
-		_ => throw new Exception("Unknown Interaction Trigger.")
+		_ => throw new Exception("Unknown Search Predefined Topic.")
 	};
 
-	public async Task<string> BuildSearchUserBasedPrompt(string userTopic) => await FillPrompt(PromptCategory.SearchUserBasedTemp, new Dictionary<string, string>
-		{
-			{"userTopic", userTopic}
-		});
+	public async Task<string> GetPrompt(string userTopic) => await BuildPrompt(PromptCategory.SearchUserBasedTemp, new
+	{
+		UserTopic = userTopic
+	});
 
-	public async Task<string> BuildSearchCtgBasedPrompt(SearchPredefinedTopic predefinedTopic)
+	public async Task<string> GetPrompt(SearchPredefinedTopic predefinedTopic)
 	{
 		var promptCategory = GetPromptCategory(predefinedTopic);
 		string randomPromptRefinement = await FetchRandPromptRefinement(promptCategory);
 
-		return await FillPrompt(PromptCategory.SearchCtgBasedTemp, new Dictionary<string, string>
-			{
-				{"predefinedTopic", $"Sustainable {predefinedTopic}"},
-				{"storedPromptRefinement", randomPromptRefinement}
-			});
+		return await BuildPrompt(PromptCategory.SearchCtgBasedTemp, new
+		{
+			PredefinedTopic = $"Sustainable {predefinedTopic}",
+			StoredPromptRefinement = randomPromptRefinement
+		});
 	}
 
-	public async Task<string> BuildTriggerNotifPrompt(DeviceInteractionTrigger interactionTrigger)
+	public async Task<string> GetPrompt(DeviceInteractionTrigger interactionTrigger)
 	{
 		var promptCategory = GetPromptCategory(interactionTrigger);
 		string actionTrigger = GetUnsustainableAction(interactionTrigger);
 		string sustainableBaselineData = GetBaselineData(interactionTrigger);
 		string storedPromptRefinement = await FetchRandPromptRefinement(promptCategory);
 
-		return await FillPrompt(PromptCategory.TriggerNotifTemp, new Dictionary<string, string>
-			{
-				{"actionTrigger", actionTrigger},
-				{"sustainableBaselineData", sustainableBaselineData},
-				{"storedPromptRefinement", storedPromptRefinement}
-			});
+		return await BuildPrompt(PromptCategory.TriggerNotifTemp, new
+		{
+			ActionTrigger = actionTrigger,
+			SustainableBaselineData = sustainableBaselineData,
+			StoredPromptRefinement = storedPromptRefinement
+		});
 	}
 
-	public async Task<string> BuildSustLikelihoodPrompt(string currentSustainabilityLikelihood, string currentLikelihoodComputation,
-		string currentFrequencyData) => await FillPrompt(PromptCategory.LikelihoodNoPrevDataTemp, new Dictionary<string, string>
+	public async Task<string> GetLikelihoodPrompt(string currentSustainabilityLikelihood, string currentLikelihoodComputation,
+		string currentFrequencyData) => await BuildPrompt(PromptCategory.LikelihoodNoPrevDataTemp, new
 		{
-			{"currentSustainabilityLikelihood", currentSustainabilityLikelihood},
-			{"currentLikelihoodComputation", currentLikelihoodComputation},
-			{"currentFrequencyData", currentFrequencyData}
+			CurrentSustainabilityLikelihood = currentSustainabilityLikelihood,
+			CurrentLikelihoodComputation = currentLikelihoodComputation,
+			CurrentFrequencyData = currentFrequencyData
 		});
 
-	public async Task<string> BuildSustLikelihoodPrompt(string currentSustainabilityLikelihood, string currentLikelihoodComputation,
+	public async Task<string> GetLikelihoodWithHistoryPrompt(string currentSustainabilityLikelihood, string currentLikelihoodComputation,
 		string currentFrequencyData, string previousSustainabilityLikelihood, string previousLikelihoodComputation, string previousFrequencyData)
-		=> await FillPrompt(PromptCategory.LikelihoodWithPrevDataTemp, new Dictionary<string, string>
+		=> await BuildPrompt(PromptCategory.LikelihoodWithPrevDataTemp, new
 		{
-			{"currentSustainabilityLikelihood", currentSustainabilityLikelihood},
-			{"currentLikelihoodComputation", currentLikelihoodComputation},
-			{"currentFrequencyData", currentFrequencyData},
-			{"previousSustainabilityLikelihood", previousSustainabilityLikelihood},
-			{"previousLikelihoodComputation", previousLikelihoodComputation},
-			{"previousFrequencyData", previousFrequencyData}
+			CurrentSustainabilityLikelihood = currentSustainabilityLikelihood,
+			CurrentLikelihoodComputation = currentLikelihoodComputation,
+			CurrentFrequencyData = currentFrequencyData,
+			PreviousSustainabilityLikelihood = previousSustainabilityLikelihood,
+			PreviousLikelihoodComputation = previousLikelihoodComputation,
+			PreviousFrequencyData = previousFrequencyData
 		});
 }

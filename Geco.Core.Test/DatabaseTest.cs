@@ -45,16 +45,16 @@ public class DatabaseTest
 		string dbPath = Environment.CurrentDirectory;
 		var promptRepo = new PromptRepository(dbPath);
 
-		string searchUserPrompt = await promptRepo.BuildSearchUserBasedPrompt("What are trending fashion globally");
+		string searchUserPrompt = await promptRepo.GetPrompt("What are trending fashion globally");
 		_output.WriteLine($"Search User Prompt: {searchUserPrompt}");
 
-		string searchCtgPrompt = await promptRepo.BuildSearchCtgBasedPrompt(SearchPredefinedTopic.Energy);
+		string searchCtgPrompt = await promptRepo.GetPrompt(SearchPredefinedTopic.Energy);
 		_output.WriteLine($"Search Predefined Category Prompt: {searchCtgPrompt}");
 
-		string triggerPrompt = await promptRepo.BuildTriggerNotifPrompt(DeviceInteractionTrigger.BrowserUsageUnsustainable);
+		string triggerPrompt = await promptRepo.GetPrompt(DeviceInteractionTrigger.BrowserUsageUnsustainable);
 		_output.WriteLine($"Trigger Prompt: {triggerPrompt}");
 
-		string sustLikelihoodPrompt = await promptRepo.BuildSustLikelihoodPrompt("16.55%", "current_sustainability_likelihood = (7/10) * (12/20) * (10/16) * (29/46)", "Charging: Total frequency – 10, Frequency Sustainable Charging – 3, Frequency Unsustainable Charging – 7");
+		string sustLikelihoodPrompt = await promptRepo.GetLikelihoodPrompt("16.55%", "current_sustainability_likelihood = (7/10) * (12/20) * (10/16) * (29/46)", "Charging: Total frequency – 10, Frequency Sustainable Charging – 3, Frequency Unsustainable Charging – 7");
 		_output.WriteLine($"Likelihood Prompt: {sustLikelihoodPrompt}");
 	}
 }
