@@ -6,7 +6,12 @@
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:helpers="clr-namespace:Geco.Views.Helpers"
              xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
+             xmlns:vm="clr-namespace:Geco.ViewModels"
+             x:DataType="vm:SearchViewModel"
              Title="Search">
+    <ContentPage.BindingContext>
+        <vm:SearchViewModel />
+    </ContentPage.BindingContext>
     <Grid Padding="10"
           ColumnSpacing="10"
           RowSpacing="10"
@@ -35,7 +40,8 @@
                 <Entry x:Name="SearchEntry"
                        Margin="20,0,7,0"
                        FontSize="18"
-                       HorizontalOptions="FillAndExpand" />
+                       HorizontalOptions="FillAndExpand" 
+                       Text="{Binding SearchQuery}"/>
 
                 <!--  Search Send Button  -->
                 <Button CornerRadius="30"
@@ -45,8 +51,7 @@
                         Margin="3"
                         VerticalOptions="Center">
                     <Button.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding SearchCommand}"
-                                              CommandParameter="{x:Reference SearchEntry}" />
+                        <TapGestureRecognizer Command="{Binding SearchCommand}"/>
                     </Button.GestureRecognizers>
                     <Button.Behaviors>
 
