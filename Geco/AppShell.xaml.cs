@@ -21,6 +21,7 @@ public partial class AppShell : Shell
 
 		// register routes
 		Routing.RegisterRoute(nameof(SettingsPage), typeof(SettingsPage));
+		Routing.RegisterRoute(nameof(SearchResultPage), typeof(SearchResultPage));
 
 		// Adding an item to the Context.ChatHistoryList triggers an event that executes code to create 
 		// a new flyout item using the details from the chat history entry.

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Geco.Views.SearchResultPage"
+             xmlns:vm="clr-namespace:Geco.ViewModels"
+             xmlns:model="clr-namespace:Geco.Models"
+             x:DataType="vm:SearchResultViewModel"
+             Title="Search Result"
+             Shell.FlyoutBehavior="Disabled">
+    <ContentPage.BindingContext>
+        <vm:SearchResultViewModel />
+    </ContentPage.BindingContext>
+
+    <StackLayout Padding="10"
+                 Spacing="10">
+        <!-- Search Bar and Button -->
+        <StackLayout Orientation="Horizontal"
+                     Spacing="5">
+            <Entry Placeholder="Search..."
+                   Text="{Binding Query}"
+                   Margin="20,0,7,0"
+                   FontSize="18"
+                   HorizontalOptions="FillAndExpand"/>
+            <Button CornerRadius="30"
+                HorizontalOptions="Center"
+                FontFamily="FontAwesome"
+                Margin="3"
+                VerticalOptions="Center">
+                <Button.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding UpdateSearchCommand}"/>
+                </Button.GestureRecognizers>
+            </Button>
+        </StackLayout>
+        
+        <!-- Results List -->
+        <CollectionView ItemsSource="{Binding SearchResults}">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="5"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="model:GecoSearchResult">
+                    <Border Stroke="Gray" 
+                            StrokeThickness="1" 
+                            Padding="10" 
+                            StrokeShape="RoundRectangle 10,10,10,10">
+                        <StackLayout>
+                            <Label Text="{Binding Title}"
+                               FontAttributes="Bold"/>
+                            <Label Text="{Binding Description}"
+                               FontSize="14"
+                               TextColor="Gray"
+                               Margin="0,5,0,0"
+                               LineBreakMode="WordWrap"/>
+                        </StackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </StackLayout>
+</ContentPage>
