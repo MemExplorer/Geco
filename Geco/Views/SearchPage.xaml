@@ -51,7 +51,8 @@
                         Margin="3"
                         VerticalOptions="Center">
                     <Button.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding SearchCommand}"/>
+                        <TapGestureRecognizer Command="{Binding SearchCommand}"
+                                              CommandParameter="{x:Reference SearchEntry}"/>
                     </Button.GestureRecognizers>
                     <Button.Behaviors>
 
