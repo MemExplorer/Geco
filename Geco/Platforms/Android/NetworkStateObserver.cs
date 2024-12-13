@@ -47,7 +47,14 @@ internal class NetworkStateObserver : IDeviceStateObserver
 	public void StopEventListener()
 	{
 		_networkCbHandler.OnNetworkChange -= OnNetworkChange;
-		_connectivityMgr.UnregisterNetworkCallback(_networkCbHandler);
+		try
+		{
+			_connectivityMgr.UnregisterNetworkCallback(_networkCbHandler);
+		}
+		catch
+		{
+			// handle **Java.Lang.IllegalArgumentException:** 'NetworkCallback was not registered'
+		}
 	}
 }
 
