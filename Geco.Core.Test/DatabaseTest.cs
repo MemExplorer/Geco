@@ -5,6 +5,7 @@ namespace Geco.Core.Test;
 
 public class DatabaseTest
 {
+
 	[Fact]
 	async Task TriggerDatabaseTest()
 	{
@@ -23,5 +24,11 @@ public class DatabaseTest
 		await triggerRepo.PurgeTriggerData();
 		triggerData = await triggerRepo.FetchTriggerRecords();
 		Debug.Assert(triggerData.Count == 0);
+	}
+
+	[Fact]
+	async Task GeminiTest()
+	{
+
 	}
 }
