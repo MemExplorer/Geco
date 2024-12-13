@@ -19,7 +19,7 @@ public partial class SearchResultViewModel : ObservableObject
 	[ObservableProperty] string? query;
 	bool isInitialized = false;
 
-	GeminiChat GeminiClient { get; } = new("API_KEY", "gemini-1.5-flash-latest");
+	GeminiChat GeminiClient { get; } = new(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest");
 
 	GeminiSettings GeminiConfig { get; } = new()
 	{
