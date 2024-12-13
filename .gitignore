@@ -399,3 +399,4 @@ FodyWeavers.xsd
 .idea/
 Geco.Core.Test/Secrets.cs
 Geco/Properties/launchSettings.json
+Geco/GecoSecrets.cs

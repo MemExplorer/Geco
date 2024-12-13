@@ -10,7 +10,7 @@ namespace Geco.ViewModels;
 public partial class ChatViewModel : ObservableObject
 {
 	[ObservableProperty] ObservableCollection<ChatMessage> _chatMessages = [];
-	GeminiChat GeminiClient { get; } = new("API_KEY", "gemini-1.5-flash-latest");
+	GeminiChat GeminiClient { get; } = new(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest");
 
 	GeminiSettings GeminiConfig { get; } = new()
 	{
