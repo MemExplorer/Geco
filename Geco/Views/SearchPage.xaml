@@ -74,7 +74,8 @@
                              RowSpacing="5"
                              Padding="50,20,50,50"
                              BackgroundColor="{AppThemeBinding Light=#D3D3D3, Dark=#262626}"
-                             Color="{AppThemeBinding Light=#b5b5b5, Dark=#141414}">
+                             Color="{AppThemeBinding Light=#b5b5b5, Dark=#141414}"
+                             SelectedItem="{Binding SelectedCategory}">
             <input:SelectionView.ItemsSource>
                 <x:Array Type="{x:Type x:String}">
                     <x:String>⚡ Energy</x:String>

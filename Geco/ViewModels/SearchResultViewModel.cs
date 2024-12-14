@@ -1,23 +1,24 @@
 using System.Collections.ObjectModel;
-using System.Data;
 using System.Text.Json;
+using System.Text.RegularExpressions;
+using System.Web;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Geco.Core.Database;
 using Geco.Models;
-using Geco.Views;
 using GoogleGeminiSDK;
 using GoogleGeminiSDK.Models.Components;
-using SchemaType = GoogleGeminiSDK.Models.Components.SchemaType;
 using ChatRole = Microsoft.Extensions.AI.ChatRole;
+using SchemaType = GoogleGeminiSDK.Models.Components.SchemaType;
 
 namespace Geco.ViewModels;
 
-[QueryProperty("Query", "Query")]
-public partial class SearchResultViewModel : ObservableObject
+public partial class SearchResultViewModel : ObservableObject, IQueryAttributable
 {
 	[ObservableProperty] ObservableCollection<GecoSearchResult> searchResults;
-	[ObservableProperty] string? query;
-	bool isInitialized = false;
+	[ObservableProperty] string? searchInput;
+	[ObservableProperty] bool isShimmerVisible = true, isResultsVisible = false;
+	bool isPredefined;
 
 	GeminiChat GeminiClient { get; } = new(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest");
 
@@ -31,12 +32,12 @@ public partial class SearchResultViewModel : ObservableObject
 			Items: new Schema(SchemaType.OBJECT,
 				Properties: new Dictionary<string, Schema>
 					{
-						{"title", new Schema(SchemaType.STRING)},
-						{"description", new Schema(SchemaType.STRING)} 
+						{"Title", new Schema(SchemaType.STRING)},
+						{"Description", new Schema(SchemaType.STRING)}
 					},
-				Required: ["title", "description"]
+				Required: ["Title", "Description"]
 				)
-			) 
+			)
 	};
 
 	public SearchResultViewModel()
@@ -48,30 +49,22 @@ public partial class SearchResultViewModel : ObservableObject
 
 	private void GeminiClientOnChatReceive(ChatReceiveEventArgs e)
 	{
-		if(e.Message.Role != ChatRole.User)
+		if (e.Message.Role != ChatRole.User)
 		{
 			string message = e.Message.ToString();
 
-			var resultData = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(message)!;
+			var results = JsonSerializer.Deserialize<List<GecoSearchResult>>(message);
 
-			if (resultData != null)
+			if (results != null)
 			{
 				SearchResults.Clear();
-				foreach (var item in resultData)
+				IsShimmerVisible = false;
+				IsResultsVisible = true;
+				foreach (var item in results)
 				{
-					SearchResults.Add(new GecoSearchResult(item["title"], item["description"]));
+					SearchResults.Add(new GecoSearchResult(item.Title, item.Description));
 				}
 			}
-		}
-	}
-
-	partial void OnQueryChanged(string? value)
-	{
-		// only run the SendSearch once when query has been passed
-		if (!isInitialized)
-		{
-			SendSearch();
-			isInitialized = true; 
 		}
 	}
 
@@ -84,17 +77,61 @@ public partial class SearchResultViewModel : ObservableObject
 
 		// hide keyboard after sending a message
 		await searchEntry.HideSoftInputAsync(CancellationToken.None);
-		SendSearch();
+
+		IsShimmerVisible = true;
+		IsResultsVisible = false;
+
+		SendSearch(false);
 	}
 
-	async void SendSearch()
+	async void SendSearch(bool isPredefined)
 	{
-		if (!string.IsNullOrWhiteSpace(Query))
+		if (!string.IsNullOrEmpty(SearchInput))
 		{
-			await GeminiClient.SendMessage(Query, settings: GeminiConfig);
+			var searchInput = Uri.UnescapeDataString(SearchInput);
+			var promptRepo = ((AppShell)Shell.Current).SvcProvider.GetService<PromptRepository>();
+
+			string? prompt = null;
+
+			if (promptRepo != null)
+			{
+				if (isPredefined && Enum.TryParse<SearchPredefinedTopic>(searchInput, out var convertedPredefTopic))
+				{
+					prompt = await promptRepo.GetPrompt(predefinedTopic: convertedPredefTopic);
+					Console.WriteLine(convertedPredefTopic);
+				}
+				else
+				{
+					prompt = await promptRepo.GetPrompt(userTopic: searchInput);
+				}
+			}
+
+			if (!string.IsNullOrEmpty(prompt))
+			{
+				await GeminiClient.SendMessage(message: prompt, settings: GeminiConfig);
+			}
 		}
 	}
 
+	public void ApplyQueryAttributes(IDictionary<string, object> query)
+	{
+		string searchInput = HttpUtility.UrlDecode(query["query"].ToString())!;
+		SearchInput = RemoveEmojis(searchInput);
 
+		string isPredefinedString = query["isPredefined"].ToString()!;
 
+		isPredefined = bool.TryParse(isPredefinedString, out bool result) && result;
+
+		if (isPredefined)
+			SendSearch(true);
+		else
+			SendSearch(false);
+	}
+
+	public static string RemoveEmojis(string input)
+	{
+		string pattern = @"[\p{Cs}\p{So}\p{Sm}]";
+
+		return Regex.Replace(input, pattern, string.Empty);
+	}
 }
