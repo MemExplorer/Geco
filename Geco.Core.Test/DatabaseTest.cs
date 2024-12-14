@@ -48,6 +48,8 @@ public class DatabaseTest
 		string searchUserPrompt = await promptRepo.GetPrompt("What are trending fashion globally");
 		_output.WriteLine($"Search User Prompt: {searchUserPrompt}");
 
+		//await promptRepo.PurgeTable();
+
 		string searchCtgPrompt = await promptRepo.GetPrompt(SearchPredefinedTopic.Energy);
 		_output.WriteLine($"Search Predefined Category Prompt: {searchCtgPrompt}");
 
