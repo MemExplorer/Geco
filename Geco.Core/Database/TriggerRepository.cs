@@ -9,7 +9,7 @@ public class TriggerRepository : DbRepositoryBase
 	}
 
 	// Database table blueprint
-	internal override TblSchema[]? TableSchemas =>
+	internal override TblSchema[] TableSchemas =>
 	[
 		new TblSchema("TblTriggerLog", [
 			new TblField("Timestamp", TblFieldType.Integer),

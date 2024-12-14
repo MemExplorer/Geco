@@ -81,8 +81,8 @@ public class ChatRepository : DbRepositoryBase
 		while (chatReader.Read())
 		{
 			ulong msgId = (ulong)(long)chatReader["MessageId"];
-			string? chatContent = (string)chatReader["Content"];
-			string? chatRole = (string)chatReader["Role"];
+			string chatContent = (string)chatReader["Content"];
+			string chatRole = (string)chatReader["Role"];
 			var chatEntry = new ChatMessage
 			{
 				Text = chatContent,

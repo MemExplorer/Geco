@@ -9,19 +9,19 @@ namespace Geco;
 internal class LocationStateObserver : IDeviceStateObserver
 {
 	public event EventHandler<TriggerEventArgs>? OnStateChanged;
-	private LocationManager _locationManager { get; }
-	private LocationListenerCallback _locationListenerCb { get; }
+	private LocationManager LocationMgrInst { get; }
+	private LocationListenerCallback LocationListenerCb { get; }
 	public LocationStateObserver()
 	{
 		var locationMgr = (LocationManager?)Platform.AppContext.GetSystemService(Context.LocationService);
-		_locationManager = locationMgr ?? throw new Exception("LocationManager is null! That was unexpected.");
-		_locationListenerCb = new LocationListenerCallback();
+		LocationMgrInst = locationMgr ?? throw new Exception("LocationManager is null! That was unexpected.");
+		LocationListenerCb = new LocationListenerCallback();
 	}
 
 	public void StartEventListener()
 	{
-		_locationListenerCb.OnToggle += OnLocationSvcToggle;
-		_locationManager.RequestLocationUpdates(LocationManager.GpsProvider, long.MaxValue, float.MaxValue, _locationListenerCb);
+		LocationListenerCb.OnToggle += OnLocationSvcToggle;
+		LocationMgrInst.RequestLocationUpdates(LocationManager.GpsProvider, long.MaxValue, float.MaxValue, LocationListenerCb);
 	}
 
 	private void OnLocationSvcToggle(object? sender, LocationStatusEventArgs e)
@@ -32,8 +32,8 @@ internal class LocationStateObserver : IDeviceStateObserver
 
 	public void StopEventListener()
 	{
-		_locationListenerCb.OnToggle -= OnLocationSvcToggle;
-		_locationManager.RemoveUpdates(_locationListenerCb);
+		LocationListenerCb.OnToggle -= OnLocationSvcToggle;
+		LocationMgrInst.RemoveUpdates(LocationListenerCb);
 	}
 }
 
@@ -50,14 +50,12 @@ class LocationListenerCallback : Java.Lang.Object, ILocationListener
 		// not needed
 	}
 
-	public void OnProviderDisabled(string provider)
-	{
+	public void OnProviderDisabled(string provider) => 
 		OnToggle?.Invoke(null, new LocationStatusEventArgs(false));
-	}
-	public void OnProviderEnabled(string provider)
-	{
+
+	public void OnProviderEnabled(string provider) => 
 		OnToggle?.Invoke(null, new LocationStatusEventArgs(true));
-	}
+
 	public void OnStatusChanged(string? provider, [GeneratedEnum] Availability status, Bundle? extras)
 	{
 		// not needed

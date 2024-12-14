@@ -24,12 +24,12 @@ internal class SpecialPermissionWatcher
 
 	private void OnActivityResultEvent(object? sender, ActivityResultEvent e)
 	{
-		if (e.RequestCode == RequestCode)
-		{
-			GrantedPermission = CheckPermissionFunc();
-			MainActivity.OnActivityResultEvent -= OnActivityResultEvent;
-			TaskResult.SetResult(true);
-		}
+		if (e.RequestCode != RequestCode) 
+			return;
+		
+		GrantedPermission = CheckPermissionFunc();
+		MainActivity.OnActivityResultEvent -= OnActivityResultEvent;
+		TaskResult.SetResult(true);
 	}
 
 	public async Task<bool> RequestAsync()

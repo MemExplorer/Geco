@@ -64,6 +64,7 @@ public partial class SettingsViewModel : ObservableObject
 		Preferences.Set(nameof(GecoSettings.Notifications), e.Value);
 	}
 
+	// ReSharper disable once AsyncVoidMethod
 	public async void ToggleMonitor(Switch sender, ToggledEventArgs e, IMonitorManagerService monitorManagerService)
 	{
 		if (_handlerLocked)
@@ -91,12 +92,7 @@ public partial class SettingsViewModel : ObservableObject
 
 			var checkUsageStatusPermissionFunc = bool () =>
 			{
-				Android.App.AppOpsManagerMode usageStatsPermissionResult;
-				if (OperatingSystem.IsAndroidVersionAtLeast(29))
-					usageStatsPermissionResult = appOpsMgr.UnsafeCheckOpNoThrow("android:get_usage_stats", Android.OS.Process.MyUid(), currentAppPackageName);
-				else
-					usageStatsPermissionResult = appOpsMgr.CheckOpNoThrow("android:get_usage_stats", Android.OS.Process.MyUid(), currentAppPackageName);
-
+				var usageStatsPermissionResult = OperatingSystem.IsAndroidVersionAtLeast(29) ? appOpsMgr.UnsafeCheckOpNoThrow("android:get_usage_stats", Android.OS.Process.MyUid(), currentAppPackageName) : appOpsMgr.CheckOpNoThrow("android:get_usage_stats", Android.OS.Process.MyUid(), currentAppPackageName);
 				return usageStatsPermissionResult == Android.App.AppOpsManagerMode.Allowed;
 			};
 
