@@ -5,8 +5,8 @@ using Geco.Views;
 namespace Geco.ViewModels;
 public partial class SearchViewModel : ObservableObject
 {
-	[ObservableProperty] string? searchQuery;
-	[ObservableProperty] string? selectedCategory;
+	[ObservableProperty] string? _searchQuery;
+	[ObservableProperty] string? _selectedCategory;
 
 	[RelayCommand]
 	async Task Search(Entry searchEntry)
@@ -18,17 +18,27 @@ public partial class SearchViewModel : ObservableObject
 		// hide keyboard after sending a message
 		await searchEntry.HideSoftInputAsync(CancellationToken.None);
 
-		_ = SearchResultsAsync(SearchQuery, false);
+		await SearchResultsAsync(SearchQuery, false);
 	}
 
-	partial void OnSelectedCategoryChanged(string? value)
+	async partial void OnSelectedCategoryChanged(string? value)
 	{
-		if (!string.IsNullOrEmpty(value))
+		try
+		{	
+			if (string.IsNullOrEmpty(value)) 
+				return;
+			await SearchResultsAsync(value, true);
+		}
+		catch
 		{
-			_ = SearchResultsAsync(value, true);
-			SelectedCategory = null;
+			// do nothing
 		}
 	}
 
-	private async Task SearchResultsAsync(string? searchInput, bool isPredefined) => await Shell.Current.GoToAsync($"{nameof(SearchResultPage)}?query={searchInput}&isPredefined={isPredefined}");
+	private async Task SearchResultsAsync(string? searchInput, bool isPredefined)
+	{
+		await Shell.Current.GoToAsync($"{nameof(SearchResultPage)}?query={searchInput}&isPredefined={isPredefined}");
+		SearchQuery = string.Empty;
+	}
+		
 }
