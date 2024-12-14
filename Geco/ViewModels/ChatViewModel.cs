@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
-using Geco.Models.Notifications;
 using GoogleGeminiSDK;
 using Microsoft.Extensions.AI;
 
@@ -21,16 +20,16 @@ public partial class ChatViewModel : ObservableObject
 
 	string? HistoryId { get; set; }
 
-	public ChatViewModel() => 
-		GeminiClient.OnChatReceive += async (s, e) => 
-		await GeminiClientOnChatReceive(s, e);
+	public ChatViewModel() =>
+		GeminiClient.OnChatReceive += async (_, e) =>
+			await GeminiClientOnChatReceive(e);
 
-	async Task GeminiClientOnChatReceive(object? sender, ChatReceiveEventArgs e)
+	async Task GeminiClientOnChatReceive(ChatReceiveEventArgs e)
 	{
 		var currentShell = (AppShell)Shell.Current;
 		var chatRepo = currentShell.SvcProvider.GetService<ChatRepository>();
 		ChatMessages.Add(e.Message);
-		
+
 		// save chat to database
 		await chatRepo!.AppendChat(HistoryId!, e.Message);
 	}

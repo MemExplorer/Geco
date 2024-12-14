@@ -61,13 +61,8 @@
                     <Label FontSize="Caption"
                            Text="Geco will monitor and give insights about your habits" />
                 </StackLayout>
-                <Switch x:Name="MonitorSwt" HorizontalOptions="End">
-                    <Switch.Behaviors>
-                        <toolkit:EventToCommandBehavior EventName="Toggled"
-                                                        x:TypeArguments="ToggledEventArgs"
-                                                        Command="{Binding ToggleMonitorCommand}" />
-                    </Switch.Behaviors>
-                </Switch>
+                <Switch x:Name="MonitorSwt" HorizontalOptions="End" Toggled="MonitorSwt_Toggled" />
+
             </StackLayout>
         </Border>
 

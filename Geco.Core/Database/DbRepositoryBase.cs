@@ -6,6 +6,7 @@ public abstract class DbRepositoryBase
 {
 	bool _initialized;
 	protected string DatabaseDir { get; }
+
 	protected DbRepositoryBase(string databaseDir) =>
 		DatabaseDir = databaseDir;
 

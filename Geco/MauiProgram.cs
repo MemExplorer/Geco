@@ -1,5 +1,7 @@
 using CommunityToolkit.Maui;
 using Geco.Core.Database;
+using Geco.Models.DeviceState;
+using Geco.Models.DeviceState.StateObservers;
 using Geco.Models.Notifications;
 using Geco.ViewModels;
 using Geco.Views;
@@ -39,10 +41,20 @@ public static class MauiProgram
 
 		// data repository instances
 		builder.Services.AddSingleton(new ChatRepository(FileSystem.AppDataDirectory));
-
+		builder.Services.AddSingleton(new TriggerRepository(FileSystem.AppDataDirectory));
 #if ANDROID
 		builder.Services.AddTransient<INotificationManagerService, NotificationManagerService>();
+
+		// monitor service
+		builder.Services.AddSingleton<IMonitorManagerService, DeviceUsageMonitorService>();
+
+		// android triggers
+		builder.Services.AddSingleton<IDeviceStateObserver, NetworkStateObserver>();
+		builder.Services.AddSingleton<IDeviceStateObserver, LocationStateObserver>();
 #endif
+
+		// triggers
+		builder.Services.AddSingleton<IDeviceStateObserver, BatteryStateObserver>();
 
 		// settings
 		SelectionView.GlobalSetting.CornerRadius = 10;

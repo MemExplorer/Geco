@@ -1,7 +1,6 @@
 using _Microsoft.Android.Resource.Designer;
 using Android.App;
 using Android.Content;
-using Android.Content.Res;
 using Android.Graphics;
 using Android.OS;
 using AndroidX.Core.App;
@@ -21,7 +20,7 @@ public class NotificationManagerService : INotificationManagerService, IDisposab
 	int _pendingIntentId = 0;
 	readonly NotificationManagerCompat _compatManager;
 
-	public event EventHandler<GecoTriggerEventMessage>? OnNotificationClick;
+	public event EventHandler<GecoNotificationMessageEvent>? OnNotificationClick;
 
 	public NotificationManagerService()
 	{
@@ -36,7 +35,7 @@ public class NotificationManagerService : INotificationManagerService, IDisposab
 			return;
 
 		string? msgContent = e.Intent.GetStringExtra("message");
-		OnNotificationClick?.Invoke(this, new GecoTriggerEventMessage(msgContent!));
+		OnNotificationClick?.Invoke(this, new GecoNotificationMessageEvent(msgContent!));
 	}
 
 	public void SendNotification(string title, string message)
@@ -46,10 +45,12 @@ public class NotificationManagerService : INotificationManagerService, IDisposab
 			CreateNotificationChannel();
 		}
 
-		Show(title, message);
+		var notificationInstance = Show(title, message);
+
+		_compatManager.Notify(_messageId++, notificationInstance);
 	}
 
-	public void Show(string title, string message)
+	public Notification Show(string title, string message)
 	{
 		var intent = new Intent(Platform.AppContext, typeof(MainActivity));
 		intent.SetAction(IntentActionName);
@@ -74,7 +75,7 @@ public class NotificationManagerService : INotificationManagerService, IDisposab
 			.SetAutoCancel(true);
 
 		var notification = builder.Build();
-		_compatManager.Notify(_messageId++, notification);
+		return notification;
 	}
 
 	void CreateNotificationChannel()

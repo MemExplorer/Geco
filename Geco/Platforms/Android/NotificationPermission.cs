@@ -2,7 +2,7 @@ using Android;
 
 namespace Geco;
 
-public class NotificationPermission : Permissions.BasePlatformPermission
+internal class NotificationPermission : Permissions.BasePlatformPermission
 {
 	public override (string androidPermission, bool isRuntime)[] RequiredPermissions
 	{

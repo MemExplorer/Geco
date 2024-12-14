@@ -1,13 +1,17 @@
+
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
 using Geco.Models;
+using Geco.Models.DeviceState;
 
 namespace Geco.ViewModels;
 
 public partial class SettingsViewModel : ObservableObject
 {
+	private bool _handlerLocked;
+
 	[RelayCommand]
 	async Task ClearHistory()
 	{
@@ -34,45 +38,96 @@ public partial class SettingsViewModel : ObservableObject
 		Preferences.Set(nameof(GecoSettings.DarkMode), isDark);
 	}
 
-	[RelayCommand]
-	void ToggleMonitor(ToggledEventArgs e) => Preferences.Set(nameof(GecoSettings.Monitor), e.Value);
-
-#pragma warning disable 1998
-	public async void LoadSettings(Switch themeToggle, Switch monitorToggle, Switch notificationToggle)
+	public void LoadSettings(Switch themeToggle, Switch monitorToggle, Switch notificationToggle)
 	{
 		themeToggle.IsToggled = Preferences.Get(nameof(GecoSettings.DarkMode), false);
-		monitorToggle.IsToggled = Preferences.Get(nameof(GecoSettings.Monitor), false);
-
-#if ANDROID
-		var permStats = await Permissions.CheckStatusAsync<NotificationPermission>();
-		if (permStats != PermissionStatus.Granted)
-		{
-			notificationToggle.IsToggled = false;
-			return;
-		}
-#endif
-
 		notificationToggle.IsToggled = Preferences.Get(nameof(GecoSettings.Notifications), false);
+
+		_handlerLocked = true;
+		monitorToggle.IsToggled = Preferences.Get(nameof(GecoSettings.Monitor), false);
+		_handlerLocked = false; // Reset flag
 	}
-#pragma warning restore 1998
-#pragma warning disable 1998
+
 	public async void ToggleNotifications(Switch sender, ToggledEventArgs e)
 	{
-		if (e.Value)
+		if (OperatingSystem.IsAndroid() && e.Value)
 		{
-#if ANDROID
-			var permStats = await Permissions.RequestAsync<NotificationPermission>();
+			var permStats = await Permissions.RequestAsync<Permissions.PostNotifications>();
 			if (permStats != PermissionStatus.Granted)
 			{
 				sender.IsToggled = false;
 				await Toast.Make("Please allow notification permissions in settings").Show();
 				return;
 			}
-
-#endif
 		}
 
 		Preferences.Set(nameof(GecoSettings.Notifications), e.Value);
 	}
-#pragma warning restore 1998
+
+	// ReSharper disable once AsyncVoidMethod
+	public async void ToggleMonitor(Switch sender, ToggledEventArgs e, IMonitorManagerService monitorManagerService)
+	{
+		if (_handlerLocked)
+			return; // Skip execution when loading settings
+
+		if (e.Value)
+		{
+#if ANDROID
+
+			// check location permission
+			var reqLocation = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+			if (reqLocation != PermissionStatus.Granted)
+			{
+				sender.IsToggled = false;
+				await Toast.Make("Please allow location permission").Show();
+				return;
+			}
+
+			// check usage stats permission
+			var appOpsMgr = (Android.App.AppOpsManager?)Platform.AppContext.GetSystemService(Android.Content.Context.AppOpsService);
+			if (appOpsMgr == null)
+				throw new Exception("appOpsMgr is unexpectedly null");
+
+			string currentAppPackageName = Platform.AppContext.PackageName!;
+
+			var checkUsageStatusPermissionFunc = bool () =>
+			{
+				var usageStatsPermissionResult = OperatingSystem.IsAndroidVersionAtLeast(29) ? appOpsMgr.UnsafeCheckOpNoThrow("android:get_usage_stats", Android.OS.Process.MyUid(), currentAppPackageName) : appOpsMgr.CheckOpNoThrow("android:get_usage_stats", Android.OS.Process.MyUid(), currentAppPackageName);
+				return usageStatsPermissionResult == Android.App.AppOpsManagerMode.Allowed;
+			};
+
+			if (!checkUsageStatusPermissionFunc())
+			{
+				var reqUsageStats = await new SpecialPermissionWatcher(checkUsageStatusPermissionFunc, Android.Provider.Settings.ActionUsageAccessSettings, currentAppPackageName).RequestAsync();
+				if (!reqUsageStats)
+				{
+					sender.IsToggled = false;
+					await Toast.Make("Please allow usage stats permission").Show();
+					return;
+				}
+			}
+
+			// check alarm manager permissions
+			var alarmManager = (Android.App.AlarmManager?)Platform.AppContext.GetSystemService(Android.Content.Context.AlarmService);
+			if (alarmManager == null)
+				throw new Exception("alarmManager is unexpectedly null");
+
+			if (OperatingSystem.IsAndroidVersionAtLeast(31) && !alarmManager.CanScheduleExactAlarms())
+			{
+				var reqAlarm = await new SpecialPermissionWatcher(alarmManager.CanScheduleExactAlarms, Android.Provider.Settings.ActionRequestScheduleExactAlarm, currentAppPackageName).RequestAsync();
+				if (!reqAlarm)
+				{
+					sender.IsToggled = false;
+					await Toast.Make("Please allow schedule exact alarm permissions in settings").Show();
+					return;
+				}
+			}
+#endif
+			monitorManagerService.Start();
+		}
+		else
+			monitorManagerService.Stop();
+
+		Preferences.Set(nameof(GecoSettings.Monitor), e.Value);
+	}
 }
