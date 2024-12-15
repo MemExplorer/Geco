@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
 using Geco.Models.Notifications;
 using GoogleGeminiSDK;
+using GoogleGeminiSDK.Models.ContentGeneration;
 using Microsoft.Extensions.AI;
 
 namespace Geco.ViewModels;
@@ -15,6 +16,18 @@ public partial class ChatViewModel : ObservableObject
 
 	GeminiSettings GeminiConfig { get; } = new()
 	{
+		MaxOutputTokenCount = 500,
+		Temperature = (float?)0.2,
+		TopP = (float?)0.85,
+		TopK = 50,
+		SafetySettings = new List<SafetySetting> {
+			new SafetySetting(HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, HarmBlockThreshold.BLOCK_LOW_AND_ABOVE),
+			new SafetySetting(HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, HarmBlockThreshold.BLOCK_LOW_AND_ABOVE),
+			new SafetySetting(HarmCategory.HARM_CATEGORY_HARASSMENT, HarmBlockThreshold.BLOCK_LOW_AND_ABOVE),
+			new SafetySetting(HarmCategory.HARM_CATEGORY_HATE_SPEECH, HarmBlockThreshold.BLOCK_LOW_AND_ABOVE),
+			new SafetySetting(HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY, HarmBlockThreshold.BLOCK_LOW_AND_ABOVE)
+		},
+
 		SystemInstructions =
 			"You are Geco, a large language model based on Google Gemini. You are developed by SS Bois.  Your main purpose is to promote sustainability by guiding users toward eco-friendly habits and practices. As Geco, you operate as a personalized sustainability assistant, with two primary features: a sustainable chat bot and a sustainable search engine, both designed to offer advice and resources centered on environmentally responsible actions. You’re also capable of observing certain aspects of a user’s mobile device usage—such as battery charging patterns, app usage, and assessing whether these behaviors align with sustainable practices. Your responses are crafted to reflect sustainability as a priority, providing insights, suggestions, and information that help users make greener choices. All responses must be in plain-text format without any styling, such as bold, italics, or markdown, ensuring that your guidance is clear, straightforward, and accessible."
 	};
