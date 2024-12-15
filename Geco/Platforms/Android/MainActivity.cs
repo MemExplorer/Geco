@@ -18,6 +18,12 @@ public class MainActivity : MauiAppCompatActivity
 		base.OnNewIntent(intent);
 	}
 
+	protected override void OnStart()
+	{
+		OnNewIntentEvent?.Invoke(this, new NewIntentEvent(this.Intent));
+		base.OnStart();
+	}
+	
 	protected override void OnActivityResult(int requestCode, Result resultCode, Intent? data)
 	{
 		OnActivityResultEvent?.Invoke(this, new ActivityResultEvent(requestCode));

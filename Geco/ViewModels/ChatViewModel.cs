@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
+using Geco.Models.Notifications;
 using GoogleGeminiSDK;
 using Microsoft.Extensions.AI;
 
@@ -20,10 +21,12 @@ public partial class ChatViewModel : ObservableObject
 
 	string? HistoryId { get; set; }
 
-	public ChatViewModel() =>
+	public ChatViewModel()
+	{
 		GeminiClient.OnChatReceive += async (_, e) =>
 			await GeminiClientOnChatReceive(e);
-
+	}
+	
 	async Task GeminiClientOnChatReceive(ChatReceiveEventArgs e)
 	{
 		var currentShell = (AppShell)Shell.Current;
@@ -46,6 +49,18 @@ public partial class ChatViewModel : ObservableObject
 		ChatMessages = [];
 		GeminiClient.ClearHistory();
 		HistoryId = null;
+		
+#if ANDROID
+		
+		// handle notification message
+		var intent = Platform.CurrentActivity?.Intent;
+		if (intent?.Action == "GecoNotif")
+		{
+			string? msgContent = intent.GetStringExtra("message");
+			ChatMessages.Add(new ChatMessage(new ChatRole("model"), msgContent));
+			intent.SetAction(null);
+		}
+#endif
 	}
 
 	[RelayCommand]

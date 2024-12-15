@@ -4,6 +4,9 @@ namespace Geco.Core.Database;
 
 public class TriggerRepository : DbRepositoryBase
 {
+	const long TwoWeeksInSeconds = 1_209_600;
+	const long OneWeekInSeconds = 604_800;
+	const long ThreeHoursInSeconds = 10_800;
 	public TriggerRepository(string databaseDir) : base(databaseDir)
 	{
 	}
@@ -26,21 +29,49 @@ public class TriggerRepository : DbRepositoryBase
 		await db.ExecuteNonQuery("INSERT INTO TblTriggerLog VALUES (unixepoch(), ?, ?)", (int)triggerType, rawValue);
 	}
 
-	public async Task<IList<TriggerInfo>> FetchTriggerRecords()
+	public async Task<IDictionary<DeviceInteractionTrigger, int>> FetchWeekOneTriggerRecords()
 	{
 		await Initialize();
 
 		using var db = await SqliteDb.GetTransient(DatabaseDir);
 
 		// ensure that the fetched data corresponds to records from the last 7 days.
-		var triggers = new List<TriggerInfo>();
+		var triggers = new Dictionary<DeviceInteractionTrigger, int>();
 		await using var fetchQuery = await db.ExecuteReader(
-			"SELECT Type, SUM(RawValue) FROM TblTriggerLog WHERE (unixepoch() - Timestamp) <= 604800 GROUP BY Type");
+			"SELECT Type, SUM(RawValue) FROM TblTriggerLog WHERE (unixepoch() - Timestamp) <= ? GROUP BY Type", OneWeekInSeconds);
 		while (fetchQuery.Read())
-			triggers.Add(new TriggerInfo((DeviceInteractionTrigger)(long)fetchQuery["Type"],
-				(int)(long)fetchQuery["SUM(RawValue)"]));
+			triggers.Add((DeviceInteractionTrigger)(long)fetchQuery["Type"],
+				(int)(long)fetchQuery["SUM(RawValue)"]);
 
 		return triggers;
+	}
+	
+	public async Task<IDictionary<DeviceInteractionTrigger, int>> FetchWeekTwoTriggerRecords()
+	{
+		await Initialize();
+
+		using var db = await SqliteDb.GetTransient(DatabaseDir);
+
+		// ensure that the fetched data corresponds to records from the last 2 weeks.
+		var triggers = new Dictionary<DeviceInteractionTrigger, int>();
+		await using var fetchQuery = await db.ExecuteReader(
+			"SELECT Type, SUM(RawValue) FROM TblTriggerLog WHERE (unixepoch() - Timestamp) > ? AND (unixepoch() - Timestamp) <= ?) GROUP BY Type", OneWeekInSeconds, TwoWeeksInSeconds);
+		while (fetchQuery.Read())
+			triggers.Add((DeviceInteractionTrigger)(long)fetchQuery["Type"],
+				(int)(long)fetchQuery["SUM(RawValue)"]);
+
+		return triggers;
+	}
+
+	public async Task<bool> HasHistory()
+	{
+		await Initialize();
+
+		using var db = await SqliteDb.GetTransient(DatabaseDir);
+
+		// check whether we have data that exists for more than a week
+		var entryCount = await db.ExecuteScalar<long>("SELECT 1 FROM TblTriggerLog WHERE (unixepoch() - Timestamp) > ?", OneWeekInSeconds);
+		return entryCount == 1;
 	}
 
 	public async Task<bool> IsTriggerInCooldown(DeviceInteractionTrigger interactionTrigger)
@@ -51,18 +82,18 @@ public class TriggerRepository : DbRepositoryBase
 
 		// check if there is a record of the specified interaction trigger within 3 hours.
 		return await db.ExecuteScalar<long>(
-				   $"SELECT EXISTS (SELECT 1 FROM TblTriggerLog WHERE (Type = {(int)interactionTrigger} OR Type = {-(int)interactionTrigger}) AND (unixepoch() - Timestamp) <= 10800)") ==
+				   $"SELECT EXISTS (SELECT 1 FROM TblTriggerLog WHERE (Type = {(int)interactionTrigger} OR Type = {-(int)interactionTrigger}) AND (unixepoch() - Timestamp) <= ?)", ThreeHoursInSeconds) ==
 			   1;
 	}
 
-	public async Task PurgeWeeklyTriggerData()
+	public async Task PurgeLastTwoWeeksTriggerData()
 	{
 		await Initialize();
 
 		using var db = await SqliteDb.GetTransient(DatabaseDir);
 
-		// only delete data that's been in the database for more than 7 days
-		await db.ExecuteNonQuery("DELETE FROM TblTriggerLog WHERE (unixepoch() - Timestamp) > 604800");
+		// only delete data that's been in the database for more than 14 days
+		await db.ExecuteNonQuery("DELETE FROM TblTriggerLog WHERE (unixepoch() - Timestamp) > ?", TwoWeeksInSeconds);
 	}
 
 	public async Task PurgeTriggerData()

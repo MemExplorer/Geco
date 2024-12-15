@@ -34,11 +34,10 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 			if (NotificationSvc is not NotificationManagerService nms)
 				return StartCommandResult.Sticky;
 
-			var notification = nms.Show("Monitoring Mobile Actions",
-				"Geco is currently monitoring your mobile actions in the background");
-			notification.Flags = NotificationFlags.OngoingEvent;
+			const string notificationDesc = "Geco is currently monitoring your mobile actions in the background";
+			var notification = nms.SendPersistentNotification("Monitoring Mobile Actions", notificationDesc);
 			if (OperatingSystem.IsAndroidVersionAtLeast(29))
-				StartForeground(ServiceId, notification, Android.Content.PM.ForegroundService.TypeDataSync);
+				StartForeground(ServiceId, notification!, Android.Content.PM.ForegroundService.TypeDataSync);
 			else
 				StartForeground(ServiceId, notification);
 
@@ -50,6 +49,7 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 			}
 
 			CreateDeviceUsageScheduledLogger();
+			CreateScheduledWeeklySummary();
 		}
 		else if (intent?.Action == "STOP_SERVICE" && !_hasStarted)
 		{
@@ -59,6 +59,7 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 				StopForeground(true);
 
 			CancelDeviceUsageScheduledLogger();
+			CancelScheduledWeeklySummary();
 
 			// stop listening to device change events
 			foreach (var observer in Observers)
@@ -88,6 +89,20 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 		stopIntent.SetAction("STOP_SERVICE");
 		Platform.CurrentActivity?.StartService(stopIntent);
 	}
+
+	private void CreateScheduledWeeklySummary()
+	{
+		// https://stackoverflow.com/a/6346190
+		var today = DateTime.Today;
+		int daysUntilMonday = ((int) DayOfWeek.Monday - (int) today.DayOfWeek + 7) % 7;
+		
+		// Create weekly report every monday 6am
+		var nextMonday = today.AddDays(daysUntilMonday).AddHours(6);
+		InternalCreateScheduledTask("weektasksummarycmd", nextMonday);
+	}
+	
+	private void CancelScheduledWeeklySummary() =>
+		InternalCancelScheduledTask("weektasksummarycmd");
 
 	private void CancelDeviceUsageScheduledLogger() =>
 		InternalCancelScheduledTask("schedtaskcmd");
@@ -147,7 +162,7 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 
 				await triggerRepo.LogTrigger(e.TriggerType, 1);
 				// Temporary Notification to test trigger
-				NotificationSvc.SendNotification("Unsustainable Charging",
+				NotificationSvc.SendInteractiveNotification("Unsustainable Charging",
 					"Charging range outside sustainable range of 20-80%");
 				break;
 			case DeviceInteractionTrigger.ChargingSustainable:
@@ -157,11 +172,11 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 			// don't count the triggers below
 			case DeviceInteractionTrigger.NetworkUsageUnsustainable:
 				await triggerRepo.LogTrigger(e.TriggerType, 0);
-				NotificationSvc.SendNotification("Unsustainable Network", "Please use wifi instead of cellular data.");
+				NotificationSvc.SendInteractiveNotification("Unsustainable Network", "Please use wifi instead of cellular data.");
 				break;
 			case DeviceInteractionTrigger.LocationUsageUnsustainable:
 				await triggerRepo.LogTrigger(e.TriggerType, 0);
-				NotificationSvc.SendNotification("Unsustainable Location Services", "Please turn off location services.");
+				NotificationSvc.SendInteractiveNotification("Unsustainable Location Services", "Please turn off location services.");
 				break;
 
 			}
