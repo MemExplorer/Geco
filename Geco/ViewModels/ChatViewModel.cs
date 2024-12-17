@@ -47,7 +47,8 @@ public partial class ChatViewModel : ObservableObject
 		ChatMessages.Add(e.Message);
 
 		// save chat to database
-		await chatRepo!.AppendChat(HistoryId!, e.Message);
+		if (HistoryId != null)
+			await chatRepo!.AppendChat(HistoryId, e.Message);
 	}
 
 	public void LoadHistory(GecoChatHistory history)
@@ -62,15 +63,17 @@ public partial class ChatViewModel : ObservableObject
 		ChatMessages = [];
 		GeminiClient.ClearHistory();
 		HistoryId = null;
-		
+
 #if ANDROID
-		
 		// handle notification message
 		var intent = Platform.CurrentActivity?.Intent;
 		if (intent?.Action == "GecoNotif")
 		{
 			string? msgContent = intent.GetStringExtra("message");
-			ChatMessages.Add(new ChatMessage(new ChatRole("model"), msgContent));
+			var chatMsg = new ChatMessage(new ChatRole("model"), msgContent);
+			chatMsg.AdditionalProperties = new AdditionalPropertiesDictionary();
+			chatMsg.AdditionalProperties["id"] = (ulong)0;
+			ChatMessages.Add(chatMsg);
 			intent.SetAction(null);
 		}
 #endif
