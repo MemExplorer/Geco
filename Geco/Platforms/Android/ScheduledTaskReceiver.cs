@@ -31,9 +31,15 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		try
 		{
 			if (intent?.Action == "schedtaskcmd")
+			{
 				await RunDeviceUsageLogger();
+				DeviceUsageMonitorService.CreateDeviceUsageScheduledLogger();
+			}
 			else if (intent?.Action == "weektasksummarycmd")
+			{
 				await RunWeeklySummaryNotification();
+				DeviceUsageMonitorService.CreateScheduledWeeklySummary();
+			}
 		}
 		catch
 		{
@@ -115,8 +121,8 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		var geminiClient = new GeminiChat(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest");
 		var geminiResponse = await geminiClient.SendMessage(likelihoodPrompt);
 		var deserializedReport = JsonSerializer.Deserialize<IDictionary<string, string>>(geminiResponse.Text!)!;
-		var notificationDesc = deserializedReport["NotificationDescription"];
-		var notificationContent = deserializedReport["Content"];
+		string notificationDesc = deserializedReport["NotificationDescription"];
+		string notificationContent = deserializedReport["Content"];
 		NotificationSvc.SendInteractiveNotification("GECO Weekly Report", notificationDesc, notificationContent);
 	}
 
