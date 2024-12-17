@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Android.App;
 using Android.Content;
 using Android.OS;
@@ -5,6 +6,9 @@ using Android.Runtime;
 using Geco.Core.Database;
 using Geco.Models.DeviceState;
 using Geco.Models.Notifications;
+using GoogleGeminiSDK;
+using GoogleGeminiSDK.Models.Components;
+using Microsoft.Maui.Controls.PlatformConfiguration;
 
 namespace Geco;
 
@@ -18,12 +22,30 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 	private IServiceProvider SvcProvider { get; }
 	private INotificationManagerService NotificationSvc { get; }
 	private IDeviceStateObserver[] Observers { get; }
-
+	private GeminiChat GeminiChat { get; }
+	private GeminiSettings GeminiSettings { get; }
 	public DeviceUsageMonitorService()
 	{
 		SvcProvider = App.Current?.Handler.MauiContext?.Services!;
 		NotificationSvc = SvcProvider.GetService<INotificationManagerService>()!;
 		Observers = [.. SvcProvider.GetServices<IDeviceStateObserver>()];
+		GeminiChat = new GeminiChat(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest");
+		GeminiSettings = new GeminiSettings()
+		{
+			Conversational = false,
+			ResponseMimeType = "application/json",
+			ResponseSchema = new Schema(
+				SchemaType.ARRAY,
+				Items: new Schema(SchemaType.OBJECT,
+					Properties: new Dictionary<string, Schema>
+					{
+						{"NotificationTitle", new Schema(SchemaType.STRING)},
+						{"NotificationDescription", new Schema(SchemaType.STRING)}
+					},
+					Required: ["NotificationTitle", "NotificationDescription"]
+				)
+			)
+		};
 	}
 
 	public override StartCommandResult OnStartCommand(Intent? intent, [GeneratedEnum] StartCommandFlags flags,
@@ -90,7 +112,7 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 		Platform.CurrentActivity?.StartService(stopIntent);
 	}
 
-	private void CreateScheduledWeeklySummary()
+	public static void CreateScheduledWeeklySummary()
 	{
 		// https://stackoverflow.com/a/6346190
 		var today = DateTime.Today;
@@ -101,7 +123,7 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 		InternalCreateScheduledTask("weektasksummarycmd", nextMonday);
 	}
 	
-	private void CancelScheduledWeeklySummary() =>
+	public static void CancelScheduledWeeklySummary() =>
 		InternalCancelScheduledTask("weektasksummarycmd");
 
 	private void CancelDeviceUsageScheduledLogger() =>
@@ -110,7 +132,7 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 	private void CreateDeviceUsageScheduledLogger() =>
 		InternalCreateScheduledTask("schedtaskcmd", DateTime.Now.Date.AddDays(1));
 
-	private void InternalCancelScheduledTask(string action)
+	private static void InternalCancelScheduledTask(string action)
 	{
 		var intent = new Intent(Platform.AppContext, typeof(ScheduledTaskReceiver));
 		intent.SetAction(action);
@@ -126,7 +148,7 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 		alarmManager.Cancel(pendingIntent);
 	}
 
-	private void InternalCreateScheduledTask(string action, DateTime scheduledDate)
+	private static void InternalCreateScheduledTask(string action, DateTime scheduledDate)
 	{
 		var intent = new Intent(Platform.AppContext, typeof(ScheduledTaskReceiver));
 		intent.SetAction(action);
@@ -142,50 +164,58 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 		var triggerTimeInUnixTimeMs = ((DateTimeOffset)scheduledDate).ToUnixTimeMilliseconds();
 		alarmManager.SetExactAndAllowWhileIdle(AlarmType.RtcWakeup, triggerTimeInUnixTimeMs, pendingIntent);
 	}
-
+	
 	private async void OnDeviceStateChanged(object? sender, TriggerEventArgs e)
 	{
-		try
+		var triggerRepo = SvcProvider.GetService<TriggerRepository>();
+		if (triggerRepo == null)
+			throw new Exception("TriggerRepository should not be null!");
+			
+		var promptRepo = SvcProvider.GetService<PromptRepository>();
+		if (promptRepo == null)
+			throw new Exception("PromptRepository should not be null!");
+			
+		// don't notify if trigger is in cooldown
+		if (await triggerRepo.IsTriggerInCooldown(e.TriggerType))
+			return;
+		
+		// ensure that we are only creating notifications for unsustainable trigger types
+		(string Title, string Description) notificationInfo = (string.Empty, string.Empty);
+		if (e.TriggerType < 0)
 		{
-			var triggerRepo = SvcProvider.GetService<TriggerRepository>();
-			if (triggerRepo == null)
-				throw new Exception("TriggerRepository should not be null!");
-
-			// don't notify if trigger is in cooldown
-			if (await triggerRepo.IsTriggerInCooldown(e.TriggerType))
-				return;
-
-			switch (e.TriggerType)
-			{
-			// only record charging
-			case DeviceInteractionTrigger.ChargingUnsustainable:
-
-				await triggerRepo.LogTrigger(e.TriggerType, 1);
-				// Temporary Notification to test trigger
-				NotificationSvc.SendInteractiveNotification("Unsustainable Charging",
-					"Charging range outside sustainable range of 20-80%");
-				break;
-			case DeviceInteractionTrigger.ChargingSustainable:
-				await triggerRepo.LogTrigger(e.TriggerType, 1);
-				break;
-
-			// don't count the triggers below
-			case DeviceInteractionTrigger.NetworkUsageUnsustainable:
-				await triggerRepo.LogTrigger(e.TriggerType, 0);
-				NotificationSvc.SendInteractiveNotification("Unsustainable Network", "Please use wifi instead of cellular data.");
-				break;
-			case DeviceInteractionTrigger.LocationUsageUnsustainable:
-				await triggerRepo.LogTrigger(e.TriggerType, 0);
-				NotificationSvc.SendInteractiveNotification("Unsustainable Location Services", "Please turn off location services.");
-				break;
-
-			}
+			string notificationPrompt = await promptRepo.GetPrompt(e.TriggerType);
+			var tunedNotification = await GeminiChat.SendMessage(notificationPrompt, settings: GeminiSettings);
+			var deserializedStructuredMsg = JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
+			var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();
+			notificationInfo = (tunedNotificationInfoFirstEntry.NotificationTitle, tunedNotificationInfoFirstEntry.NotificationDescription);
 		}
-		catch
+
+		switch (e.TriggerType)
 		{
-			// do nothing
+		// only record charging
+		case DeviceInteractionTrigger.ChargingUnsustainable:
+
+			await triggerRepo.LogTrigger(e.TriggerType, 1);
+			NotificationSvc.SendInteractiveNotification(notificationInfo.Title,notificationInfo.Description);
+			break;
+		case DeviceInteractionTrigger.ChargingSustainable:
+			await triggerRepo.LogTrigger(e.TriggerType, 1);
+			break;
+
+		// don't count the triggers below
+		case DeviceInteractionTrigger.NetworkUsageUnsustainable:
+			await triggerRepo.LogTrigger(e.TriggerType, 0);
+			NotificationSvc.SendInteractiveNotification(notificationInfo.Title,notificationInfo.Description);
+			break;
+		case DeviceInteractionTrigger.LocationUsageUnsustainable:
+			await triggerRepo.LogTrigger(e.TriggerType, 0);
+			NotificationSvc.SendInteractiveNotification(notificationInfo.Title,notificationInfo.Description);
+			break;
+
 		}
 	}
 
 	public override IBinder? OnBind(Intent? intent) => null;
 }
+
+record TunedNotificationInfo(string NotificationTitle, string NotificationDescription);
