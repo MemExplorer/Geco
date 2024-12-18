@@ -1,4 +1,4 @@
-namespace Geco.Core.Database;
+namespace Geco.Core.Models.Prompt;
 
 /// <summary>
 ///     Represents the prompt category.

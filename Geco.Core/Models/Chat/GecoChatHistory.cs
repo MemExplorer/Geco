@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using Microsoft.Extensions.AI;
 
-namespace Geco.Core.Database;
+namespace Geco.Core.Models.Chat;
 
 /// <summary>
 ///     Chat history model

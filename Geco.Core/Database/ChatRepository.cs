@@ -1,4 +1,5 @@
 using Geco.Core.Database.SqliteModel;
+using Geco.Core.Models.Chat;
 using Microsoft.Extensions.AI;
 
 namespace Geco.Core.Database;

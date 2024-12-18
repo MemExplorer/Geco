@@ -1,6 +1,6 @@
 using Android.Content;
 
-namespace Geco;
+namespace Geco.Notifications;
 
 public class NewIntentEvent(Intent? intentArg) : EventArgs
 {

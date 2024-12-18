@@ -1,4 +1,4 @@
-namespace Geco.Models.Notifications;
+namespace Geco.Core.Models.Notification;
 
 public class GecoNotificationMessageEvent(string triggerEvtMessage) : EventArgs
 {

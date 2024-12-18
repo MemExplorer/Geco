@@ -4,9 +4,9 @@ using Android.Content;
 using Android.Graphics;
 using Android.OS;
 using AndroidX.Core.App;
-using Geco.Models.Notifications;
+using Geco.Core.Models.Notification;
 
-namespace Geco;
+namespace Geco.Notifications;
 
 public class NotificationManagerService : INotificationManagerService
 {
@@ -19,12 +19,12 @@ public class NotificationManagerService : INotificationManagerService
 	int _messageId = 0;
 	int _pendingIntentId = 0;
 	readonly NotificationManagerCompat _compatManager;
-	
+
 	public NotificationManagerService()
 	{
 		CreateNotificationChannel();
 		_compatManager = NotificationManagerCompat.From(Platform.AppContext);
-		MainActivity.OnNewIntentEvent += async (s, e) => 
+		MainActivity.OnNewIntentEvent += async (s, e) =>
 			await OnNewIntentEvent(s, e);
 	}
 
@@ -42,7 +42,7 @@ public class NotificationManagerService : INotificationManagerService
 	{
 		if (!_channelInitialized)
 			CreateNotificationChannel();
-		
+
 		_compatManager.Notify(_messageId, notification);
 	}
 
@@ -55,10 +55,12 @@ public class NotificationManagerService : INotificationManagerService
 
 	public void SendInteractiveNotification(string title, string description) =>
 		InternalSendNotification(title, description, description, true);
+
 	public void SendInteractiveNotification(string title, string description, string message) =>
 		InternalSendNotification(title, description, message, true);
 
-	private Notification? InternalSendNotification(string title, string description, string message, bool interactive, bool notify = true)
+	private Notification? InternalSendNotification(string title, string description, string message, bool interactive,
+		bool notify = true)
 	{
 		if (!_channelInitialized)
 		{
@@ -69,7 +71,7 @@ public class NotificationManagerService : INotificationManagerService
 
 		if (notify)
 			_compatManager.Notify(_messageId++, notificationInstance);
-		
+
 		return notificationInstance;
 	}
 
@@ -100,7 +102,7 @@ public class NotificationManagerService : INotificationManagerService
 				PendingIntent.GetActivity(Platform.AppContext, _pendingIntentId++, intent, pendingIntentFlags);
 			builder = builder.SetContentIntent(pendingIntent);
 		}
-		
+
 		return builder.Build();
 	}
 

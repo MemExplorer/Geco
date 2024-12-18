@@ -24,10 +24,10 @@ public class BayesTheorem
 			sb.Append(k.Value.Negative);
 			sb.AppendLine();
 		}
-		
+
 		return sb.ToString();
 	}
-	
+
 	public (string PositiveComputation, string NegativeComputation) GetComputationInString()
 	{
 		double totalPositiveAttr = _frequencyTbl.Values.Sum(attr => attr.Positive);
@@ -44,29 +44,29 @@ public class BayesTheorem
 			positiveComputation.Append('/');
 			positiveComputation.Append(attrTotalFreq);
 			positiveComputation.Append(") * ");
-			
+
 			negativeComputation.Append('(');
 			negativeComputation.Append(x.Negative);
 			negativeComputation.Append('/');
 			negativeComputation.Append(attrTotalFreq);
 			negativeComputation.Append(") * ");
 		}
-		
+
 		positiveComputation.Append('(');
 		positiveComputation.Append(totalPositiveAttr);
 		positiveComputation.Append('/');
 		positiveComputation.Append(sumTblFrequency);
 		positiveComputation.Append(')');
-		
+
 		negativeComputation.Append('(');
 		negativeComputation.Append(totalNegativeAttr);
 		negativeComputation.Append('/');
 		negativeComputation.Append(sumTblFrequency);
 		negativeComputation.Append(')');
-		
+
 		return (positiveComputation.ToString(), negativeComputation.ToString());
 	}
-	
+
 	public (bool IsPositive, double PositiveProbs, double NegativeProbs) Compute()
 	{
 		double totalPositiveAttr = _frequencyTbl.Values.Sum(attr => attr.Positive);

@@ -8,10 +8,10 @@ namespace Geco.Core.Test;
 public class BayesTheoremTest
 {
 	private readonly ITestOutputHelper _output;
-	
-	public BayesTheoremTest(ITestOutputHelper output) => 
+
+	public BayesTheoremTest(ITestOutputHelper output) =>
 		_output = output;
-	
+
 	[Fact]
 	void StabilityTest()
 	{
@@ -23,11 +23,11 @@ public class BayesTheoremTest
 		var computationStr = bayesInst.GetComputationInString();
 		_output.WriteLine("Positive: " + computationStr.PositiveComputation);
 		_output.WriteLine("Negative: " + computationStr.NegativeComputation);
-		var frequencyStr = bayesInst.GetFrequencyInString();
+		string? frequencyStr = bayesInst.GetFrequencyInString();
 		_output.WriteLine("Frequency: \n" + frequencyStr);
 		Debug.Assert(computation.IsPositive == false);
 	}
-	
+
 	[Fact]
 	async Task BayesWithPromptTest()
 	{
@@ -43,7 +43,7 @@ public class BayesTheoremTest
 		string currWeekFrequencyStr = currWeekBayesInst.GetFrequencyInString();
 		string currSustainableProportionalProbability = Math.Round(currWeekComputationResult.PositiveProbs, 2)
 			.ToString(CultureInfo.InvariantCulture) + "%";
-		var finalPrompt = await promptRepo.GetLikelihoodPrompt(currSustainableProportionalProbability,
+		string? finalPrompt = await promptRepo.GetLikelihoodPrompt(currSustainableProportionalProbability,
 			currWeekComputationStr.PositiveComputation, currWeekFrequencyStr);
 		_output.WriteLine(finalPrompt);
 	}

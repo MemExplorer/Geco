@@ -5,7 +5,8 @@ using System.Web;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
-using Geco.Models;
+using Geco.Core.Models;
+using Geco.Core.Models.Prompt;
 using GoogleGeminiSDK;
 using GoogleGeminiSDK.Models.Components;
 using ChatRole = Microsoft.Extensions.AI.ChatRole;
@@ -31,13 +32,12 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 			SchemaType.ARRAY,
 			Items: new Schema(SchemaType.OBJECT,
 				Properties: new Dictionary<string, Schema>
-					{
-						{"Title", new Schema(SchemaType.STRING)},
-						{"Description", new Schema(SchemaType.STRING)}
-					},
+				{
+					{ "Title", new Schema(SchemaType.STRING) }, { "Description", new Schema(SchemaType.STRING) }
+				},
 				Required: ["Title", "Description"]
-				)
 			)
+		)
 	};
 
 	public SearchResultViewModel()
@@ -49,16 +49,16 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 
 	private void GeminiClientOnChatReceive(ChatReceiveEventArgs e)
 	{
-		if (e.Message.Role == ChatRole.User) 
+		if (e.Message.Role == ChatRole.User)
 			return;
-		
+
 		string message = e.Message.ToString();
 
 		var results = JsonSerializer.Deserialize<List<GecoSearchResult>>(message);
 
-		if (results == null) 
+		if (results == null)
 			return;
-		
+
 		SearchResults.Clear();
 		foreach (var item in results)
 			SearchResults.Add(new GecoSearchResult(item.Title, item.Description));
@@ -84,19 +84,19 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 			if (string.IsNullOrEmpty(SearchInput))
 				return;
 
-			var unescapeDataString = Uri.UnescapeDataString(SearchInput);
+			string? unescapeDataString = Uri.UnescapeDataString(SearchInput);
 			var promptRepo = ((AppShell)Shell.Current).SvcProvider.GetService<PromptRepository>()!;
 
 			string prompt;
 
 			if (isPredefined &&
 			    Enum.TryParse<SearchPredefinedTopic>(unescapeDataString, out var convertedPredefinedTopic))
-				prompt = await promptRepo.GetPrompt(predefinedTopic: convertedPredefinedTopic);
+				prompt = await promptRepo.GetPrompt(convertedPredefinedTopic);
 			else
-				prompt = await promptRepo.GetPrompt(userTopic: unescapeDataString);
+				prompt = await promptRepo.GetPrompt(unescapeDataString);
 
 			if (!string.IsNullOrEmpty(prompt))
-				await GeminiClient.SendMessage(message: prompt, settings: GeminiConfig);
+				await GeminiClient.SendMessage(prompt, settings: GeminiConfig);
 		}
 		catch
 		{
@@ -116,6 +116,6 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 	private static string RemoveEmojis(string input) =>
 		RemoveEmojiPattern().Replace(input, string.Empty);
 
-    [GeneratedRegex(@"[\p{Cs}\p{So}\p{Sm}]")]
-    private static partial Regex RemoveEmojiPattern();
+	[GeneratedRegex(@"[\p{Cs}\p{So}\p{Sm}]")]
+	private static partial Regex RemoveEmojiPattern();
 }

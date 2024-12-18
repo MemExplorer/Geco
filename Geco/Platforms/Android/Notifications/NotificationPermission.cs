@@ -1,6 +1,6 @@
 using Android;
 
-namespace Geco;
+namespace Geco.Notifications;
 
 internal class NotificationPermission : Permissions.BasePlatformPermission
 {

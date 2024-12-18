@@ -5,15 +5,16 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
 using Geco.Core.Database;
-using Geco.Models.DeviceState;
-using Geco.Models.Notifications;
+using Geco.Core.Models.ActionObserver;
+using Geco.Core.Models.Notification;
+using Geco.Notifications;
 using GoogleGeminiSDK;
 using GoogleGeminiSDK.Models.Components;
 
 namespace Geco;
 
 [Service(Name = "com.ssbois.geco.DeviceUsageMonitorService")]
-public class DeviceUsageMonitorService : Service, IMonitorManagerService
+public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 {
 	public const int TaskScheduleId = 84268154;
 	const int ServiceId = 1000;
@@ -228,5 +229,3 @@ public class DeviceUsageMonitorService : Service, IMonitorManagerService
 
 	public override IBinder? OnBind(Intent? intent) => null;
 }
-
-record TunedNotificationInfo(string NotificationTitle, string NotificationDescription);

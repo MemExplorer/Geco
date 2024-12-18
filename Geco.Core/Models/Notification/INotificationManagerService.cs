@@ -1,12 +1,11 @@
-
-namespace Geco.Models.Notifications;
+namespace Geco.Core.Models.Notification;
 
 public interface INotificationManagerService
 {
-	#if ANDROID
+#if ANDROID
 	void RunNotification(Android.App.Notification notification);
 	Android.App.Notification? SendPersistentNotification(string title, string description);
-	#endif
+#endif
 	void SendInteractiveNotification(string title, string description);
 	void SendInteractiveNotification(string title, string description, string message);
 }

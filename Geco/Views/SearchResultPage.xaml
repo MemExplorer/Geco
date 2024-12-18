@@ -1,11 +1,12 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
+
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Geco.Views.SearchResultPage"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:helpers="clr-namespace:Geco.Views.Helpers"
              xmlns:vm="clr-namespace:Geco.ViewModels"
-             xmlns:model="clr-namespace:Geco.Models"
+             xmlns:model="clr-namespace:Geco.Core.Models;assembly=Geco.Core"
              xmlns:shimmer="clr-namespace:Syncfusion.Maui.Toolkit.Shimmer;assembly=Syncfusion.Maui.Toolkit"
              x:DataType="vm:SearchResultViewModel"
              Title="Search Result"
@@ -18,33 +19,33 @@
                  Spacing="15">
         <!-- Search Bar -->
         <Border Padding="5"
-            BackgroundColor="{AppThemeBinding Light=#e3e3e3,
+                BackgroundColor="{AppThemeBinding Light=#e3e3e3,
                                               Dark=#191919}"
-            HorizontalOptions="FillAndExpand"
-            Stroke="Transparent"
-            StrokeShape="RoundRectangle 30,30,30,30"
-            Margin="0,10,0,20">
-            
-            <StackLayout 
+                HorizontalOptions="FillAndExpand"
+                Stroke="Transparent"
+                StrokeShape="RoundRectangle 30,30,30,30"
+                Margin="0,10,0,20">
+
+            <StackLayout
                 Orientation="Horizontal"
                 Spacing="5">
                 <!--  Search Entry/Input  -->
                 <Entry x:Name="SearchEntry"
                        Margin="20,0,7,0"
                        FontSize="18"
-                       HorizontalOptions="FillAndExpand" 
-                       Text="{Binding SearchInput}"/>
+                       HorizontalOptions="FillAndExpand"
+                       Text="{Binding SearchInput}" />
 
                 <!--  Search Send Button  -->
                 <Button CornerRadius="30"
-                            HorizontalOptions="Center"
-                            FontFamily="FontAwesome"
-                            Text="{x:Static helpers:IconFont.MagnifyingGlass}"
-                            Margin="3"
-                            VerticalOptions="Center">
+                        HorizontalOptions="Center"
+                        FontFamily="FontAwesome"
+                        Text="{x:Static helpers:IconFont.MagnifyingGlass}"
+                        Margin="3"
+                        VerticalOptions="Center">
                     <Button.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding UpdateSearchCommand}"
-                                              CommandParameter="{x:Reference SearchEntry}"/>
+                                              CommandParameter="{x:Reference SearchEntry}" />
                     </Button.GestureRecognizers>
                     <Button.Behaviors>
 
@@ -59,106 +60,106 @@
         </Border>
 
         <!-- Line Border -->
-        <BoxView 
-            Color ="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
+        <BoxView
+            Color="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
             CornerRadius="10"
             HeightRequest="2"
             HorizontalOptions="FillAndExpand"
             BackgroundColor="Transparent"
-            VerticalOptions="Center"/>
-        
+            VerticalOptions="Center" />
+
         <!-- Results List -->
         <CollectionView ItemsSource="{Binding SearchResults}" VerticalOptions="StartAndExpand">
             <CollectionView.ItemsLayout>
-                <LinearItemsLayout Orientation="Vertical" ItemSpacing="10"/>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
             </CollectionView.ItemsLayout>
             <CollectionView.EmptyView>
                 <!-- Shimmer -->
                 <StackLayout Orientation="Vertical" Spacing="10">
                     <Border StrokeThickness="0"
-                            StrokeShape="RoundRectangle 10,10,10,10" 
+                            StrokeShape="RoundRectangle 10,10,10,10"
                             BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}">
-                        <shimmer:SfShimmer 
-                            Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}" 
+                        <shimmer:SfShimmer
+                            Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
                             WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
                             BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
-                            HeightRequest="145"
-                        >
+                            HeightRequest="145">
                             <shimmer:SfShimmer.CustomView>
                                 <VerticalStackLayout Spacing="8" Padding="10">
-                                    <BoxView HeightRequest="15" BackgroundColor="#B0B0B0" WidthRequest="230" CornerRadius="5" HorizontalOptions="Start"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
+                                    <BoxView HeightRequest="15" BackgroundColor="#B0B0B0" WidthRequest="230"
+                                             CornerRadius="5" HorizontalOptions="Start" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
                                 </VerticalStackLayout>
                             </shimmer:SfShimmer.CustomView>
                         </shimmer:SfShimmer>
                     </Border>
                     <Border StrokeThickness="0"
-                            StrokeShape="RoundRectangle 10,10,10,10" 
+                            StrokeShape="RoundRectangle 10,10,10,10"
                             BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}">
-                        <shimmer:SfShimmer 
-                            Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}" 
+                        <shimmer:SfShimmer
+                            Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
                             WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
                             BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
-                            HeightRequest="145"
-                        >
+                            HeightRequest="145">
                             <shimmer:SfShimmer.CustomView>
                                 <VerticalStackLayout Spacing="8" Padding="10">
-                                    <BoxView HeightRequest="15" BackgroundColor="#B0B0B0" WidthRequest="230" CornerRadius="5" HorizontalOptions="Start"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
+                                    <BoxView HeightRequest="15" BackgroundColor="#B0B0B0" WidthRequest="230"
+                                             CornerRadius="5" HorizontalOptions="Start" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
                                 </VerticalStackLayout>
                             </shimmer:SfShimmer.CustomView>
                         </shimmer:SfShimmer>
                     </Border>
                     <Border StrokeThickness="0"
-                            StrokeShape="RoundRectangle 10,10,10,10" 
+                            StrokeShape="RoundRectangle 10,10,10,10"
                             BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}">
-                        <shimmer:SfShimmer 
-                            Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}" 
+                        <shimmer:SfShimmer
+                            Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
                             WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
                             BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
-                            HeightRequest="145"
-                        >
+                            HeightRequest="145">
                             <shimmer:SfShimmer.CustomView>
                                 <VerticalStackLayout Spacing="8" Padding="10">
-                                    <BoxView HeightRequest="15" BackgroundColor="#B0B0B0" WidthRequest="230" CornerRadius="5" HorizontalOptions="Start"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
+                                    <BoxView HeightRequest="15" BackgroundColor="#B0B0B0" WidthRequest="230"
+                                             CornerRadius="5" HorizontalOptions="Start" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
                                 </VerticalStackLayout>
                             </shimmer:SfShimmer.CustomView>
                         </shimmer:SfShimmer>
                     </Border>
                     <Border StrokeThickness="0"
-                            StrokeShape="RoundRectangle 10,10,10,10" 
+                            StrokeShape="RoundRectangle 10,10,10,10"
                             BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}">
-                        <shimmer:SfShimmer 
-                            Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}" 
+                        <shimmer:SfShimmer
+                            Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
                             WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
                             BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
-                            HeightRequest="145"
-                        >
+                            HeightRequest="145">
                             <shimmer:SfShimmer.CustomView>
                                 <VerticalStackLayout Spacing="8" Padding="10">
-                                    <BoxView HeightRequest="15" BackgroundColor="#B0B0B0" WidthRequest="230" CornerRadius="5" HorizontalOptions="Start"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
-                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5"/>
+                                    <BoxView HeightRequest="15" BackgroundColor="#B0B0B0" WidthRequest="230"
+                                             CornerRadius="5" HorizontalOptions="Start" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
+                                    <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
                                 </VerticalStackLayout>
                             </shimmer:SfShimmer.CustomView>
                         </shimmer:SfShimmer>
@@ -167,20 +168,20 @@
             </CollectionView.EmptyView>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="model:GecoSearchResult">
-                    <Border Stroke="Transparent" 
-                            StrokeThickness="1" 
-                            Padding="5" 
-                            StrokeShape="RoundRectangle 10,10,10,10" 
+                    <Border Stroke="Transparent"
+                            StrokeThickness="1"
+                            Padding="5"
+                            StrokeShape="RoundRectangle 10,10,10,10"
                             BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}">
                         <StackLayout Padding="10">
-                            <Label Text="{Binding Title}"  
-                                   FontAttributes="Bold" 
-                                   FontSize="15" 
-                                   FontFamily="Poppins"/>
-                            <Label Text="{Binding Description}" 
-                                   FontSize="12" 
-                                   FontFamily="Poppins" 
-                                   LineBreakMode="WordWrap"/>
+                            <Label Text="{Binding Title}"
+                                   FontAttributes="Bold"
+                                   FontSize="15"
+                                   FontFamily="Poppins" />
+                            <Label Text="{Binding Description}"
+                                   FontSize="12"
+                                   FontFamily="Poppins"
+                                   LineBreakMode="WordWrap" />
                         </StackLayout>
                     </Border>
                 </DataTemplate>

@@ -1,4 +1,4 @@
-namespace Geco.Models;
+namespace Geco;
 
 public enum GecoSettings
 {

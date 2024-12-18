@@ -1,17 +1,17 @@
-using Geco.Models.DeviceState;
+using Geco.Core.Models.ActionObserver;
 using Geco.ViewModels;
 
 namespace Geco.Views;
 
 public partial class SettingsPage : ContentPage
 {
-	readonly IMonitorManagerService _monitorService;
+	readonly IPlatformActionObserver _monitorService;
 
-	public SettingsPage(IMonitorManagerService monitorManagerService)
+	public SettingsPage(IPlatformActionObserver platformActionObserver)
 	{
 		InitializeComponent();
 		Appearing += SettingsPage_Appearing;
-		_monitorService = monitorManagerService;
+		_monitorService = platformActionObserver;
 	}
 
 	void SettingsPage_Appearing(object? sender, EventArgs e)

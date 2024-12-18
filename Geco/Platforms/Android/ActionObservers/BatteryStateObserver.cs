@@ -1,6 +1,6 @@
-using Geco.Core.Database;
+using Geco.Core.Models.ActionObserver;
 
-namespace Geco.Models.DeviceState.StateObservers;
+namespace Geco.ActionObservers;
 
 internal class BatteryStateObserver : IDeviceStateObserver
 {
@@ -19,7 +19,7 @@ internal class BatteryStateObserver : IDeviceStateObserver
 
 		// Check if the battery percentage when charging is outside the range of 20-80%
 		if (isCharging && Battery.Default.PowerSource != BatteryPowerSource.Battery &&
-			(chargeLevel < 20 || chargeLevel > 80))
+		    (chargeLevel < 20 || chargeLevel > 80))
 			triggerType = DeviceInteractionTrigger.ChargingUnsustainable;
 		else
 			triggerType = DeviceInteractionTrigger.ChargingSustainable;

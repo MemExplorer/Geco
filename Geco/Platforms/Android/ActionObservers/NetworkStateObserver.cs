@@ -1,8 +1,9 @@
 using Android.Net;
 using Geco.Core.Database;
-using Geco.Models.DeviceState;
+using Geco.Core.Models;
+using Geco.Core.Models.ActionObserver;
 
-namespace Geco;
+namespace Geco.ActionObservers;
 
 internal class NetworkStateObserver : IDeviceStateObserver
 {

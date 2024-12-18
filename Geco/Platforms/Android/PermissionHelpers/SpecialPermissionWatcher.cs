@@ -1,6 +1,7 @@
 using Android.Content;
 using AndroidNet = Android.Net;
-namespace Geco;
+
+namespace Geco.PermissionHelpers;
 
 internal class SpecialPermissionWatcher
 {
@@ -24,9 +25,9 @@ internal class SpecialPermissionWatcher
 
 	private void OnActivityResultEvent(object? sender, ActivityResultEvent e)
 	{
-		if (e.RequestCode != RequestCode) 
+		if (e.RequestCode != RequestCode)
 			return;
-		
+
 		GrantedPermission = CheckPermissionFunc();
 		MainActivity.OnActivityResultEvent -= OnActivityResultEvent;
 		TaskResult.SetResult(true);

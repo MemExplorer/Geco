@@ -1,12 +1,15 @@
 using CommunityToolkit.Maui;
+#if ANDROID
+using Geco.ActionObservers;
+using Geco.Notifications;
+#endif
 using Geco.Core.Database;
-using Geco.Models.DeviceState;
-using Geco.Models.DeviceState.StateObservers;
-using Geco.Models.Notifications;
+using Geco.Core.Models.ActionObserver;
+using Geco.Core.Models.Notification;
+using Microsoft.Maui.Platform;
 using Geco.ViewModels;
 using Geco.Views;
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Platform;
 using Syncfusion.Maui.Toolkit.Hosting;
 
 namespace Geco;
@@ -45,15 +48,13 @@ public static class MauiProgram
 		builder.Services.AddTransient<INotificationManagerService, NotificationManagerService>();
 
 		// monitor service
-		builder.Services.AddSingleton<IMonitorManagerService, DeviceUsageMonitorService>();
+		builder.Services.AddSingleton<IPlatformActionObserver, DeviceUsageMonitorService>();
 
 		// android triggers
 		builder.Services.AddSingleton<IDeviceStateObserver, NetworkStateObserver>();
 		builder.Services.AddSingleton<IDeviceStateObserver, LocationStateObserver>();
-#endif
-
-		// triggers
 		builder.Services.AddSingleton<IDeviceStateObserver, BatteryStateObserver>();
+#endif
 
 #if DEBUG
 		builder.Logging.AddDebug();

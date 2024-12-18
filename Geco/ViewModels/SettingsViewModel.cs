@@ -1,10 +1,11 @@
-
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
-using Geco.Models;
-using Geco.Models.DeviceState;
+using Geco.Core.Models.ActionObserver;
+#if ANDROID
+using Geco.PermissionHelpers;
+#endif
 
 namespace Geco.ViewModels;
 
@@ -66,7 +67,7 @@ public partial class SettingsViewModel : ObservableObject
 	}
 
 	// ReSharper disable once AsyncVoidMethod
-	public async void ToggleMonitor(Switch sender, ToggledEventArgs e, IMonitorManagerService monitorManagerService)
+	public async void ToggleMonitor(Switch sender, ToggledEventArgs e, IPlatformActionObserver platformActionObserver)
 	{
 		if (_handlerLocked)
 			return; // Skip execution when loading settings
@@ -74,7 +75,6 @@ public partial class SettingsViewModel : ObservableObject
 		if (e.Value)
 		{
 #if ANDROID
-
 			// check location permission
 			var reqLocation = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
 			if (reqLocation != PermissionStatus.Granted)
@@ -85,7 +85,8 @@ public partial class SettingsViewModel : ObservableObject
 			}
 
 			// check usage stats permission
-			var appOpsMgr = (Android.App.AppOpsManager?)Platform.AppContext.GetSystemService(Android.Content.Context.AppOpsService);
+			var appOpsMgr =
+ (Android.App.AppOpsManager?)Platform.AppContext.GetSystemService(Android.Content.Context.AppOpsService);
 			if (appOpsMgr == null)
 				throw new Exception("appOpsMgr is unexpectedly null");
 
@@ -93,13 +94,15 @@ public partial class SettingsViewModel : ObservableObject
 
 			var checkUsageStatusPermissionFunc = bool () =>
 			{
-				var usageStatsPermissionResult = OperatingSystem.IsAndroidVersionAtLeast(29) ? appOpsMgr.UnsafeCheckOpNoThrow("android:get_usage_stats", Android.OS.Process.MyUid(), currentAppPackageName) : appOpsMgr.CheckOpNoThrow("android:get_usage_stats", Android.OS.Process.MyUid(), currentAppPackageName);
+				var usageStatsPermissionResult =
+ OperatingSystem.IsAndroidVersionAtLeast(29) ? appOpsMgr.UnsafeCheckOpNoThrow("android:get_usage_stats", Android.OS.Process.MyUid(), currentAppPackageName) : appOpsMgr.CheckOpNoThrow("android:get_usage_stats", Android.OS.Process.MyUid(), currentAppPackageName);
 				return usageStatsPermissionResult == Android.App.AppOpsManagerMode.Allowed;
 			};
 
 			if (!checkUsageStatusPermissionFunc())
 			{
-				var reqUsageStats = await new SpecialPermissionWatcher(checkUsageStatusPermissionFunc, Android.Provider.Settings.ActionUsageAccessSettings, currentAppPackageName).RequestAsync();
+				var reqUsageStats =
+ await new SpecialPermissionWatcher(checkUsageStatusPermissionFunc, Android.Provider.Settings.ActionUsageAccessSettings, currentAppPackageName).RequestAsync();
 				if (!reqUsageStats)
 				{
 					sender.IsToggled = false;
@@ -109,13 +112,15 @@ public partial class SettingsViewModel : ObservableObject
 			}
 
 			// check alarm manager permissions
-			var alarmManager = (Android.App.AlarmManager?)Platform.AppContext.GetSystemService(Android.Content.Context.AlarmService);
+			var alarmManager =
+ (Android.App.AlarmManager?)Platform.AppContext.GetSystemService(Android.Content.Context.AlarmService);
 			if (alarmManager == null)
 				throw new Exception("alarmManager is unexpectedly null");
 
 			if (OperatingSystem.IsAndroidVersionAtLeast(31) && !alarmManager.CanScheduleExactAlarms())
 			{
-				var reqAlarm = await new SpecialPermissionWatcher(alarmManager.CanScheduleExactAlarms, Android.Provider.Settings.ActionRequestScheduleExactAlarm, currentAppPackageName).RequestAsync();
+				var reqAlarm =
+ await new SpecialPermissionWatcher(alarmManager.CanScheduleExactAlarms, Android.Provider.Settings.ActionRequestScheduleExactAlarm, currentAppPackageName).RequestAsync();
 				if (!reqAlarm)
 				{
 					sender.IsToggled = false;
@@ -124,10 +129,10 @@ public partial class SettingsViewModel : ObservableObject
 				}
 			}
 #endif
-			monitorManagerService.Start();
+			platformActionObserver.Start();
 		}
 		else
-			monitorManagerService.Stop();
+			platformActionObserver.Stop();
 
 		Preferences.Set(nameof(GecoSettings.Monitor), e.Value);
 	}

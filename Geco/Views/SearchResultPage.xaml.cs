@@ -1,4 +1,3 @@
-
 namespace Geco.Views;
 
 public partial class SearchResultPage : ContentPage

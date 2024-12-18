@@ -1,6 +1,6 @@
 using System.Collections.Specialized;
 using Geco.Core.Database;
-using Geco.Models;
+using Geco.Core.Models.Chat;
 using Geco.ViewModels;
 using Geco.Views;
 using Geco.Views.Helpers;
@@ -12,7 +12,7 @@ public partial class AppShell : Shell
 	public AppShell(IServiceProvider provider)
 	{
 		InitializeComponent();
-		
+
 		SvcProvider = provider;
 		Context = (AppShellViewModel)BindingContext;
 		Context.ChatHistoryList.CollectionChanged += ChatHistoryList_CollectionChanged;
@@ -42,7 +42,7 @@ public partial class AppShell : Shell
 	{
 		if (CurrentPage.Parent is ShellContent currShellContent)
 		{
-			var zz = MainFlyout.Items.First().Route;
+			string? zz = MainFlyout.Items.First().Route;
 			Context.IsChatPage = CurrentPage is ChatPage;
 			Context.IsChatInstance = Context.IsChatPage && currShellContent.ClassId != "ChatPage";
 		}

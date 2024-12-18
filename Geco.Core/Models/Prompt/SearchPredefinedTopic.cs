@@ -1,4 +1,5 @@
-namespace Geco.Core.Database;
+namespace Geco.Core.Models.Prompt;
+
 /// <summary>
 ///     Represents the predefined topics in sustainable search.
 /// </summary>
@@ -9,4 +10,3 @@ public enum SearchPredefinedTopic
 	Fashion,
 	Transport
 }
-

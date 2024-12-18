@@ -7,7 +7,8 @@ using Android.Net;
 using Android.Telephony;
 using Geco.Core;
 using Geco.Core.Database;
-using Geco.Models.Notifications;
+using Geco.Core.Models.ActionObserver;
+using Geco.Core.Models.Notification;
 using GoogleGeminiSDK;
 using AndroidOS = Android.OS;
 

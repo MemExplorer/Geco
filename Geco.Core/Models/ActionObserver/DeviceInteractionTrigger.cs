@@ -1,4 +1,4 @@
-namespace Geco.Core.Database;
+namespace Geco.Core.Models.ActionObserver;
 
 /// <summary>
 ///     Represents the device interaction trigger type.
