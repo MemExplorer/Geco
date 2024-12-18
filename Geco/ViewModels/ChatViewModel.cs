@@ -16,9 +16,8 @@ public partial class ChatViewModel : ObservableObject
 
 	GeminiSettings GeminiConfig { get; } = new()
 	{
-		MaxOutputTokenCount = 500,
-		Temperature = (float?)0.2,
-		TopP = (float?)0.85,
+		Temperature = 0.2f,
+		TopP = 0.85f,
 		TopK = 50,
 		SafetySettings = new List<SafetySetting> {
 			new SafetySetting(HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, HarmBlockThreshold.BLOCK_LOW_AND_ABOVE),
@@ -34,12 +33,10 @@ public partial class ChatViewModel : ObservableObject
 
 	string? HistoryId { get; set; }
 
-	public ChatViewModel()
-	{
+	public ChatViewModel() =>
 		GeminiClient.OnChatReceive += async (_, e) =>
 			await GeminiClientOnChatReceive(e);
-	}
-	
+
 	async Task GeminiClientOnChatReceive(ChatReceiveEventArgs e)
 	{
 		var currentShell = (AppShell)Shell.Current;
