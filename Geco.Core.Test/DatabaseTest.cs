@@ -23,19 +23,19 @@ public class DatabaseTest
 		await triggerRepo.LogTrigger(DeviceInteractionTrigger.ChargingUnsustainable, 1);
 		await triggerRepo.LogTrigger(DeviceInteractionTrigger.ChargingUnsustainable, 1);
 
-		var triggerData = await triggerRepo.FetchTriggerRecords();
+		var triggerData = await triggerRepo.FetchWeekOneTriggerRecords();
 		Debug.Assert(triggerData.Count == 2);
 
 		foreach (var record in triggerData)
 		{
-			_output.WriteLine($"Type: {record.Type}, Number of Records: {record.RawValue}");
+			_output.WriteLine($"Type: {record.Key}, Number of Records: {record.Value}");
 		}
 
 		bool recentTriggerData = await triggerRepo.IsTriggerInCooldown(DeviceInteractionTrigger.ChargingUnsustainable);
 		_output.WriteLine($"Is there recorded action trigger within 3 hours: {recentTriggerData}");
 
 		await triggerRepo.PurgeTriggerData();
-		triggerData = await triggerRepo.FetchTriggerRecords();
+		triggerData = await triggerRepo.FetchWeekOneTriggerRecords();
 		Debug.Assert(triggerData.Count == 0);
 	}
 
@@ -47,6 +47,8 @@ public class DatabaseTest
 
 		string searchUserPrompt = await promptRepo.GetPrompt("What are trending fashion globally");
 		_output.WriteLine($"Search User Prompt: {searchUserPrompt}");
+
+		//await promptRepo.PurgeTable();
 
 		string searchCtgPrompt = await promptRepo.GetPrompt(SearchPredefinedTopic.Energy);
 		_output.WriteLine($"Search Predefined Category Prompt: {searchCtgPrompt}");

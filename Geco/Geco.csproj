@@ -71,6 +71,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <MauiXaml Update="Views\SearchResultPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="Views\SettingsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>

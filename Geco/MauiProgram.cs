@@ -38,10 +38,15 @@ public static class MauiProgram
 		builder.Services.AddSingleton<AppShellViewModel>();
 		builder.Services.AddTransient<ChatPage>();
 		builder.Services.AddTransient<ChatViewModel>();
+		builder.Services.AddSingleton<SearchPage>();
+		builder.Services.AddSingleton<SearchViewModel>();
+		builder.Services.AddTransient<SearchResultPage>();
+		builder.Services.AddTransient<SearchResultViewModel>();
 
 		// data repository instances
 		builder.Services.AddSingleton(new ChatRepository(FileSystem.AppDataDirectory));
 		builder.Services.AddSingleton(new TriggerRepository(FileSystem.AppDataDirectory));
+		builder.Services.AddSingleton(new PromptRepository(FileSystem.AppDataDirectory));
 #if ANDROID
 		builder.Services.AddTransient<INotificationManagerService, NotificationManagerService>();
 

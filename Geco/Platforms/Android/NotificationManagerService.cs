@@ -8,7 +8,7 @@ using Geco.Models.Notifications;
 
 namespace Geco;
 
-public class NotificationManagerService : INotificationManagerService, IDisposable
+public class NotificationManagerService : INotificationManagerService
 {
 	const string ChannelId = "gecoChannelId";
 	const string ChannelName = "Geco Channel Name";
@@ -19,63 +19,89 @@ public class NotificationManagerService : INotificationManagerService, IDisposab
 	int _messageId = 0;
 	int _pendingIntentId = 0;
 	readonly NotificationManagerCompat _compatManager;
-
-	public event EventHandler<GecoNotificationMessageEvent>? OnNotificationClick;
-
+	
 	public NotificationManagerService()
 	{
 		CreateNotificationChannel();
 		_compatManager = NotificationManagerCompat.From(Platform.AppContext);
-		MainActivity.OnNewIntentEvent += OnNewIntentEvent;
+		MainActivity.OnNewIntentEvent += async (s, e) => 
+			await OnNewIntentEvent(s, e);
 	}
 
-	private void OnNewIntentEvent(object? sender, NewIntentEvent e)
+	private async Task OnNewIntentEvent(object? sender, NewIntentEvent e)
 	{
-		if (e.Intent == null || e.Intent.Action != IntentActionName)
+		if (e.Intent is not { Action: IntentActionName })
 			return;
 
-		string? msgContent = e.Intent.GetStringExtra("message");
-		OnNotificationClick?.Invoke(this, new GecoNotificationMessageEvent(msgContent!));
+		Platform.CurrentActivity!.Intent = e.Intent;
+		await Shell.Current.Navigation.PopToRootAsync();
+		await Shell.Current.GoToAsync("///IMPL_ChatPage");
 	}
 
-	public void SendNotification(string title, string message)
+	public void RunNotification(Notification notification)
+	{
+		if (!_channelInitialized)
+			CreateNotificationChannel();
+		
+		_compatManager.Notify(_messageId, notification);
+	}
+
+	public Notification? SendPersistentNotification(string title, string description)
+	{
+		var notificationInst = InternalSendNotification(title, description, description, false, false)!;
+		notificationInst.Flags = NotificationFlags.OngoingEvent;
+		return notificationInst;
+	}
+
+	public void SendInteractiveNotification(string title, string description) =>
+		InternalSendNotification(title, description, description, true);
+	public void SendInteractiveNotification(string title, string description, string message) =>
+		InternalSendNotification(title, description, message, true);
+
+	private Notification? InternalSendNotification(string title, string description, string message, bool interactive, bool notify = true)
 	{
 		if (!_channelInitialized)
 		{
 			CreateNotificationChannel();
 		}
 
-		var notificationInstance = Show(title, message);
+		var notificationInstance = Show(title, description, message, interactive);
 
-		_compatManager.Notify(_messageId++, notificationInstance);
+		if (notify)
+			_compatManager.Notify(_messageId++, notificationInstance);
+		
+		return notificationInstance;
 	}
 
-	public Notification Show(string title, string message)
+	public Notification Show(string title, string description, string message, bool interactive)
 	{
-		var intent = new Intent(Platform.AppContext, typeof(MainActivity));
-		intent.SetAction(IntentActionName);
-		intent.PutExtra("message", message);
-
-		var pendingIntentFlags = Build.VERSION.SdkInt >= BuildVersionCodes.S
-#pragma warning disable CA1416
-			? PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable
-			: PendingIntentFlags.UpdateCurrent;
-#pragma warning restore CA1416
-
-		var pendingIntent =
-			PendingIntent.GetActivity(Platform.AppContext, _pendingIntentId++, intent, pendingIntentFlags);
 		var builder = new NotificationCompat.Builder(Platform.AppContext, ChannelId)
-			.SetContentIntent(pendingIntent)
 			.SetContentTitle(title)
-			.SetContentText(message)
+			.SetContentText(description)
 			.SetSmallIcon(ResourceConstant.Drawable.geco_logo)
 			.SetLargeIcon(BitmapFactory.DecodeResource(Platform.AppContext.Resources,
 				ResourceConstant.Drawable.geco_logo))
-			.SetStyle(new NotificationCompat.BigTextStyle().BigText(message))
+			.SetStyle(new NotificationCompat.BigTextStyle().BigText(description))
 			.SetAutoCancel(true);
 
-		var notification = builder.Build();
-		return notification;
+		if (interactive)
+		{
+			var intent = new Intent(Platform.AppContext, typeof(MainActivity));
+			intent.SetAction(IntentActionName);
+			intent.PutExtra("message", message);
+
+			var pendingIntentFlags = Build.VERSION.SdkInt >= BuildVersionCodes.S
+#pragma warning disable CA1416
+				? PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable
+				: PendingIntentFlags.UpdateCurrent;
+#pragma warning restore CA1416
+
+			var pendingIntent =
+				PendingIntent.GetActivity(Platform.AppContext, _pendingIntentId++, intent, pendingIntentFlags);
+			builder = builder.SetContentIntent(pendingIntent);
+		}
+		
+		return builder.Build();
 	}
 
 	void CreateNotificationChannel()
@@ -86,10 +112,7 @@ public class NotificationManagerService : INotificationManagerService, IDisposab
 
 		var channelNameJava = new Java.Lang.String(ChannelName);
 #pragma warning disable CA1416
-		var channel = new NotificationChannel(ChannelId, channelNameJava, NotificationImportance.Default)
-		{
-			Description = ChannelDescription
-		};
+		var channel = new NotificationChannel(ChannelId, channelNameJava, NotificationImportance.None);
 #pragma warning restore CA1416
 		// Register the channel
 		var manager = (NotificationManager)Platform.AppContext.GetSystemService(Context.NotificationService)!;
@@ -98,6 +121,4 @@ public class NotificationManagerService : INotificationManagerService, IDisposab
 #pragma warning restore CA1416
 		_channelInitialized = true;
 	}
-
-	public void Dispose() => MainActivity.OnNewIntentEvent -= OnNewIntentEvent;
 }

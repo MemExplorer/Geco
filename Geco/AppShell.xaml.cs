@@ -12,24 +12,25 @@ public partial class AppShell : Shell
 	public AppShell(IServiceProvider provider)
 	{
 		InitializeComponent();
-
+		
 		SvcProvider = provider;
 		Context = (AppShellViewModel)BindingContext;
 		Context.ChatHistoryList.CollectionChanged += ChatHistoryList_CollectionChanged;
 		Navigated += AppShell_Navigated;
-		Loaded += AppShell_Loaded;
+		Loaded += async (s, e) =>
+			await AppShell_Loaded(s, e);
 
 		// register routes
 		Routing.RegisterRoute(nameof(SettingsPage), typeof(SettingsPage));
+		Routing.RegisterRoute(nameof(SearchResultPage), typeof(SearchResultPage));
+	}
 
+	async Task AppShell_Loaded(object? sender, EventArgs e)
+	{
 		// Adding an item to the Context.ChatHistoryList triggers an event that executes code to create 
 		// a new flyout item using the details from the chat history entry.
 		var chatRepo = SvcProvider.GetService<ChatRepository>();
-		chatRepo!.LoadHistory(Context.ChatHistoryList).Wait();
-	}
-
-	void AppShell_Loaded(object? sender, EventArgs e)
-	{
+		await chatRepo!.LoadHistory(Context.ChatHistoryList);
 		bool isDark = Preferences.Get(nameof(GecoSettings.DarkMode), false);
 		Application.Current!.UserAppTheme = isDark ? AppTheme.Dark : AppTheme.Light;
 	}
@@ -41,6 +42,7 @@ public partial class AppShell : Shell
 	{
 		if (CurrentPage.Parent is ShellContent currShellContent)
 		{
+			var zz = MainFlyout.Items.First().Route;
 			Context.IsChatPage = CurrentPage is ChatPage;
 			Context.IsChatInstance = Context.IsChatPage && currShellContent.ClassId != "ChatPage";
 		}
