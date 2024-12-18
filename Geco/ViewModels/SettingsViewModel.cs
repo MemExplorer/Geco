@@ -48,6 +48,7 @@ public partial class SettingsViewModel : ObservableObject
 		_handlerLocked = false; // Reset flag
 	}
 
+	// ReSharper disable once AsyncVoidMethod
 	public async void ToggleNotifications(Switch sender, ToggledEventArgs e)
 	{
 		if (OperatingSystem.IsAndroid() && e.Value)

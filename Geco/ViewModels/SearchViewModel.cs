@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Geco.Views;
 
 namespace Geco.ViewModels;
+
 public partial class SearchViewModel : ObservableObject
 {
 	[ObservableProperty] string? _searchQuery;
@@ -21,24 +22,13 @@ public partial class SearchViewModel : ObservableObject
 		await SearchResultsAsync(SearchQuery, false);
 	}
 
-	async partial void OnSelectedCategoryChanged(string? value)
-	{
-		try
-		{	
-			if (string.IsNullOrEmpty(value)) 
-				return;
-			await SearchResultsAsync(value, true);
-		}
-		catch
-		{
-			// do nothing
-		}
-	}
+	[RelayCommand]
+	async Task ChipClick(Button btnElement) =>
+		await SearchResultsAsync(btnElement.Text, true);
 
 	private async Task SearchResultsAsync(string? searchInput, bool isPredefined)
 	{
 		await Shell.Current.GoToAsync($"{nameof(SearchResultPage)}?query={searchInput}&isPredefined={isPredefined}");
 		SearchQuery = string.Empty;
 	}
-		
 }

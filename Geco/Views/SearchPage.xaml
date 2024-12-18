@@ -5,7 +5,6 @@
              x:Class="Geco.Views.SearchPage"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:helpers="clr-namespace:Geco.Views.Helpers"
-             xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
              xmlns:vm="clr-namespace:Geco.ViewModels"
              x:DataType="vm:SearchViewModel"
              Title="Search">
@@ -40,8 +39,8 @@
                 <Entry x:Name="SearchEntry"
                        Margin="20,0,7,0"
                        FontSize="18"
-                       HorizontalOptions="FillAndExpand" 
-                       Text="{Binding SearchQuery}"/>
+                       HorizontalOptions="FillAndExpand"
+                       Text="{Binding SearchQuery}" />
 
                 <!--  Search Send Button  -->
                 <Button CornerRadius="30"
@@ -52,7 +51,7 @@
                         VerticalOptions="Center">
                     <Button.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding SearchCommand}"
-                                              CommandParameter="{x:Reference SearchEntry}"/>
+                                              CommandParameter="{x:Reference SearchEntry}" />
                     </Button.GestureRecognizers>
                     <Button.Behaviors>
 
@@ -67,23 +66,31 @@
         </Border>
 
         <!-- Sustainable Chips (TODO: Disappear after chatting) -->
-        <input:SelectionView x:Name="BtnSelection"
-                             Grid.Row="2"
-                             ColumnNumber="2"
-                             ColumnSpacing="5"
-                             RowSpacing="5"
-                             Padding="50,20,50,50"
-                             BackgroundColor="{AppThemeBinding Light=#D3D3D3, Dark=#262626}"
-                             Color="{AppThemeBinding Light=#b5b5b5, Dark=#141414}"
-                             SelectedItem="{Binding SelectedCategory}">
-            <input:SelectionView.ItemsSource>
-                <x:Array Type="{x:Type x:String}">
-                    <x:String>⚡ Energy</x:String>
-                    <x:String>🗑 Waste</x:String>
-                    <x:String>👗 Fashion</x:String>
-                    <x:String>🚗 Transport</x:String>
-                </x:Array>
-            </input:SelectionView.ItemsSource>
-        </input:SelectionView>
+        <Grid Grid.Row="2"
+              RowDefinitions="auto, auto"
+              ColumnDefinitions="*, auto, auto, *"
+              RowSpacing="5"
+              ColumnSpacing="5">
+            <Button x:Name="energyBtn" Grid.Row="0" Grid.Column="1" Text="⚡ Energy"
+                    BackgroundColor="{AppThemeBinding Light=#D3D3D3, Dark=#262626}"
+                    TextColor="{AppThemeBinding Light=#141414, Dark=#b5b5b5}"
+                    Command="{Binding ChipClickCommand}"
+                    CommandParameter="{x:Reference energyBtn}" />
+            <Button x:Name="wasteBtn" Grid.Row="0" Grid.Column="2" Text="🗑 Waste"
+                    BackgroundColor="{AppThemeBinding Light=#D3D3D3, Dark=#262626}"
+                    TextColor="{AppThemeBinding Light=#141414, Dark=#b5b5b5}"
+                    Command="{Binding ChipClickCommand}"
+                    CommandParameter="{x:Reference wasteBtn}" />
+            <Button x:Name="fashionBtn" Grid.Row="1" Grid.Column="1" Text="👗 Fashion"
+                    BackgroundColor="{AppThemeBinding Light=#D3D3D3, Dark=#262626}"
+                    TextColor="{AppThemeBinding Light=#141414, Dark=#b5b5b5}"
+                    Command="{Binding ChipClickCommand}"
+                    CommandParameter="{x:Reference fashionBtn}" />
+            <Button x:Name="transportBtn" Grid.Row="1" Grid.Column="2" Text="🚗 Transport"
+                    BackgroundColor="{AppThemeBinding Light=#D3D3D3, Dark=#262626}"
+                    TextColor="{AppThemeBinding Light=#141414, Dark=#b5b5b5}"
+                    Command="{Binding ChipClickCommand}"
+                    CommandParameter="{x:Reference transportBtn}" />
+        </Grid>
     </Grid>
 </ContentPage>
