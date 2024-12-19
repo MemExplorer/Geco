@@ -26,7 +26,7 @@ public class ChatRepository : DbRepositoryBase
 		])
 	];
 
-	public async Task AppendHistory(GecoChatHistory history)
+	public async Task AppendHistory(GecoConversation history)
 	{
 		await Initialize();
 
@@ -53,7 +53,7 @@ public class ChatRepository : DbRepositoryBase
 			message.Text, message.Role.Value);
 	}
 
-	public async Task LoadHistory(ICollection<GecoChatHistory> historyData)
+	public async Task LoadHistory(ICollection<GecoConversation> historyData)
 	{
 		await Initialize();
 
@@ -61,13 +61,13 @@ public class ChatRepository : DbRepositoryBase
 		await using var historyReader = await db.ExecuteReader("SELECT * FROM TblChatHistory ORDER BY DateCreated ASC");
 		while (historyReader.Read())
 		{
-			var historyEntry = new GecoChatHistory((string)historyReader["Id"], (string)historyReader["Title"],
+			var historyEntry = new GecoConversation((string)historyReader["Id"], (string)historyReader["Title"],
 				(long)historyReader["DateCreated"], []);
 			historyData.Add(historyEntry);
 		}
 	}
 
-	public async Task LoadChats(GecoChatHistory history)
+	public async Task LoadChats(GecoConversation history)
 	{
 		await Initialize();
 

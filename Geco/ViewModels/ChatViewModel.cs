@@ -37,24 +37,36 @@ public partial class ChatViewModel : ObservableObject
 		GeminiClient.OnChatReceive += async (_, e) =>
 			await GeminiClientOnChatReceive(e);
 
+	/// <summary>
+	///     Handles chat send and receive events from Gemini
+	/// </summary>
+	/// <param name="e">Chat message data</param>
 	async Task GeminiClientOnChatReceive(ChatReceiveEventArgs e)
 	{
+		// append received message to chat UI
 		var currentShell = (AppShell)Shell.Current;
 		var chatRepo = currentShell.SvcProvider.GetService<ChatRepository>();
 		ChatMessages.Add(e.Message);
 
-		// save chat to database
+		// save chat message to database
 		if (HistoryId != null)
 			await chatRepo!.AppendChat(HistoryId, e.Message);
 	}
 
-	public void LoadHistory(GecoChatHistory history)
+	/// <summary>
+	///     Loads chat history into the ChatViewModel instance
+	/// </summary>
+	/// <param name="conversationInfo">Conversation data</param>
+	public void LoadHistory(GecoConversation conversationInfo)
 	{
-		ChatMessages = history.Messages;
-		GeminiClient.LoadHistory(history.Messages);
-		HistoryId = history.Id;
+		ChatMessages = conversationInfo.Messages;
+		GeminiClient.LoadHistory(conversationInfo.Messages);
+		HistoryId = conversationInfo.Id;
 	}
 
+	/// <summary>
+	///     Resets current chat instance
+	/// </summary>
 	public void Reset()
 	{
 		ChatMessages = [];
@@ -80,7 +92,6 @@ public partial class ChatViewModel : ObservableObject
 	async Task ChatSend(Entry inputEntry)
 	{
 		var currentShell = (AppShell)Shell.Current;
-		var chatRepo = currentShell.SvcProvider.GetService<ChatRepository>();
 
 		// do not send an empty message
 		if (string.IsNullOrWhiteSpace(inputEntry.Text))
@@ -88,15 +99,30 @@ public partial class ChatViewModel : ObservableObject
 
 		// hide keyboard after sending a message
 		await inputEntry.HideSoftInputAsync(CancellationToken.None);
+		string inputContent = inputEntry.Text;
+		bool isNewChat = await InitializeNewConversation(currentShell, inputContent);
 
+		// set input to empty string after sending a message
+		inputEntry.Text = string.Empty;
+
+		// send user message to Gemini and append its response
+		await GeminiClient.SendMessage(inputContent, settings: GeminiConfig);
+
+		if (isNewChat)
+			await currentShell.GoToAsync("//" + HistoryId);
+	}
+
+	async Task<bool> InitializeNewConversation(AppShell currentShell, string inputContent)
+	{
 		// saves new instance of a chat
 		bool gecoInitiated = ChatMessages.Count == 1 && ChatMessages.First().Role != ChatRole.User;
-		bool newChat = (ChatMessages.Count == 0 || gecoInitiated) && HistoryId == null;
-		if (newChat)
+		bool isNewChat = (ChatMessages.Count == 0 || gecoInitiated) && HistoryId == null;
+		if (isNewChat)
 		{
+			var chatRepo = currentShell.SvcProvider.GetService<ChatRepository>();
 			var shellViewModel = (AppShellViewModel)currentShell.BindingContext;
-			string chatTitle = CreateChatTitle(gecoInitiated ? ChatMessages.First().Text! : inputEntry.Text);
-			var historyInstance = new GecoChatHistory(Guid.NewGuid().ToString(), chatTitle,
+			string chatTitle = CreateChatTitle(gecoInitiated ? ChatMessages.First().Text! : inputContent);
+			var historyInstance = new GecoConversation(Guid.NewGuid().ToString(), chatTitle,
 				DateTimeOffset.UtcNow.ToUnixTimeSeconds(), ChatMessages);
 
 			// append to UI
@@ -112,15 +138,7 @@ public partial class ChatViewModel : ObservableObject
 				GeminiClient.AppendToHistory(ChatMessages.First());
 		}
 
-		// set input to empty string after sending a message
-		string inputContent = inputEntry.Text;
-		inputEntry.Text = string.Empty;
-
-		// send user message to Gemini and append its response
-		await GeminiClient.SendMessage(inputContent, settings: GeminiConfig);
-
-		if (newChat)
-			await currentShell.GoToAsync("//" + HistoryId);
+		return isNewChat;
 	}
 
 	static string CreateChatTitle(string message)

@@ -5,6 +5,7 @@ using Android.Graphics;
 using Android.OS;
 using AndroidX.Core.App;
 using Geco.Core.Models.Notification;
+using String = Java.Lang.String;
 
 namespace Geco.Notifications;
 
@@ -15,9 +16,9 @@ public class NotificationManagerService : INotificationManagerService
 	const string ChannelDescription = "The default channel for notifications.";
 	const string IntentActionName = "GecoNotif";
 
-	bool _channelInitialized = false;
-	int _messageId = 0;
-	int _pendingIntentId = 0;
+	bool _channelInitialized;
+	int _messageId;
+	int _pendingIntentId;
 	readonly NotificationManagerCompat _compatManager;
 
 	public NotificationManagerService()
@@ -112,7 +113,7 @@ public class NotificationManagerService : INotificationManagerService
 		if (Build.VERSION.SdkInt < BuildVersionCodes.O)
 			return;
 
-		var channelNameJava = new Java.Lang.String(ChannelName);
+		var channelNameJava = new String(ChannelName);
 #pragma warning disable CA1416
 		var channel = new NotificationChannel(ChannelId, channelNameJava, NotificationImportance.None);
 #pragma warning restore CA1416

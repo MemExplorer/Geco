@@ -19,7 +19,9 @@ internal class BatteryStateObserver : IDeviceStateObserver
 		// Check if the battery percentage when charging is outside the range of 20-80%
 		if (isCharging && Battery.Default.PowerSource != BatteryPowerSource.Battery)
 		{
-			var triggerType = chargeLevel is < 20 or > 80 ? DeviceInteractionTrigger.ChargingUnsustainable : DeviceInteractionTrigger.ChargingSustainable;
+			var triggerType = chargeLevel is < 20 or > 80
+				? DeviceInteractionTrigger.ChargingUnsustainable
+				: DeviceInteractionTrigger.ChargingSustainable;
 			OnStateChanged?.Invoke(sender, new TriggerEventArgs(triggerType, e));
 		}
 	}

@@ -22,7 +22,7 @@ public class MainActivity : MauiAppCompatActivity
 
 	protected override void OnStart()
 	{
-		OnNewIntentEvent?.Invoke(this, new NewIntentEvent(this.Intent));
+		OnNewIntentEvent?.Invoke(this, new NewIntentEvent(Intent));
 		base.OnStart();
 	}
 

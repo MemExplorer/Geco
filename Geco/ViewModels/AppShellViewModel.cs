@@ -8,7 +8,7 @@ namespace Geco.ViewModels;
 
 public partial class AppShellViewModel : ObservableObject
 {
-	[ObservableProperty] ObservableCollection<GecoChatHistory> _chatHistoryList;
+	[ObservableProperty] ObservableCollection<GecoConversation> _chatHistoryList;
 
 	[ObservableProperty] bool _isChatInstance;
 
@@ -36,6 +36,9 @@ public partial class AppShellViewModel : ObservableObject
 		await Shell.Current.GoToAsync("SettingsPage");
 	}
 
+	/// <summary>
+	///     Deletes selected conversation
+	/// </summary>
 	[RelayCommand]
 	async Task DeleteChat()
 	{

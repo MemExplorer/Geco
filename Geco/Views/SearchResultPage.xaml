@@ -73,7 +73,7 @@
             HorizontalOptions="FillAndExpand"
             BackgroundColor="Transparent"
             VerticalOptions="Center" />
-        
+
         <!-- Shimmer -->
         <StackLayout Orientation="Vertical" Spacing="10" IsVisible="{Binding IsSearching}">
             <Border StrokeThickness="0"
@@ -173,7 +173,7 @@
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
             </CollectionView.ItemsLayout>
             <CollectionView.EmptyView>
-                <Label HorizontalTextAlignment="Center" VerticalTextAlignment="Center" Text="No results found"></Label>
+                <Label HorizontalTextAlignment="Center" VerticalTextAlignment="Center" Text="No results found" />
             </CollectionView.EmptyView>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="model:GecoSearchResult">

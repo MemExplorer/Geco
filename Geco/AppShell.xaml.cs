@@ -9,6 +9,9 @@ namespace Geco;
 
 public partial class AppShell : Shell
 {
+	internal IServiceProvider SvcProvider { get; }
+	AppShellViewModel Context { get; }
+
 	public AppShell(IServiceProvider provider)
 	{
 		InitializeComponent();
@@ -20,6 +23,11 @@ public partial class AppShell : Shell
 		Loaded += async (s, e) =>
 			await AppShell_Loaded(s, e);
 
+		InitializeRoutes();
+	}
+
+	void InitializeRoutes()
+	{
 		// register routes
 		Routing.RegisterRoute(nameof(SettingsPage), typeof(SettingsPage));
 		Routing.RegisterRoute(nameof(SearchResultPage), typeof(SearchResultPage));
@@ -35,14 +43,10 @@ public partial class AppShell : Shell
 		Application.Current!.UserAppTheme = isDark ? AppTheme.Dark : AppTheme.Light;
 	}
 
-	AppShellViewModel Context { get; }
-	internal IServiceProvider SvcProvider { get; }
-
 	void AppShell_Navigated(object? sender, ShellNavigatedEventArgs e)
 	{
 		if (CurrentPage.Parent is ShellContent currShellContent)
 		{
-			string? zz = MainFlyout.Items.First().Route;
 			Context.IsChatPage = CurrentPage is ChatPage;
 			Context.IsChatInstance = Context.IsChatPage && currShellContent.ClassId != "ChatPage";
 		}
@@ -65,7 +69,7 @@ public partial class AppShell : Shell
 				return;
 
 			// only one item is added at a time
-			var firstItem = (GecoChatHistory)e.NewItems[0]!;
+			var firstItem = (GecoConversation)e.NewItems[0]!;
 			var iconSrc = new FontImageSource { FontFamily = "FontAwesome", Glyph = IconFont.MessageLines };
 			iconSrc.SetAppThemeColor(FontImageSource.ColorProperty, Color.Parse("#262626"), Color.Parse("#D3D3D3"));
 
@@ -87,7 +91,7 @@ public partial class AppShell : Shell
 				return;
 
 			// only one item is removed at a time
-			var firstItem = (GecoChatHistory)e.OldItems[0]!;
+			var firstItem = (GecoConversation)e.OldItems[0]!;
 			var selectedShell = ChatHistoryFlyout.Items.First(x => x.Route == "IMPL_" + firstItem.Id);
 			ChatHistoryFlyout.Items.Remove(selectedShell);
 		}

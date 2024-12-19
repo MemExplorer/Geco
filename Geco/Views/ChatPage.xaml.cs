@@ -5,6 +5,8 @@ namespace Geco.Views;
 
 public partial class ChatPage : ContentPage
 {
+	IServiceProvider SvcProvider { get; }
+
 	public ChatPage(IServiceProvider sp, ChatViewModel vm)
 	{
 		InitializeComponent();
@@ -12,12 +14,9 @@ public partial class ChatPage : ContentPage
 		SvcProvider = sp;
 
 		// Create new instance of chat page every time page is loaded
-		Appearing += ChatPage_Appearing;
+		Appearing += async (_, _) =>
+			await InitializeChat();
 	}
-
-	IServiceProvider SvcProvider { get; }
-
-	async void ChatPage_Appearing(object? sender, EventArgs e) => await InitializeChat();
 
 	async Task InitializeChat()
 	{
@@ -38,6 +37,8 @@ public partial class ChatPage : ContentPage
 			var chatRepo = SvcProvider.GetService<ChatRepository>();
 			var appShellCtx = (AppShellViewModel)Parent.BindingContext;
 			var currentHistory = appShellCtx.ChatHistoryList.First(x => x.Id == Parent.ClassId);
+
+			// load conversation data
 			await chatRepo!.LoadChats(currentHistory);
 			ctx.LoadHistory(currentHistory);
 		}

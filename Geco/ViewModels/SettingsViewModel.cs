@@ -3,8 +3,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
 using Geco.Core.Models.ActionObserver;
+using Application = Microsoft.Maui.Controls.Application;
 #if ANDROID
 using Geco.PermissionHelpers;
+using Android.App;
+using Android.Content;
+using Android.OS;
+using Android.Provider;
 #endif
 
 namespace Geco.ViewModels;
@@ -86,7 +91,7 @@ public partial class SettingsViewModel : ObservableObject
 
 			// check usage stats permission
 			var appOpsMgr =
- (Android.App.AppOpsManager?)Platform.AppContext.GetSystemService(Android.Content.Context.AppOpsService);
+				(AppOpsManager?)Platform.AppContext.GetSystemService(Context.AppOpsService);
 			if (appOpsMgr == null)
 				throw new Exception("appOpsMgr is unexpectedly null");
 
@@ -95,14 +100,18 @@ public partial class SettingsViewModel : ObservableObject
 			var checkUsageStatusPermissionFunc = bool () =>
 			{
 				var usageStatsPermissionResult =
- OperatingSystem.IsAndroidVersionAtLeast(29) ? appOpsMgr.UnsafeCheckOpNoThrow("android:get_usage_stats", Android.OS.Process.MyUid(), currentAppPackageName) : appOpsMgr.CheckOpNoThrow("android:get_usage_stats", Android.OS.Process.MyUid(), currentAppPackageName);
-				return usageStatsPermissionResult == Android.App.AppOpsManagerMode.Allowed;
+					OperatingSystem.IsAndroidVersionAtLeast(29)
+						? appOpsMgr.UnsafeCheckOpNoThrow("android:get_usage_stats", Process.MyUid(),
+							currentAppPackageName)
+						: appOpsMgr.CheckOpNoThrow("android:get_usage_stats", Process.MyUid(), currentAppPackageName);
+				return usageStatsPermissionResult == AppOpsManagerMode.Allowed;
 			};
 
 			if (!checkUsageStatusPermissionFunc())
 			{
-				var reqUsageStats =
- await new SpecialPermissionWatcher(checkUsageStatusPermissionFunc, Android.Provider.Settings.ActionUsageAccessSettings, currentAppPackageName).RequestAsync();
+				bool reqUsageStats =
+					await new SpecialPermissionWatcher(checkUsageStatusPermissionFunc,
+						Settings.ActionUsageAccessSettings, currentAppPackageName).RequestAsync();
 				if (!reqUsageStats)
 				{
 					sender.IsToggled = false;
@@ -113,14 +122,15 @@ public partial class SettingsViewModel : ObservableObject
 
 			// check alarm manager permissions
 			var alarmManager =
- (Android.App.AlarmManager?)Platform.AppContext.GetSystemService(Android.Content.Context.AlarmService);
+				(AlarmManager?)Platform.AppContext.GetSystemService(Context.AlarmService);
 			if (alarmManager == null)
 				throw new Exception("alarmManager is unexpectedly null");
 
 			if (OperatingSystem.IsAndroidVersionAtLeast(31) && !alarmManager.CanScheduleExactAlarms())
 			{
-				var reqAlarm =
- await new SpecialPermissionWatcher(alarmManager.CanScheduleExactAlarms, Android.Provider.Settings.ActionRequestScheduleExactAlarm, currentAppPackageName).RequestAsync();
+				bool reqAlarm =
+					await new SpecialPermissionWatcher(alarmManager.CanScheduleExactAlarms,
+						Settings.ActionRequestScheduleExactAlarm, currentAppPackageName).RequestAsync();
 				if (!reqAlarm)
 				{
 					sender.IsToggled = false;

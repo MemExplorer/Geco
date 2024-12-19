@@ -2,9 +2,9 @@ using Android.Content;
 using Android.Locations;
 using Android.OS;
 using Android.Runtime;
-using Geco.Core.Database;
-using Geco.Core.Models;
 using Geco.Core.Models.ActionObserver;
+using Location = Android.Locations.Location;
+using Object = Java.Lang.Object;
 
 namespace Geco.ActionObservers;
 
@@ -48,11 +48,11 @@ internal class LocationStatusEventArgs(bool isToggled) : EventArgs
 	public bool IsToggled { get; } = isToggled;
 }
 
-class LocationListenerCallback : Java.Lang.Object, ILocationListener
+class LocationListenerCallback : Object, ILocationListener
 {
 	public event EventHandler<LocationStatusEventArgs>? OnToggle;
 
-	public void OnLocationChanged(Android.Locations.Location location)
+	public void OnLocationChanged(Location location)
 	{
 		// not needed
 	}

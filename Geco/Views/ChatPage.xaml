@@ -12,7 +12,7 @@
     <ContentPage.Resources>
         <helpers:ChatAlignmentConverter x:Key="ChatAlignmentConverter" />
         <helpers:IsModelToBooleanConverter x:Key="IsModelToBooleanConverter" />
-        <helpers:IsModelToShapeConverter x:Key="IsModelToShapeConverter"/>
+        <helpers:IsModelToShapeConverter x:Key="IsModelToShapeConverter" />
     </ContentPage.Resources>
 
     <StackLayout Padding="10"
@@ -47,15 +47,15 @@
                                    Margin="5"
                                    VerticalOptions="End"
                                    IsVisible="{Binding Role, Converter={StaticResource IsModelToBooleanConverter}}" />
-                            <Border Margin="2" 
+                            <Border Margin="2"
                                     Grid.Column="1"
                                     StrokeShape="{Binding Role, Converter={StaticResource IsModelToShapeConverter}}"
                                     BackgroundColor="{AppThemeBinding Light=#e3e3e3,
                                                   Dark=#191919}"
                                     HorizontalOptions="{Binding Role, Converter={StaticResource ChatAlignmentConverter}}">
-                                <Label 
-                                       Padding="15"
-                                       Text="{Binding Text}"/>
+                                <Label
+                                    Padding="15"
+                                    Text="{Binding Text}" />
                             </Border>
                         </Grid>
                     </Border>

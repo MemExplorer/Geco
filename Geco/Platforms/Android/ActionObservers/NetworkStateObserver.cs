@@ -1,6 +1,4 @@
 using Android.Net;
-using Geco.Core.Database;
-using Geco.Core.Models;
 using Geco.Core.Models.ActionObserver;
 
 namespace Geco.ActionObservers;

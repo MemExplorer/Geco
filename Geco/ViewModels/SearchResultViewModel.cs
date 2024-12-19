@@ -19,6 +19,7 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 	[ObservableProperty] ObservableCollection<GecoSearchResult> _searchResults;
 	[ObservableProperty] string? _searchInput;
 	bool _isPredefined;
+	[ObservableProperty] bool _isSearching;
 
 	GeminiChat GeminiClient { get; } = new(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest");
 
@@ -49,19 +50,22 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 
 	private void GeminiClientOnChatReceive(ChatReceiveEventArgs e)
 	{
+		// only accept messages from Gemini
 		if (e.Message.Role == ChatRole.User)
 			return;
 
-		string message = e.Message.ToString();
-
+		// deserialize structured response
+		string message = e.Message.Text!;
 		var results = JsonSerializer.Deserialize<List<GecoSearchResult>>(message);
 
 		if (results == null)
 			return;
 
-		SearchResults.Clear();
+		// populate search result
 		foreach (var item in results)
 			SearchResults.Add(new GecoSearchResult(item.Title, item.Description));
+
+		IsSearching = false;
 	}
 
 	[RelayCommand]
@@ -70,6 +74,11 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 		// do not send an empty message
 		if (string.IsNullOrWhiteSpace(searchEntry.Text))
 			return;
+
+		IsSearching = true;
+
+		// clear results
+		SearchResults.Clear();
 
 		// hide keyboard after sending a message
 		await searchEntry.HideSoftInputAsync(CancellationToken.None);
@@ -84,11 +93,10 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 			if (string.IsNullOrEmpty(SearchInput))
 				return;
 
-			string? unescapeDataString = Uri.UnescapeDataString(SearchInput);
+			string unescapeDataString = Uri.UnescapeDataString(SearchInput);
 			var promptRepo = ((AppShell)Shell.Current).SvcProvider.GetService<PromptRepository>()!;
 
 			string prompt;
-
 			if (isPredefined &&
 			    Enum.TryParse<SearchPredefinedTopic>(unescapeDataString, out var convertedPredefinedTopic))
 				prompt = await promptRepo.GetPrompt(convertedPredefinedTopic);
@@ -110,6 +118,7 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 		SearchInput = RemoveEmojis(searchInput);
 		string isPredefinedString = query["isPredefined"].ToString()!;
 		_isPredefined = bool.TryParse(isPredefinedString, out bool result) && result;
+		IsSearching = true;
 		SendSearch(_isPredefined);
 	}
 

@@ -2,15 +2,18 @@ using CommunityToolkit.Maui;
 #if ANDROID
 using Geco.ActionObservers;
 using Geco.Notifications;
+using Microsoft.Maui.Handlers;
+using Microsoft.Maui.Platform;
+using Android.Content.Res;
 #endif
 using Geco.Core.Database;
 using Geco.Core.Models.ActionObserver;
 using Geco.Core.Models.Notification;
-using Microsoft.Maui.Platform;
 using Geco.ViewModels;
 using Geco.Views;
 using Microsoft.Extensions.Logging;
 using Syncfusion.Maui.Toolkit.Hosting;
+
 
 namespace Geco;
 
@@ -29,8 +32,22 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 				fonts.AddFont("Poppins-Regular.ttf", "Poppins");
 				fonts.AddFont("FontAwesome6DuotoneNew-Solid.ttf", "FontAwesome");
-			});
+			})
+			.InitializeUiServices()
+			.InitializeDatabaseServices()
+			.InitializeAndroidServices();
 
+#if DEBUG
+		builder.Logging.AddDebug();
+#endif
+		// platform specific modifications
+		ApplyAndroidUiModifications();
+
+		return builder.Build();
+	}
+
+	static MauiAppBuilder InitializeUiServices(this MauiAppBuilder builder)
+	{
 		// page and view model instances
 		builder.Services.AddSingleton<AppShellViewModel>();
 		builder.Services.AddTransient<ChatPage>();
@@ -39,11 +56,20 @@ public static class MauiProgram
 		builder.Services.AddSingleton<SearchViewModel>();
 		builder.Services.AddTransient<SearchResultPage>();
 		builder.Services.AddTransient<SearchResultViewModel>();
+		return builder;
+	}
 
+	static MauiAppBuilder InitializeDatabaseServices(this MauiAppBuilder builder)
+	{
 		// data repository instances
 		builder.Services.AddSingleton(new ChatRepository(FileSystem.AppDataDirectory));
 		builder.Services.AddSingleton(new TriggerRepository(FileSystem.AppDataDirectory));
 		builder.Services.AddSingleton(new PromptRepository(FileSystem.AppDataDirectory));
+		return builder;
+	}
+
+	static MauiAppBuilder InitializeAndroidServices(this MauiAppBuilder builder)
+	{
 #if ANDROID
 		builder.Services.AddTransient<INotificationManagerService, NotificationManagerService>();
 
@@ -55,30 +81,23 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IDeviceStateObserver, LocationStateObserver>();
 		builder.Services.AddSingleton<IDeviceStateObserver, BatteryStateObserver>();
 #endif
-
-#if DEBUG
-		builder.Logging.AddDebug();
-#endif
-		// platform specific modifications
-		ApplyAndroidModifications();
-
-		return builder.Build();
+		return builder;
 	}
 
-	static void ApplyAndroidModifications()
+	static void ApplyAndroidUiModifications()
 	{
 #if ANDROID
 		// Adjust header title position
-		Microsoft.Maui.Handlers.ToolbarHandler.Mapper.AppendToMapping("CustomNavigationView", (handler, view) =>
+		ToolbarHandler.Mapper.AppendToMapping("CustomNavigationView", (handler, view) =>
 		{
 			handler.PlatformView.ContentInsetStartWithNavigation = 0;
 		});
 
 		// Remove underscore in Entry Control
-		Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("NoUnderline", (h, v) =>
+		EntryHandler.Mapper.AppendToMapping("NoUnderline", (h, v) =>
 		{
 			h.PlatformView.BackgroundTintList =
-				Android.Content.Res.ColorStateList.ValueOf(Colors.Transparent.ToPlatform());
+				ColorStateList.ValueOf(Colors.Transparent.ToPlatform());
 		});
 #endif
 	}
