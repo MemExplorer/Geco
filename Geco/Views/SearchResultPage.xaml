@@ -142,28 +142,6 @@
                     </shimmer:SfShimmer.CustomView>
                 </shimmer:SfShimmer>
             </Border>
-            <Border StrokeThickness="0"
-                    StrokeShape="RoundRectangle 10,10,10,10"
-                    BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}">
-                <shimmer:SfShimmer
-                    Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
-                    WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
-                    BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
-                    HeightRequest="145">
-                    <shimmer:SfShimmer.CustomView>
-                        <VerticalStackLayout Spacing="8" Padding="10">
-                            <BoxView HeightRequest="15" BackgroundColor="#B0B0B0" WidthRequest="230"
-                                     CornerRadius="5" HorizontalOptions="Start" />
-                            <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
-                            <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
-                            <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
-                            <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
-                            <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
-                            <BoxView HeightRequest="10" BackgroundColor="#D3D3D3" CornerRadius="5" />
-                        </VerticalStackLayout>
-                    </shimmer:SfShimmer.CustomView>
-                </shimmer:SfShimmer>
-            </Border>
         </StackLayout>
 
         <!-- Results List -->
