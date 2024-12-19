@@ -75,7 +75,7 @@
                 <Border HorizontalOptions="FillAndExpand">
                     <Label HorizontalTextAlignment="Center"
                            VerticalTextAlignment="Center"
-                           Text="Add something here..." />
+                           Text="© SS Bois 2024" />
                 </Border>
                 <Border HorizontalOptions="End">
                     <Button x:DataType="vm:AppShellViewModel"
