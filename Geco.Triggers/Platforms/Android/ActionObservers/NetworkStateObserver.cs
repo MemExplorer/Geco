@@ -1,9 +1,8 @@
 using Android.Net;
 using Geco.Core.Models.ActionObserver;
+namespace Geco.Triggers.ActionObservers;
 
-namespace Geco.ActionObservers;
-
-internal class NetworkStateObserver : IDeviceStateObserver
+public class NetworkStateObserver : IDeviceStateObserver
 {
 	private readonly NetworkCallbackHandler _networkCbHandler;
 	private readonly ConnectivityManager _connectivityMgr;

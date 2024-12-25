@@ -1,6 +1,6 @@
 using CommunityToolkit.Maui;
 #if ANDROID
-using Geco.ActionObservers;
+using Geco.Triggers.ActionObservers;
 using Geco.Notifications;
 using Microsoft.Maui.Handlers;
 using Microsoft.Maui.Platform;

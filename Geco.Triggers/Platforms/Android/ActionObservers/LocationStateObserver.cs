@@ -6,9 +6,9 @@ using Geco.Core.Models.ActionObserver;
 using Location = Android.Locations.Location;
 using Object = Java.Lang.Object;
 
-namespace Geco.ActionObservers;
+namespace Geco.Triggers.ActionObservers;
 
-internal class LocationStateObserver : IDeviceStateObserver
+public class LocationStateObserver : IDeviceStateObserver
 {
 	public event EventHandler<TriggerEventArgs>? OnStateChanged;
 	private LocationManager LocationMgrInst { get; }
@@ -43,7 +43,7 @@ internal class LocationStateObserver : IDeviceStateObserver
 	}
 }
 
-internal class LocationStatusEventArgs(bool isToggled) : EventArgs
+public class LocationStatusEventArgs(bool isToggled) : EventArgs
 {
 	public bool IsToggled { get; } = isToggled;
 }

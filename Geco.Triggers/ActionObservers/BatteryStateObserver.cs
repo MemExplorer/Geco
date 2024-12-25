@@ -1,8 +1,8 @@
 using Geco.Core.Models.ActionObserver;
 
-namespace Geco.ActionObservers;
+namespace Geco.Triggers.ActionObservers;
 
-internal class BatteryStateObserver : IDeviceStateObserver
+public class BatteryStateObserver : IDeviceStateObserver
 {
 	public event EventHandler<TriggerEventArgs>? OnStateChanged;
 

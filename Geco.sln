@@ -18,6 +18,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geco.Core", "Geco.Core\Geco
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geco.Core.Test", "Geco.Core.Test\Geco.Core.Test.csproj", "{464DAC29-A38B-4315-879D-519162C9A89A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geco.Triggers", "Geco.Triggers\Geco.Triggers.csproj", "{3BC0367F-0347-4411-B055-83AA5F646517}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Android|Any CPU = Android|Any CPU
@@ -69,6 +71,18 @@ Global
 		{464DAC29-A38B-4315-879D-519162C9A89A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{464DAC29-A38B-4315-879D-519162C9A89A}.Release|x64.ActiveCfg = Release|Any CPU
 		{464DAC29-A38B-4315-879D-519162C9A89A}.Release|x64.Build.0 = Release|Any CPU
+		{3BC0367F-0347-4411-B055-83AA5F646517}.Android|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BC0367F-0347-4411-B055-83AA5F646517}.Android|Any CPU.Build.0 = Debug|Any CPU
+		{3BC0367F-0347-4411-B055-83AA5F646517}.Android|x64.ActiveCfg = Debug|Any CPU
+		{3BC0367F-0347-4411-B055-83AA5F646517}.Android|x64.Build.0 = Debug|Any CPU
+		{3BC0367F-0347-4411-B055-83AA5F646517}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BC0367F-0347-4411-B055-83AA5F646517}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BC0367F-0347-4411-B055-83AA5F646517}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3BC0367F-0347-4411-B055-83AA5F646517}.Debug|x64.Build.0 = Debug|Any CPU
+		{3BC0367F-0347-4411-B055-83AA5F646517}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BC0367F-0347-4411-B055-83AA5F646517}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BC0367F-0347-4411-B055-83AA5F646517}.Release|x64.ActiveCfg = Release|Any CPU
+		{3BC0367F-0347-4411-B055-83AA5F646517}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
