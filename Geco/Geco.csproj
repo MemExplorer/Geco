@@ -19,7 +19,7 @@
     <MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
 
     <!-- Display name -->
-    <ApplicationTitle>Geco</ApplicationTitle>
+    <ApplicationTitle>GECO</ApplicationTitle>
 
     <!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
     <WindowsPackageType>None</WindowsPackageType>
