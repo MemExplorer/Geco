@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
 using Geco.Core.Models;
+using Geco.Core.Models.ActionObserver;
 using Geco.Core.Models.Prompt;
 using GoogleGeminiSDK;
 using GoogleGeminiSDK.Models.Components;
@@ -41,14 +42,17 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 		)
 	};
 
+	IServiceProvider SvcProvider { get; }
+
 	public SearchResultViewModel()
 	{
 		_searchResults = [];
-		GeminiClient.OnChatReceive += (_, e) =>
-			GeminiClientOnChatReceive(e);
+		SvcProvider = App.Current?.Handler.MauiContext?.Services!;
+		GeminiClient.OnChatReceive += async (_, e) =>
+			await GeminiClientOnChatReceive(e);
 	}
 
-	private void GeminiClientOnChatReceive(ChatReceiveEventArgs e)
+	private async Task GeminiClientOnChatReceive(ChatReceiveEventArgs e)
 	{
 		// only accept messages from Gemini
 		if (e.Message.Role == ChatRole.User)
@@ -64,6 +68,11 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 		// populate search result
 		foreach (var item in results)
 			SearchResults.Add(new GecoSearchResult(item.Title, item.Description));
+
+		// log usage
+		var triggerRepo = SvcProvider.GetService<TriggerRepository>();
+		if (triggerRepo != null)
+			await triggerRepo.LogTrigger(DeviceInteractionTrigger.BrowserUsageSustainable, 0);
 
 		IsSearching = false;
 	}

@@ -10,6 +10,7 @@ using Geco.Core.Database;
 using Geco.Core.Models.ActionObserver;
 using Geco.Core.Models.Notification;
 using GoogleGeminiSDK;
+using GoogleGeminiSDK.Models.Components;
 using AndroidOS = Android.OS;
 
 namespace Geco;
@@ -169,6 +170,44 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 			await triggerRepo.LogTrigger(DeviceInteractionTrigger.NetworkUsageUnsustainable, 1);
 		else
 			await triggerRepo.LogTrigger(DeviceInteractionTrigger.NetworkUsageSustainable, 1);
+
+		// Verify if the user has used geco search within the last 24 hours
+		if (!await triggerRepo.IsTriggerInCooldown(DeviceInteractionTrigger.BrowserUsageSustainable, 86_400))
+			await CreateBrowserUnsustainableNotification(SvcProvider);
+	}
+
+	private async Task CreateBrowserUnsustainableNotification(IServiceProvider svcProvider)
+	{
+		var promptRepo = svcProvider.GetService<PromptRepository>();
+		if (promptRepo == null)
+			throw new Exception("PromptRepository should not be null!");
+
+		var geminiClient = new GeminiChat(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest");
+		var geminiSettings = new GeminiSettings
+		{
+			Conversational = false,
+			ResponseMimeType = "application/json",
+			ResponseSchema = new Schema(
+			SchemaType.ARRAY,
+			Items: new Schema(SchemaType.OBJECT,
+				Properties: new Dictionary<string, Schema>
+				{
+						{ "NotificationTitle", new Schema(SchemaType.STRING) },
+						{ "NotificationDescription", new Schema(SchemaType.STRING) }
+				},
+				Required: ["NotificationTitle", "NotificationDescription"]
+			)
+		)
+		};
+
+		string notificationPrompt = await promptRepo.GetPrompt(DeviceInteractionTrigger.BrowserUsageUnsustainable);
+		var tunedNotification = await geminiClient.SendMessage(notificationPrompt, settings: geminiSettings);
+		var deserializedStructuredMsg =
+			JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
+		var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();
+		(string Title, string Description) notificationInfo = (tunedNotificationInfoFirstEntry.NotificationTitle,
+			tunedNotificationInfoFirstEntry.NotificationDescription);
+		NotificationSvc.SendInteractiveNotification(notificationInfo.Title, notificationInfo.Description);
 	}
 
 	internal static async Task<(bool Granted, string? SubId)> GetSubscriptionId()

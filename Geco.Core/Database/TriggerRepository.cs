@@ -80,7 +80,7 @@ public class TriggerRepository : DbRepositoryBase
 		return entryCount == 1;
 	}
 
-	public async Task<bool> IsTriggerInCooldown(DeviceInteractionTrigger interactionTrigger)
+	public async Task<bool> IsTriggerInCooldown(DeviceInteractionTrigger interactionTrigger, int? cooldownInSeconds = null)
 	{
 		await Initialize();
 
@@ -88,9 +88,8 @@ public class TriggerRepository : DbRepositoryBase
 
 		// check if there is a record of the specified interaction trigger within 3 hours.
 		return await db.ExecuteScalar<long>(
-			       $"SELECT EXISTS (SELECT 1 FROM TblTriggerLog WHERE (Type = {(int)interactionTrigger} OR Type = {-(int)interactionTrigger}) AND (unixepoch() - Timestamp) <= ?)",
-			       ThreeHoursInSeconds) ==
-		       1;
+				   $"SELECT EXISTS (SELECT 1 FROM TblTriggerLog WHERE (Type = {(int)interactionTrigger} OR Type = {-(int)interactionTrigger}) AND (unixepoch() - Timestamp) <= ?)",
+				   cooldownInSeconds ?? ThreeHoursInSeconds) == 1;
 	}
 
 	public async Task PurgeLastTwoWeeksTriggerData()
