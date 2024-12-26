@@ -9,7 +9,7 @@
        xmlns:helpers="clr-namespace:Geco.Views.Helpers"
        Shell.TabBarIsVisible="False"
        BackgroundColor="{AppThemeBinding Light={StaticResource ContainerLight}, Dark={StaticResource ContainerDark}}"
-       Title="Geco">
+       Title="GECO">
     <Shell.BindingContext>
         <vm:AppShellViewModel />
     </Shell.BindingContext>

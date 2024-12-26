@@ -23,7 +23,7 @@
                         VerticalOptions="EndAndExpand">
             <CollectionView.EmptyView>
                 <StackLayout Orientation="Vertical" Padding="0, 80">
-                    <Label Text="Geco" FontFamily="Poppins" FontAttributes="Bold" FontSize="50"
+                    <Label Text="GECO" FontFamily="Poppins" FontAttributes="Bold" FontSize="50"
                            HorizontalOptions="Center"
                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
                     <Label FontSize="10" Margin="0,-20,0,10" FontFamily="Poppins" HorizontalOptions="Center"

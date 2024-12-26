@@ -59,7 +59,7 @@
                     <Label FontSize="18"
                            Text="Monitor Habits" />
                     <Label FontSize="Caption"
-                           Text="Geco will monitor and give insights about your habits" />
+                           Text="GECO will monitor and give insights about your habits" />
                 </StackLayout>
                 <Switch x:Name="MonitorSwt" HorizontalOptions="End" Toggled="MonitorSwt_Toggled" />
 
@@ -75,7 +75,7 @@
                     <Label FontSize="18"
                            Text="Notifications" />
                     <Label FontSize="Caption"
-                           Text="Geco will notify you about your habits" />
+                           Text="GECO will notify you about your habits" />
                 </StackLayout>
                 <Switch x:Name="NotificationSwt" HorizontalOptions="End" Toggled="NotificationToggle_Toggled" />
             </StackLayout>

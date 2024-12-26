@@ -21,7 +21,7 @@ public partial class AppShellViewModel : ObservableObject
 		ChatHistoryList = [];
 		IsChatPage = false;
 		IsChatInstance = false;
-		PageTitle = "Geco";
+		PageTitle = "GECO";
 	}
 
 	[RelayCommand]
