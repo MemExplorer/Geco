@@ -5,6 +5,7 @@ using Android.App.Usage;
 using Android.Content;
 using Android.Net;
 using Android.Telephony;
+using CommunityToolkit.Maui.Alerts;
 using Geco.Core;
 using Geco.Core.Database;
 using Geco.Core.Models.ActionObserver;
@@ -120,12 +121,19 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 					currWeekComputationStr.PositiveComputation, currWeekFrequencyStr);
 		}
 
-		var geminiClient = new GeminiChat(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest");
-		var geminiResponse = await geminiClient.SendMessage(likelihoodPrompt);
-		var deserializedReport = JsonSerializer.Deserialize<IDictionary<string, string>>(geminiResponse.Text!)!;
-		string notificationDesc = deserializedReport["NotificationDescription"];
-		string notificationContent = deserializedReport["Content"];
-		NotificationSvc.SendInteractiveNotification("GECO Weekly Report", notificationDesc, notificationContent);
+		try
+		{
+			var geminiClient = new GeminiChat(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest");
+			var geminiResponse = await geminiClient.SendMessage(likelihoodPrompt);
+			var deserializedReport = JsonSerializer.Deserialize<IDictionary<string, string>>(geminiResponse.Text!)!;
+			string notificationDesc = deserializedReport["NotificationDescription"];
+			string notificationContent = deserializedReport["Content"];
+			NotificationSvc.SendInteractiveNotification("GECO Weekly Report", notificationDesc, notificationContent);
+		}
+		catch (Exception ex)
+		{
+			await Toast.Make(ex.ToString()).Show();
+		}
 	}
 
 	private async Task RunDeviceUsageLogger()
@@ -201,13 +209,20 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		};
 
 		string notificationPrompt = await promptRepo.GetPrompt(DeviceInteractionTrigger.BrowserUsageUnsustainable);
-		var tunedNotification = await geminiClient.SendMessage(notificationPrompt, settings: geminiSettings);
-		var deserializedStructuredMsg =
-			JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
-		var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();
-		(string Title, string Description) notificationInfo = (tunedNotificationInfoFirstEntry.NotificationTitle,
-			tunedNotificationInfoFirstEntry.NotificationDescription);
-		NotificationSvc.SendInteractiveNotification(notificationInfo.Title, notificationInfo.Description);
+		try
+		{
+			var tunedNotification = await geminiClient.SendMessage(notificationPrompt, settings: geminiSettings);
+			var deserializedStructuredMsg =
+				JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
+			var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();
+			(string Title, string Description) notificationInfo = (tunedNotificationInfoFirstEntry.NotificationTitle,
+				tunedNotificationInfoFirstEntry.NotificationDescription);
+			NotificationSvc.SendInteractiveNotification(notificationInfo.Title, notificationInfo.Description);
+		}
+		catch (Exception ex)
+		{
+			await Toast.Make(ex.ToString()).Show();
+		}
 	}
 
 	internal static async Task<(bool Granted, string? SubId)> GetSubscriptionId()

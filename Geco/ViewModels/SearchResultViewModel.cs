@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Web;
+using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
@@ -112,8 +113,15 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 			else
 				prompt = await promptRepo.GetPrompt(unescapeDataString);
 
-			if (!string.IsNullOrEmpty(prompt))
-				await GeminiClient.SendMessage(prompt, settings: GeminiConfig);
+			try
+			{
+				if (!string.IsNullOrEmpty(prompt))
+					await GeminiClient.SendMessage(prompt, settings: GeminiConfig);
+			}
+			catch (Exception ex)
+			{
+				await Toast.Make(ex.ToString()).Show();
+			}
 		}
 		catch
 		{

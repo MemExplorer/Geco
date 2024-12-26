@@ -4,6 +4,7 @@ using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
+using CommunityToolkit.Maui.Alerts;
 using Geco.Core.Database;
 using Geco.Core.Models.ActionObserver;
 using Geco.Core.Models.Notification;
@@ -187,15 +188,24 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 
 			// ensure that we are only creating notifications for unsustainable trigger types
 			(string Title, string Description) notificationInfo = (string.Empty, string.Empty);
+			bool requestCompleted = false;
 			if (e.TriggerType < 0)
 			{
 				string notificationPrompt = await promptRepo.GetPrompt(e.TriggerType);
-				var tunedNotification = await GeminiChat.SendMessage(notificationPrompt, settings: GeminiSettings);
-				var deserializedStructuredMsg =
-					JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
-				var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();
-				notificationInfo = (tunedNotificationInfoFirstEntry.NotificationTitle,
-					tunedNotificationInfoFirstEntry.NotificationDescription);
+				try
+				{
+					var tunedNotification = await GeminiChat.SendMessage(notificationPrompt, settings: GeminiSettings);
+					var deserializedStructuredMsg =
+						JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
+					var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();
+					notificationInfo = (tunedNotificationInfoFirstEntry.NotificationTitle,
+						tunedNotificationInfoFirstEntry.NotificationDescription);
+					requestCompleted = true;
+				}
+				catch(Exception ex)
+				{
+					await Toast.Make(ex.ToString()).Show();
+				}
 			}
 
 			switch (e.TriggerType)
@@ -204,7 +214,8 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 			case DeviceInteractionTrigger.ChargingUnsustainable:
 
 				await triggerRepo.LogTrigger(e.TriggerType, 1);
-				NotificationSvc.SendInteractiveNotification(notificationInfo.Title, notificationInfo.Description);
+				if (requestCompleted)
+					NotificationSvc.SendInteractiveNotification(notificationInfo.Title, notificationInfo.Description);
 				break;
 			case DeviceInteractionTrigger.ChargingSustainable:
 				await triggerRepo.LogTrigger(e.TriggerType, 1);
@@ -213,11 +224,13 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 			// don't count the triggers below
 			case DeviceInteractionTrigger.NetworkUsageUnsustainable:
 				await triggerRepo.LogTrigger(e.TriggerType, 0);
-				NotificationSvc.SendInteractiveNotification(notificationInfo.Title, notificationInfo.Description);
+				if (requestCompleted)
+					NotificationSvc.SendInteractiveNotification(notificationInfo.Title, notificationInfo.Description);
 				break;
 			case DeviceInteractionTrigger.LocationUsageUnsustainable:
 				await triggerRepo.LogTrigger(e.TriggerType, 0);
-				NotificationSvc.SendInteractiveNotification(notificationInfo.Title, notificationInfo.Description);
+				if (requestCompleted)
+					NotificationSvc.SendInteractiveNotification(notificationInfo.Title, notificationInfo.Description);
 				break;
 			}
 		}

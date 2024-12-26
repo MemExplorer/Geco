@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using CommunityToolkit.Maui.Alerts;
+using System.Speech.Synthesis;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
@@ -105,8 +107,15 @@ public partial class ChatViewModel : ObservableObject
 		// set input to empty string after sending a message
 		inputEntry.Text = string.Empty;
 
-		// send user message to Gemini and append its response
-		await GeminiClient.SendMessage(inputContent, settings: GeminiConfig);
+		try
+		{
+			// send user message to Gemini and append its response
+			await GeminiClient.SendMessage(inputContent, settings: GeminiConfig);
+		}
+		catch
+		{
+			await Toast.Make("Failed sending message!").Show();
+		}
 
 		if (isNewChat)
 			await currentShell.GoToAsync("//" + HistoryId);
