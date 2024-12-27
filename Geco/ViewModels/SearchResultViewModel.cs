@@ -108,7 +108,7 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 
 			string prompt;
 			if (isPredefined &&
-			    Enum.TryParse<SearchPredefinedTopic>(unescapeDataString, out var convertedPredefinedTopic))
+				Enum.TryParse<SearchPredefinedTopic>(unescapeDataString, out var convertedPredefinedTopic))
 				prompt = await promptRepo.GetPrompt(convertedPredefinedTopic);
 			else
 				prompt = await promptRepo.GetPrompt(unescapeDataString);

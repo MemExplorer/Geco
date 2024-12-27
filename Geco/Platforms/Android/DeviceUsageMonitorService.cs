@@ -202,7 +202,7 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 						tunedNotificationInfoFirstEntry.NotificationDescription);
 					requestCompleted = true;
 				}
-				catch(Exception ex)
+				catch (Exception ex)
 				{
 					await Toast.Make(ex.ToString()).Show();
 				}
