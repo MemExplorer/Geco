@@ -27,13 +27,16 @@
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android|AnyCPU'">
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
+  </PropertyGroup>
 
   <ItemGroup>
     <!-- App Icon -->
-    <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" ForegroundScale="0.65" Color="#19342F"/>
+    <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" ForegroundScale="0.65" Color="#19342F" />
     
     <!-- Splash Screen -->
-    <MauiSplashScreen Include="Resources\Images\geco_logo.png" Color="#0e1514" BaseSize="128,128" />
+    <MauiSplashScreen Include="Resources\Splash\splash_geco_logo.png" Color="#0e1514" BaseSize="128,128" />
 
     <!-- Images -->
     <MauiImage Include="Resources\Images\*" />
@@ -48,6 +51,10 @@
 
   <ItemGroup>
     <None Remove="Resources\Fonts\Poppins-Regular.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <MauiImage Include="Resources\Splash\splash_geco_logo.png" />
   </ItemGroup>
 
   <ItemGroup>
