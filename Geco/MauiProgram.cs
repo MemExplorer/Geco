@@ -62,9 +62,14 @@ public static class MauiProgram
 	static MauiAppBuilder InitializeDatabaseServices(this MauiAppBuilder builder)
 	{
 		// data repository instances
-		builder.Services.AddSingleton(new ChatRepository(FileSystem.AppDataDirectory));
-		builder.Services.AddSingleton(new TriggerRepository(FileSystem.AppDataDirectory));
-		builder.Services.AddSingleton(new PromptRepository(FileSystem.AppDataDirectory));
+#if ANDROID
+		string dataDir = Android.App.Application.Context.GetExternalFilesDir(null)!.AbsoluteFile.Path;
+#else
+		string dataDir = FileSystem.AppDataDirectory;
+#endif
+		builder.Services.AddSingleton(new ChatRepository(dataDir));
+		builder.Services.AddSingleton(new TriggerRepository(dataDir));
+		builder.Services.AddSingleton(new PromptRepository(dataDir));
 		return builder;
 	}
 
