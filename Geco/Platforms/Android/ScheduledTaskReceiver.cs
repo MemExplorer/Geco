@@ -121,13 +121,30 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 					currWeekComputationStr.PositiveComputation, currWeekFrequencyStr);
 		}
 
+		var geminiClient = new GeminiChat(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest");
+		var geminiSettings = new GeminiSettings
+		{
+			Conversational = false,
+			ResponseMimeType = "application/json",
+			ResponseSchema = new Schema(
+			SchemaType.ARRAY,
+			Items: new Schema(SchemaType.OBJECT,
+				Properties: new Dictionary<string, Schema>
+				{
+									{ "NotificationTitle", new Schema(SchemaType.STRING) },
+									{ "NotificationDescription", new Schema(SchemaType.STRING) }
+				},
+				Required: ["NotificationTitle", "NotificationDescription"]
+			)
+		)
+		};
+
 		try
 		{
-			var geminiClient = new GeminiChat(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest");
-			var geminiResponse = await geminiClient.SendMessage(likelihoodPrompt);
-			var deserializedReport = JsonSerializer.Deserialize<IDictionary<string, string>>(geminiResponse.Text!)!;
-			string notificationDesc = deserializedReport["NotificationDescription"];
-			string notificationContent = deserializedReport["Content"];
+			var weeklyReportResponse = await geminiClient.SendMessage(likelihoodPrompt, settings: geminiSettings);
+			var deserializedWeeklyReport = JsonSerializer.Deserialize<IDictionary<string, string>>(weeklyReportResponse.Text!)!;
+			string notificationDesc = deserializedWeeklyReport["NotificationDescription"];
+			string notificationContent = deserializedWeeklyReport["Content"];
 			NotificationSvc.SendInteractiveNotification("GECO Weekly Report", notificationDesc, notificationContent);
 		}
 		catch (Exception ex)
@@ -164,12 +181,15 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		if (queryStatsData == null || queryStatsWifi == null)
 			throw new Exception("Network query is null!");
 
-		long totalScreenTime = usageQueryStatsResult.Where(s => s.TotalTimeInForeground > 0)
+		long totalScreenTimeMs = usageQueryStatsResult.Where(s => s.TotalTimeInForeground > 0)
 			.Sum(s => s.TotalTimeInForeground);
 
 		// check if screen time is equal or greater than 7 hrs in ms
-		if (totalScreenTime >= 25_200_000)
+		if (totalScreenTimeMs >= 25_200_000)
+		{
 			await triggerRepo.LogTrigger(DeviceInteractionTrigger.DeviceUsageUnsustainable, 1);
+			await CreateUnsustainableNotification(SvcProvider, DeviceInteractionTrigger.DeviceUsageUnsustainable);
+		}
 		else
 			await triggerRepo.LogTrigger(DeviceInteractionTrigger.DeviceUsageSustainable, 1);
 
@@ -181,10 +201,10 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 
 		// Verify if the user has used geco search within the last 24 hours
 		if (!await triggerRepo.IsTriggerInCooldown(DeviceInteractionTrigger.BrowserUsageSustainable, 86_400))
-			await CreateBrowserUnsustainableNotification(SvcProvider);
+			await CreateUnsustainableNotification(SvcProvider, DeviceInteractionTrigger.BrowserUsageUnsustainable);
 	}
 
-	private async Task CreateBrowserUnsustainableNotification(IServiceProvider svcProvider)
+	private async Task CreateUnsustainableNotification(IServiceProvider svcProvider, DeviceInteractionTrigger triggerType)
 	{
 		var promptRepo = svcProvider.GetService<PromptRepository>();
 		if (promptRepo == null)
@@ -208,7 +228,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		)
 		};
 
-		string notificationPrompt = await promptRepo.GetPrompt(DeviceInteractionTrigger.BrowserUsageUnsustainable);
+		string notificationPrompt = await promptRepo.GetPrompt(triggerType);
 		try
 		{
 			var tunedNotification = await geminiClient.SendMessage(notificationPrompt, settings: geminiSettings);
