@@ -117,13 +117,9 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 
 	public static void CreateScheduledWeeklySummary()
 	{
-		// https://stackoverflow.com/a/6346190
-		var today = DateTime.Today;
-		int daysUntilMonday = ((int)DayOfWeek.Monday - (int)today.DayOfWeek + 7) % 7;
-
-		// Create weekly report every monday 6am
-		var nextMonday = today.AddDays(daysUntilMonday).AddHours(6);
-		InternalCreateScheduledTask("weektasksummarycmd", nextMonday);
+		// Create weekly report every 6am
+		var nextWeek = DateTime.Today.AddDays(7).AddHours(6);
+		InternalCreateScheduledTask("weektasksummarycmd", nextWeek);
 	}
 
 	private void CancelScheduledWeeklySummary() =>
@@ -220,7 +216,6 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 			case DeviceInteractionTrigger.ChargingSustainable:
 				await triggerRepo.LogTrigger(e.TriggerType, 1);
 				break;
-
 			// don't count the triggers below
 			case DeviceInteractionTrigger.NetworkUsageUnsustainable:
 				await triggerRepo.LogTrigger(e.TriggerType, 0);
