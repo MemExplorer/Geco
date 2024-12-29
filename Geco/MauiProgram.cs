@@ -99,6 +99,13 @@ public static class MauiProgram
 			h.PlatformView.BackgroundTintList =
 				ColorStateList.ValueOf(Colors.Transparent.ToPlatform());
 		});
+
+		// Remove underscore in Editor Control
+		EditorHandler.Mapper.AppendToMapping("NoUnderline", (h, v) =>
+		{
+			h.PlatformView.BackgroundTintList =
+				ColorStateList.ValueOf(Colors.Transparent.ToPlatform());
+		});
 #endif
 	}
 }

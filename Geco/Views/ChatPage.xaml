@@ -73,7 +73,7 @@
                 Orientation="Horizontal"
                 Spacing="5">
                 <!--  Chat Entry/Input  -->
-                <Entry x:Name="ChatEntry"
+                <Editor x:Name="ChatEntry"
                        Margin="20,0,7,0"
                        FontSize="18"
                        HorizontalOptions="FillAndExpand" />
