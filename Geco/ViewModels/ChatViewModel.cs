@@ -90,21 +90,21 @@ public partial class ChatViewModel : ObservableObject
 	}
 
 	[RelayCommand]
-	async Task ChatSend(Entry inputEntry)
+	async Task ChatSend(Editor inputEditor)
 	{
 		var currentShell = (AppShell)Shell.Current;
 
 		// do not send an empty message
-		if (string.IsNullOrWhiteSpace(inputEntry.Text))
+		if (string.IsNullOrWhiteSpace(inputEditor.Text))
 			return;
 
 		// hide keyboard after sending a message
-		await inputEntry.HideSoftInputAsync(CancellationToken.None);
-		string inputContent = inputEntry.Text;
+		await inputEditor.HideSoftInputAsync(CancellationToken.None);
+		string inputContent = inputEditor.Text;
 		bool isNewChat = await InitializeNewConversation(currentShell, inputContent);
 
 		// set input to empty string after sending a message
-		inputEntry.Text = string.Empty;
+		inputEditor.Text = string.Empty;
 
 		try
 		{
