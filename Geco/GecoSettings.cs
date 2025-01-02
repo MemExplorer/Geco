@@ -21,15 +21,15 @@ public class GecoSettings
 		set => Preferences.Default.Set(nameof(Notifications), value);
 	}
 
-	public static DateTime? WeeklyReportDateTime
+	public static DateTime WeeklyReportDateTime
 	{
-		get => Preferences.Default.Get<DateTime?>(nameof(WeeklyReportDateTime), null);
+		get => Preferences.Default.Get(nameof(WeeklyReportDateTime), DateTime.UnixEpoch);
 		set => Preferences.Default.Set(nameof(WeeklyReportDateTime), value);
 	}
 
-	public static DateTime? DailyReportDateTime
+	public static DateTime DailyReportDateTime
 	{
-		get => Preferences.Default.Get<DateTime?>(nameof(DailyReportDateTime), null);
+		get => Preferences.Default.Get(nameof(DailyReportDateTime), DateTime.UnixEpoch);
 		set => Preferences.Default.Set(nameof(DailyReportDateTime), value);
 	}
 }

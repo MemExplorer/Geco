@@ -41,7 +41,7 @@ public partial class SettingsViewModel : ObservableObject
 	{
 		bool isDark = e.Value;
 		Application.Current!.UserAppTheme = isDark ? AppTheme.Dark : AppTheme.Light;
-		Preferences.Set(nameof(GecoSettings.DarkMode), isDark);
+		GecoSettings.DarkMode = isDark;
 	}
 
 	public void LoadSettings(Switch themeToggle, Switch monitorToggle, Switch notificationToggle)
@@ -68,7 +68,7 @@ public partial class SettingsViewModel : ObservableObject
 			}
 		}
 
-		Preferences.Set(nameof(GecoSettings.Notifications), e.Value);
+		GecoSettings.Notifications = e.Value;
 	}
 
 	// ReSharper disable once AsyncVoidMethod
@@ -163,6 +163,6 @@ public partial class SettingsViewModel : ObservableObject
 		else
 			platformActionObserver.Stop();
 
-		Preferences.Set(nameof(GecoSettings.Monitor), e.Value);
+		GecoSettings.Monitor = e.Value;
 	}
 }
