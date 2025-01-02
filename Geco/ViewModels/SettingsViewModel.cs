@@ -41,16 +41,16 @@ public partial class SettingsViewModel : ObservableObject
 	{
 		bool isDark = e.Value;
 		Application.Current!.UserAppTheme = isDark ? AppTheme.Dark : AppTheme.Light;
-		Preferences.Set(nameof(GecoSettings.DarkMode), isDark);
+		GecoSettings.DarkMode = isDark;
 	}
 
 	public void LoadSettings(Switch themeToggle, Switch monitorToggle, Switch notificationToggle)
 	{
-		themeToggle.IsToggled = Preferences.Get(nameof(GecoSettings.DarkMode), false);
-		notificationToggle.IsToggled = Preferences.Get(nameof(GecoSettings.Notifications), false);
+		themeToggle.IsToggled = GecoSettings.DarkMode;
+		notificationToggle.IsToggled = GecoSettings.Notifications;
 
 		_handlerLocked = true;
-		monitorToggle.IsToggled = Preferences.Get(nameof(GecoSettings.Monitor), false);
+		monitorToggle.IsToggled = GecoSettings.Monitor;
 		_handlerLocked = false; // Reset flag
 	}
 
@@ -68,7 +68,7 @@ public partial class SettingsViewModel : ObservableObject
 			}
 		}
 
-		Preferences.Set(nameof(GecoSettings.Notifications), e.Value);
+		GecoSettings.Notifications = e.Value;
 	}
 
 	// ReSharper disable once AsyncVoidMethod
@@ -120,6 +120,25 @@ public partial class SettingsViewModel : ObservableObject
 				}
 			}
 
+			// Check battery optimization setting
+			var powerMgr = (PowerManager?)Platform.AppContext.GetSystemService(Context.PowerService);
+			if (powerMgr == null)
+				throw new Exception("powerMgr is unexpectedly null");
+
+			var checkPwrMgr = bool () => powerMgr.IsIgnoringBatteryOptimizations(currentAppPackageName);
+			if (!checkPwrMgr())
+			{
+				bool reqIgnoreBatteryOptimization =
+					await new SpecialPermissionWatcher(checkPwrMgr,
+						Settings.ActionRequestIgnoreBatteryOptimizations, currentAppPackageName).RequestAsync();
+				if (!reqIgnoreBatteryOptimization)
+				{
+					sender.IsToggled = false;
+					await Toast.Make("Please disable battery optimization").Show();
+					return;
+				}
+			}
+
 			// check alarm manager permissions
 			var alarmManager =
 				(AlarmManager?)Platform.AppContext.GetSystemService(Context.AlarmService);
@@ -144,6 +163,6 @@ public partial class SettingsViewModel : ObservableObject
 		else
 			platformActionObserver.Stop();
 
-		Preferences.Set(nameof(GecoSettings.Monitor), e.Value);
+		GecoSettings.Monitor = e.Value;
 	}
 }

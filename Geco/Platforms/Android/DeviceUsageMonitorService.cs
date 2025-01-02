@@ -4,6 +4,7 @@ using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
+using AndroidX.Core.Content;
 using CommunityToolkit.Maui.Alerts;
 using Geco.Core.Database;
 using Geco.Core.Models.ActionObserver;
@@ -56,6 +57,7 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 	{
 		if (intent?.Action == "START_SERVICE" && _hasStarted)
 		{
+			
 			if (NotificationSvc is not NotificationManagerService nms)
 				return StartCommandResult.Sticky;
 
@@ -104,7 +106,7 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 		_hasStarted = true;
 		var startService = new Intent(Platform.AppContext, Class);
 		startService.SetAction("START_SERVICE");
-		Platform.CurrentActivity?.StartService(startService);
+		ContextCompat.StartForegroundService(Platform.AppContext, startService);
 	}
 
 	public void Stop()
@@ -112,13 +114,21 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 		_hasStarted = false;
 		var stopIntent = new Intent(Platform.AppContext, Class);
 		stopIntent.SetAction("STOP_SERVICE");
-		Platform.CurrentActivity?.StartService(stopIntent);
+		Platform.AppContext.StopService(stopIntent);
 	}
 
 	public static void CreateScheduledWeeklySummary()
 	{
 		// Create weekly report every 6am
-		var nextWeek = DateTime.Today.AddDays(7).AddHours(6);
+		DateTime nextWeek;
+		if (DateTime.Now > GecoSettings.WeeklyReportDateTime.Subtract(new TimeSpan(0, 5, 0)))
+		{
+			nextWeek = DateTime.Today.AddDays(7).AddHours(6);
+			GecoSettings.WeeklyReportDateTime = nextWeek;
+		}
+		else
+			nextWeek = GecoSettings.WeeklyReportDateTime;
+
 		InternalCreateScheduledTask("weektasksummarycmd", nextWeek);
 	}
 
@@ -128,8 +138,19 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 	private void CancelDeviceUsageScheduledLogger() =>
 		InternalCancelScheduledTask("schedtaskcmd");
 
-	public static void CreateDeviceUsageScheduledLogger() =>
-		InternalCreateScheduledTask("schedtaskcmd", DateTime.Now.Date.AddDays(1));
+	public static void CreateDeviceUsageScheduledLogger()
+	{
+		DateTime nextDay;
+		if(DateTime.Now > GecoSettings.DailyReportDateTime.Subtract(new TimeSpan(0, 5, 0)))
+		{
+			nextDay = DateTime.Today.AddDays(1);
+			GecoSettings.DailyReportDateTime = nextDay;
+		}	
+		else
+			nextDay = GecoSettings.DailyReportDateTime;
+
+		InternalCreateScheduledTask("schedtaskcmd", nextDay);
+	}	
 
 	private static void InternalCancelScheduledTask(string action)
 	{

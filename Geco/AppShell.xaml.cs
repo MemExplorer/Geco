@@ -39,8 +39,7 @@ public partial class AppShell : Shell
 		// a new flyout item using the details from the chat history entry.
 		var chatRepo = SvcProvider.GetService<ChatRepository>();
 		await chatRepo!.LoadHistory(Context.ChatHistoryList);
-		bool isDark = Preferences.Get(nameof(GecoSettings.DarkMode), false);
-		Application.Current!.UserAppTheme = isDark ? AppTheme.Dark : AppTheme.Light;
+		Application.Current!.UserAppTheme = GecoSettings.DarkMode ? AppTheme.Dark : AppTheme.Light;
 	}
 
 	void AppShell_Navigated(object? sender, ShellNavigatedEventArgs e)
