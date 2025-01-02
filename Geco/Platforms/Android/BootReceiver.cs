@@ -16,10 +16,9 @@ public class BootReceiver : BroadcastReceiver
 
 		try
 		{
-			var monitorEnabled = Preferences.Get(nameof(GecoSettings.Monitor), false);
 			var serviceProvider = App.Current?.Handler.MauiContext?.Services!;
 			var monitorService = serviceProvider.GetService<IPlatformActionObserver>();
-			if (monitorEnabled)
+			if (GecoSettings.Monitor)
 				monitorService?.Start();
 		}
 		catch (Exception ex)

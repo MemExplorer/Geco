@@ -46,11 +46,11 @@ public partial class SettingsViewModel : ObservableObject
 
 	public void LoadSettings(Switch themeToggle, Switch monitorToggle, Switch notificationToggle)
 	{
-		themeToggle.IsToggled = Preferences.Get(nameof(GecoSettings.DarkMode), false);
-		notificationToggle.IsToggled = Preferences.Get(nameof(GecoSettings.Notifications), false);
+		themeToggle.IsToggled = GecoSettings.DarkMode;
+		notificationToggle.IsToggled = GecoSettings.Notifications;
 
 		_handlerLocked = true;
-		monitorToggle.IsToggled = Preferences.Get(nameof(GecoSettings.Monitor), false);
+		monitorToggle.IsToggled = GecoSettings.Monitor;
 		_handlerLocked = false; // Reset flag
 	}
 
