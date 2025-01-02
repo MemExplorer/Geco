@@ -120,6 +120,25 @@ public partial class SettingsViewModel : ObservableObject
 				}
 			}
 
+			// Check battery optimization setting
+			var powerMgr = (PowerManager?)Platform.AppContext.GetSystemService(Context.PowerService);
+			if (powerMgr == null)
+				throw new Exception("powerMgr is unexpectedly null");
+
+			var checkPwrMgr = bool () => powerMgr.IsIgnoringBatteryOptimizations(currentAppPackageName);
+			if (!checkPwrMgr())
+			{
+				bool reqIgnoreBatteryOptimization =
+					await new SpecialPermissionWatcher(checkPwrMgr,
+						Settings.ActionRequestIgnoreBatteryOptimizations, currentAppPackageName).RequestAsync();
+				if (!reqIgnoreBatteryOptimization)
+				{
+					sender.IsToggled = false;
+					await Toast.Make("Please disable battery optimization").Show();
+					return;
+				}
+			}
+
 			// check alarm manager permissions
 			var alarmManager =
 				(AlarmManager?)Platform.AppContext.GetSystemService(Context.AlarmService);

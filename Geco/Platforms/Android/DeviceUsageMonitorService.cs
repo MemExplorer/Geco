@@ -4,6 +4,7 @@ using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
+using AndroidX.Core.Content;
 using CommunityToolkit.Maui.Alerts;
 using Geco.Core.Database;
 using Geco.Core.Models.ActionObserver;
@@ -56,6 +57,7 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 	{
 		if (intent?.Action == "START_SERVICE" && _hasStarted)
 		{
+			
 			if (NotificationSvc is not NotificationManagerService nms)
 				return StartCommandResult.Sticky;
 
@@ -104,7 +106,7 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 		_hasStarted = true;
 		var startService = new Intent(Platform.AppContext, Class);
 		startService.SetAction("START_SERVICE");
-		Platform.CurrentActivity?.StartService(startService);
+		ContextCompat.StartForegroundService(Platform.AppContext, startService);
 	}
 
 	public void Stop()
@@ -112,7 +114,7 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 		_hasStarted = false;
 		var stopIntent = new Intent(Platform.AppContext, Class);
 		stopIntent.SetAction("STOP_SERVICE");
-		Platform.CurrentActivity?.StartService(stopIntent);
+		Platform.AppContext.StopService(stopIntent);
 	}
 
 	public static void CreateScheduledWeeklySummary()
