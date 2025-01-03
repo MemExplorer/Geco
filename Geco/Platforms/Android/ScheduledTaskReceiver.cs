@@ -86,7 +86,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		try
 		{
 			var weeklyReportResponse = await geminiClient.SendMessage(likelihoodPrompt, settings: geminiSettings);
-			var deserializedWeeklyReport = JsonSerializer.Deserialize<List<WeeklyReportContent>> (weeklyReportResponse.Text!)!;
+			var deserializedWeeklyReport = JsonSerializer.Deserialize<List<WeeklyReportContent>>(weeklyReportResponse.Text!)!;
 			var firstItem = deserializedWeeklyReport.First();
 			NotificationSvc.SendInteractiveNotification("GECO Weekly Report", firstItem.NotificationDescription, firstItem.Content);
 		}
@@ -105,7 +105,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 			return null;
 
 		// check if we have data from last 2 weeks
-		if (await triggerRepo.HasHistory() && false)
+		if (await triggerRepo.HasHistory())
 		{
 			// fetch data from last 2 weeks
 			var lastWeekTriggerRecords = (await triggerRepo.FetchWeekTwoTriggerRecords()).ToDictionary();
@@ -127,13 +127,12 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 
 	private (string PositiveComputation, string Frequency, string Probability)? GetLikelihoodPromptFromRecords(Dictionary<DeviceInteractionTrigger, int> currentWeekTriggerRecords)
 	{
-		var chargingPositive = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.ChargingSustainable, 5);
-		var chargingNegative = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.ChargingUnsustainable, 3);
-		var networkUsagePositive = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.NetworkUsageSustainable, 6);
-		var networkUsageNegative = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.NetworkUsageUnsustainable, 8);
-		var deviceUsagePositive = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.DeviceUsageSustainable, 2);
-		var deviceUsageNegative = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.DeviceUsageUnsustainable, 4);
-
+		var chargingPositive = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.ChargingSustainable, 0);
+		var chargingNegative = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.ChargingUnsustainable, 0);
+		var networkUsagePositive = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.NetworkUsageSustainable, 0);
+		var networkUsageNegative = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.NetworkUsageUnsustainable, 0);
+		var deviceUsagePositive = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.DeviceUsageSustainable, 0);
+		var deviceUsageNegative = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.DeviceUsageUnsustainable, 0);
 		if (chargingPositive == 0 && chargingNegative == 0)
 			return null;
 
