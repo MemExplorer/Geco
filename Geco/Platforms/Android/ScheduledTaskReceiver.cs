@@ -4,6 +4,7 @@ using Android.App;
 using Android.App.Usage;
 using Android.Content;
 using Android.Net;
+using Android.Net.Wifi.P2p;
 using Android.Telephony;
 using CommunityToolkit.Maui.Alerts;
 using Geco.Core;
@@ -60,66 +61,9 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		if (promptRepo == null)
 			throw new Exception("PromptRepository should not be null!");
 
-		// fetch trigger records for current week
-		var currentWeekTriggerRecords = await triggerRepo.FetchWeekOneTriggerRecords();
-
-		// pass the first week's data to Bayes Math Model
-		var currWeekBayesInst = new BayesTheorem();
-		currWeekBayesInst.AppendData("Charging",
-			currentWeekTriggerRecords[DeviceInteractionTrigger.ChargingSustainable],
-			currentWeekTriggerRecords[DeviceInteractionTrigger.ChargingUnsustainable]);
-		currWeekBayesInst.AppendData("Network Usage",
-			currentWeekTriggerRecords[DeviceInteractionTrigger.NetworkUsageSustainable],
-			currentWeekTriggerRecords[DeviceInteractionTrigger.NetworkUsageUnsustainable]);
-		currWeekBayesInst.AppendData("Device Usage",
-			currentWeekTriggerRecords[DeviceInteractionTrigger.DeviceUsageSustainable],
-			currentWeekTriggerRecords[DeviceInteractionTrigger.DeviceUsageUnsustainable]);
-
-		// gets values we need for prompt
-		var currWeekComputationResult = currWeekBayesInst.Compute();
-		var currWeekComputationStr = currWeekBayesInst.GetComputationInString();
-		string currWeekFrequencyStr = currWeekBayesInst.GetFrequencyInString();
-		string currSustainableProportionalProbability = Math.Round(currWeekComputationResult.PositiveProbs, 2)
-			.ToString(CultureInfo.InvariantCulture) + "%";
-
-		// check if we have data from last 2 weeks
-		string likelihoodPrompt;
-		if (await triggerRepo.HasHistory())
-		{
-			// fetch data from last 2 weeks
-			var lastWeekTriggerRecords = await triggerRepo.FetchWeekTwoTriggerRecords();
-			var lastWeekBayesInst = new BayesTheorem();
-			lastWeekBayesInst.AppendData("Charging",
-				lastWeekTriggerRecords[DeviceInteractionTrigger.ChargingSustainable],
-				lastWeekTriggerRecords[DeviceInteractionTrigger.ChargingUnsustainable]);
-			lastWeekBayesInst.AppendData("Network Usage",
-				lastWeekTriggerRecords[DeviceInteractionTrigger.NetworkUsageSustainable],
-				lastWeekTriggerRecords[DeviceInteractionTrigger.NetworkUsageUnsustainable]);
-			lastWeekBayesInst.AppendData("Device Usage",
-				lastWeekTriggerRecords[DeviceInteractionTrigger.DeviceUsageSustainable],
-				lastWeekTriggerRecords[DeviceInteractionTrigger.DeviceUsageUnsustainable]);
-
-			// get the values we need to construct the prompt
-			var lastWeekComputationResult = lastWeekBayesInst.Compute();
-			var lastWeekComputationStr = lastWeekBayesInst.GetComputationInString();
-			string lastWeekFrequencyStr = lastWeekBayesInst.GetFrequencyInString();
-			string lastSustainableProportionalProbability = Math.Round(lastWeekComputationResult.PositiveProbs, 2)
-				.ToString(CultureInfo.InvariantCulture) + "%";
-
-			// build likelihood prompt
-			likelihoodPrompt = await promptRepo.GetLikelihoodWithHistoryPrompt(
-				currSustainableProportionalProbability, currWeekComputationStr.PositiveComputation,
-				currWeekFrequencyStr,
-				lastSustainableProportionalProbability, lastWeekComputationStr.PositiveComputation,
-				lastWeekFrequencyStr);
-		}
-		else
-		{
-			// build likelihood prompt
-			likelihoodPrompt =
-				await promptRepo.GetLikelihoodPrompt(currSustainableProportionalProbability,
-					currWeekComputationStr.PositiveComputation, currWeekFrequencyStr);
-		}
+		string? likelihoodPrompt = await ConstructLikelihoodPrompt(triggerRepo, promptRepo);
+		if (likelihoodPrompt == null)
+			return;
 
 		var geminiClient = new GeminiChat(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest");
 		var geminiSettings = new GeminiSettings
@@ -131,10 +75,10 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 			Items: new Schema(SchemaType.OBJECT,
 				Properties: new Dictionary<string, Schema>
 				{
-									{ "NotificationTitle", new Schema(SchemaType.STRING) },
-									{ "NotificationDescription", new Schema(SchemaType.STRING) }
+									{ "NotificationDescription", new Schema(SchemaType.STRING) },
+									{ "Content", new Schema(SchemaType.STRING) }
 				},
-				Required: ["NotificationTitle", "NotificationDescription"]
+				Required: ["NotificationDescription", "Content"]
 			)
 		)
 		};
@@ -142,15 +86,77 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		try
 		{
 			var weeklyReportResponse = await geminiClient.SendMessage(likelihoodPrompt, settings: geminiSettings);
-			var deserializedWeeklyReport = JsonSerializer.Deserialize<IDictionary<string, string>>(weeklyReportResponse.Text!)!;
-			string notificationDesc = deserializedWeeklyReport["NotificationDescription"];
-			string notificationContent = deserializedWeeklyReport["Content"];
-			NotificationSvc.SendInteractiveNotification("GECO Weekly Report", notificationDesc, notificationContent);
+			var deserializedWeeklyReport = JsonSerializer.Deserialize<List<WeeklyReportContent>> (weeklyReportResponse.Text!)!;
+			var firstItem = deserializedWeeklyReport.First();
+			NotificationSvc.SendInteractiveNotification("GECO Weekly Report", firstItem.NotificationDescription, firstItem.Content);
 		}
 		catch (Exception ex)
 		{
 			await Toast.Make(ex.ToString()).Show();
 		}
+	}
+
+	private async Task<string?> ConstructLikelihoodPrompt(TriggerRepository triggerRepo, PromptRepository promptRepo)
+	{
+		// fetch trigger records for current week
+		var currentWeekTriggerRecords = (await triggerRepo.FetchWeekOneTriggerRecords()).ToDictionary();
+		var currentWeekResult = GetLikelihoodPromptFromRecords(currentWeekTriggerRecords);
+		if (currentWeekResult == null)
+			return null;
+
+		// check if we have data from last 2 weeks
+		if (await triggerRepo.HasHistory() && false)
+		{
+			// fetch data from last 2 weeks
+			var lastWeekTriggerRecords = (await triggerRepo.FetchWeekTwoTriggerRecords()).ToDictionary();
+			var lastWeekResult = GetLikelihoodPromptFromRecords(lastWeekTriggerRecords);
+			if (lastWeekResult != null)
+			{
+				// build likelihood prompt
+				return await promptRepo.GetLikelihoodWithHistoryPrompt(
+					currentWeekResult.Value.Probability, currentWeekResult.Value.PositiveComputation,
+					currentWeekResult.Value.Frequency,
+					lastWeekResult.Value.Probability, lastWeekResult.Value.PositiveComputation,
+					lastWeekResult.Value.Frequency);
+			}
+		}
+
+		return await promptRepo.GetLikelihoodPrompt(currentWeekResult.Value.Probability, currentWeekResult.Value.PositiveComputation,
+					currentWeekResult.Value.Frequency);
+	}
+
+	private (string PositiveComputation, string Frequency, string Probability)? GetLikelihoodPromptFromRecords(Dictionary<DeviceInteractionTrigger, int> currentWeekTriggerRecords)
+	{
+		var chargingPositive = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.ChargingSustainable, 5);
+		var chargingNegative = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.ChargingUnsustainable, 3);
+		var networkUsagePositive = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.NetworkUsageSustainable, 6);
+		var networkUsageNegative = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.NetworkUsageUnsustainable, 8);
+		var deviceUsagePositive = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.DeviceUsageSustainable, 2);
+		var deviceUsageNegative = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.DeviceUsageUnsustainable, 4);
+
+		if (chargingPositive == 0 && chargingNegative == 0)
+			return null;
+
+		if (networkUsagePositive == 0 && networkUsageNegative == 0)
+			return null;
+
+		if (deviceUsagePositive == 0 && deviceUsageNegative == 0)
+			return null;
+
+		// pass the first week's data to Bayes Math Model
+		var currWeekBayesInst = new BayesTheorem();
+		currWeekBayesInst.AppendData("Charging", chargingPositive, chargingNegative);
+		currWeekBayesInst.AppendData("Network Usage", networkUsagePositive, networkUsageNegative);
+		currWeekBayesInst.AppendData("Device Usage", deviceUsagePositive, deviceUsageNegative);
+
+		// gets values we need for prompt
+		var currWeekComputationResult = currWeekBayesInst.Compute();
+		var currWeekComputationStr = currWeekBayesInst.GetComputationInString();
+		string currWeekFrequencyStr = currWeekBayesInst.GetFrequencyInString();
+		string currSustainableProportionalProbability = Math.Round(currWeekComputationResult.PositiveProbs, 2)
+			.ToString(CultureInfo.InvariantCulture) + "%";
+
+		return (currWeekComputationStr.PositiveComputation, currWeekFrequencyStr, currSustainableProportionalProbability);
 	}
 
 	private async Task RunDeviceUsageLogger()
