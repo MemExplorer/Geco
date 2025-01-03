@@ -145,10 +145,16 @@ public class PromptRepository : DbRepositoryBase
 			((int)PromptCategory.SearchingBrowserRefinement, "Sustainable Browsing Practices")
 		};
 
-		const string insertQuery = "INSERT INTO TblPrompt (Category, Content) VALUES (?, ?)";
-		foreach (var prompt in prompts)
+		long countCheck = await db.ExecuteScalar<long>("SELECT COUNT(*) FROM TblPrompt");
+		if (countCheck < prompts.Count)
 		{
-			await db.ExecuteNonQuery(insertQuery, prompt.Category, prompt.Content);
+			// ensure that we have deleted incomplete data
+			await db.ExecuteNonQuery("DELETE FROM TblPrompt");
+
+			// insert prompts
+			const string insertQuery = "INSERT INTO TblPrompt (Category, Content) VALUES (?, ?)";
+			foreach (var prompt in prompts)
+				await db.ExecuteNonQuery(insertQuery, prompt.Category, prompt.Content);
 		}
 	}
 

@@ -75,7 +75,7 @@ public class TriggerRepository : DbRepositoryBase
 
 		// check whether we have data that exists for more than a week
 		long entryCount =
-			await db.ExecuteScalar<long>("SELECT 1 FROM TblTriggerLog WHERE (unixepoch() - Timestamp) > ?",
+			await db.ExecuteScalar<long>("SELECT EXISTS (SELECT 1 FROM TblTriggerLog WHERE (unixepoch() - Timestamp) > ?)",
 				OneWeekInSeconds);
 		return entryCount == 1;
 	}
