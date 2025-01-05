@@ -1,16 +1,19 @@
 using Geco.Core.Database;
 using Geco.ViewModels;
+using Syncfusion.Maui.Toolkit.Chips;
 
 namespace Geco.Views;
 
 public partial class ChatPage : ContentPage
 {
 	IServiceProvider SvcProvider { get; }
+	ChatViewModel CurrentViewModel { get; init; }
 
 	public ChatPage(IServiceProvider sp, ChatViewModel vm)
 	{
 		InitializeComponent();
 		BindingContext = vm;
+		CurrentViewModel = vm;
 		SvcProvider = sp;
 
 		// Create new instance of chat page every time page is loaded
@@ -43,4 +46,14 @@ public partial class ChatPage : ContentPage
 			ctx.LoadHistory(currentHistory);
 		}
 	}
+
+	private void ChatEntry_TextChanged(object sender, TextChangedEventArgs e) =>
+		CurrentViewModel.ChatTextChanged(e);
+
+	private void Chip_Clicked(object sender, EventArgs e)
+	{
+		if (sender is SfChip c)
+			CurrentViewModel.ChipClick(c, ChatEntry);
+	}
+		
 }

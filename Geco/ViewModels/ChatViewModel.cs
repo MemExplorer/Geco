@@ -7,12 +7,14 @@ using Geco.Core.Models.Chat;
 using GoogleGeminiSDK;
 using GoogleGeminiSDK.Models.ContentGeneration;
 using Microsoft.Extensions.AI;
+using Syncfusion.Maui.Toolkit.Chips;
 
 namespace Geco.ViewModels;
 
 public partial class ChatViewModel : ObservableObject
 {
 	[ObservableProperty] ObservableCollection<ChatMessage> _chatMessages = [];
+	[ObservableProperty] bool _isAutoCompleteVisible = true;
 	GeminiChat GeminiClient { get; } = new(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest");
 
 	GeminiSettings GeminiConfig { get; } = new()
@@ -87,6 +89,32 @@ public partial class ChatViewModel : ObservableObject
 			intent.SetAction(null);
 		}
 #endif
+	}
+
+	internal void ChipClick(SfChip chip, Editor chatEditor)
+	{
+		IsAutoCompleteVisible = false;
+		switch (chip.Text)
+		{
+			case "Impacts of fast fashion":
+				chatEditor.Text = "Can you tell me what are the impacts of the fast fashion to the environment?";
+			break;
+			case "Surprise me":
+				chatEditor.Text = "Surprise me with anything about sustainability.";
+			break;
+			case "Sustainability Advice":
+				chatEditor.Text = "Can you give me some advice related to being more sustainable?";
+			break;
+			case "Tutorial":
+				chatEditor.Text = "Can you teach me how to use this application?";
+			break;
+		}
+	}
+
+	internal void ChatTextChanged(TextChangedEventArgs e)
+	{
+		if (!IsAutoCompleteVisible && e.NewTextValue.Length == 0)
+			IsAutoCompleteVisible = true;
 	}
 
 	[RelayCommand]
