@@ -8,6 +8,7 @@
              xmlns:helpers="clr-namespace:Geco.Views.Helpers"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:Geco.ViewModels"
+             xmlns:ChipControl="clr-namespace:Syncfusion.Maui.Toolkit.Chips;assembly=Syncfusion.Maui.Toolkit"
              Title="Chat">
     <ContentPage.Resources>
         <helpers:ChatAlignmentConverter x:Key="ChatAlignmentConverter" />
@@ -22,7 +23,7 @@
                         ItemsUpdatingScrollMode="KeepLastItemInView"
                         VerticalOptions="EndAndExpand">
             <CollectionView.EmptyView>
-                <StackLayout Orientation="Vertical" Padding="0, 80">
+                <StackLayout Orientation="Vertical" Padding="0, 40">
                     <Label Text="GECO" FontFamily="Poppins" FontAttributes="Bold" FontSize="50"
                            HorizontalOptions="Center"
                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
@@ -33,6 +34,42 @@
                            Padding="50, 0"
                            FontSize="15" FontAttributes="Bold"
                            Text="Let's talk about sustainability! How can I help you today?" />
+                    <Border Stroke="Transparent"
+                            Margin="12, 0"
+                            Padding="0,10,0,0"
+                            IsVisible="{Binding IsAutoCompleteVisible}">
+                        <VerticalStackLayout Spacing="5"
+                                             Padding="1">
+                            <HorizontalStackLayout Spacing="5"
+                                                   HorizontalOptions="Center">
+                                <ChipControl:SfChip StrokeThickness="2"
+                                                    FontAttributes="Bold"
+                                                    TextColor="{AppThemeBinding Light=#141414, Dark=#b5b5b5}"
+                                                    Text="Impacts of fast fashion"
+                                                    Clicked="Chip_Clicked" />
+                                <ChipControl:SfChip StrokeThickness="2"
+                                                    FontAttributes="Bold"
+                                                    TextColor="{AppThemeBinding Light=#141414, Dark=#b5b5b5}"
+                                                    Text="Surprise me"
+                                                    Clicked="Chip_Clicked" />
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="5"
+                                                   Padding="1"
+                                                   HorizontalOptions="Center">
+                                <ChipControl:SfChip StrokeThickness="2"
+                                                    FontAttributes="Bold"
+                                                    TextColor="{AppThemeBinding Light=#141414, Dark=#b5b5b5}"
+                                                    Text="Sustainability Advice"
+                                                    Clicked="Chip_Clicked" />
+                                <ChipControl:SfChip StrokeThickness="2"
+                                                    FontAttributes="Bold"
+                                                    TextColor="{AppThemeBinding Light=#141414, Dark=#b5b5b5}"
+                                                    Padding="0,0,-1,0"
+                                                    Text="Tutorial"
+                                                    Clicked="Chip_Clicked" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
                 </StackLayout>
             </CollectionView.EmptyView>
             <CollectionView.ItemTemplate>
@@ -76,7 +113,11 @@
                 <Editor x:Name="ChatEntry"
                        Margin="20,0,7,0"
                        FontSize="18"
-                       HorizontalOptions="FillAndExpand" />
+                       AutoSize="TextChanges"
+                       MaximumHeightRequest="100"
+                       HorizontalOptions="FillAndExpand"
+                       Placeholder="Message to GECO"
+                       TextChanged="ChatEntry_TextChanged"/>
 
                 <!--  Chat Send Button  -->
                 <Button CornerRadius="30"

@@ -203,51 +203,37 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 			if (await triggerRepo.IsTriggerInCooldown(e.TriggerType))
 				return;
 
-			// ensure that we are only creating notifications for unsustainable trigger types
-			(string Title, string Description) notificationInfo = (string.Empty, string.Empty);
-			bool requestCompleted = false;
-			if (e.TriggerType < 0)
-			{
-				string notificationPrompt = await promptRepo.GetPrompt(e.TriggerType);
-				try
-				{
-					var tunedNotification = await GeminiChat.SendMessage(notificationPrompt, settings: GeminiSettings);
-					var deserializedStructuredMsg =
-						JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
-					var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();
-					notificationInfo = (tunedNotificationInfoFirstEntry.NotificationTitle,
-						tunedNotificationInfoFirstEntry.NotificationDescription);
-					requestCompleted = true;
-				}
-				catch (Exception ex)
-				{
-					await Toast.Make(ex.ToString()).Show();
-				}
-			}
-
+			// Log trigger first
 			switch (e.TriggerType)
 			{
-			// only record charging
-			case DeviceInteractionTrigger.ChargingUnsustainable:
+				case DeviceInteractionTrigger.ChargingUnsustainable:
+				case DeviceInteractionTrigger.ChargingSustainable:
+					await triggerRepo.LogTrigger(e.TriggerType, 1);
+					break;
+				// don't count the triggers below
+				case DeviceInteractionTrigger.NetworkUsageUnsustainable:
+				case DeviceInteractionTrigger.LocationUsageUnsustainable:
+					await triggerRepo.LogTrigger(e.TriggerType, 0);
+					break;
+			}
 
-				await triggerRepo.LogTrigger(e.TriggerType, 1);
-				if (requestCompleted)
-					NotificationSvc.SendInteractiveNotification(notificationInfo.Title, notificationInfo.Description);
-				break;
-			case DeviceInteractionTrigger.ChargingSustainable:
-				await triggerRepo.LogTrigger(e.TriggerType, 1);
-				break;
-			// don't count the triggers below
-			case DeviceInteractionTrigger.NetworkUsageUnsustainable:
-				await triggerRepo.LogTrigger(e.TriggerType, 0);
-				if (requestCompleted)
-					NotificationSvc.SendInteractiveNotification(notificationInfo.Title, notificationInfo.Description);
-				break;
-			case DeviceInteractionTrigger.LocationUsageUnsustainable:
-				await triggerRepo.LogTrigger(e.TriggerType, 0);
-				if (requestCompleted)
-					NotificationSvc.SendInteractiveNotification(notificationInfo.Title, notificationInfo.Description);
-				break;
+			// ensure that we are only creating notifications for unsustainable trigger types
+			if (e.TriggerType > 0)
+				return;
+
+			// create notification for the unsustainable trigger
+			string notificationPrompt = await promptRepo.GetPrompt(e.TriggerType);
+			try
+			{
+				var tunedNotification = await GeminiChat.SendMessage(notificationPrompt, settings: GeminiSettings);
+				var deserializedStructuredMsg =
+					JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
+				var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();
+				NotificationSvc.SendInteractiveNotification(tunedNotificationInfoFirstEntry.NotificationTitle, tunedNotificationInfoFirstEntry.NotificationDescription);
+			}
+			catch (Exception ex)
+			{
+				await Toast.Make(ex.ToString()).Show();
 			}
 		}
 		catch
