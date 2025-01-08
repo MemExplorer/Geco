@@ -35,7 +35,7 @@
                            FontSize="15" FontAttributes="Bold"
                            Text="Let's talk about sustainability! How can I help you today?" />
                     <Border Stroke="Transparent"
-                            Margin="18, 0"
+                            Margin="12, 0"
                             Padding="0,10,0,0"
                             IsVisible="{Binding IsAutoCompleteVisible}">
                         <VerticalStackLayout Spacing="5"
