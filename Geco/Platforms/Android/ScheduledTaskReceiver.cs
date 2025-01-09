@@ -4,7 +4,6 @@ using Android.App;
 using Android.App.Usage;
 using Android.Content;
 using Android.Net;
-using Android.Net.Wifi.P2p;
 using Android.Telephony;
 using CommunityToolkit.Maui.Alerts;
 using Geco.Core;
@@ -80,6 +79,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 				},
 				Required: ["NotificationDescription", "Content"]
 			)
+
 		)
 		};
 

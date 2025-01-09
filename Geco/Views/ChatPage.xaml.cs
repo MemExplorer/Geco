@@ -55,5 +55,20 @@ public partial class ChatPage : ContentPage
 		if (sender is SfChip c)
 			CurrentViewModel.ChipClick(c, ChatEntry);
 	}
-		
+
+	//NOTE: Not triggering atm
+	private async void WebView_Navigated(object sender, WebNavigatedEventArgs e)
+	{
+		if (sender is WebView w)
+		{
+			await w.EvaluateJavaScriptAsync(@"
+            function disableScroll() {
+                document.body.style.overflow = 'hidden'; 
+                document.body.style.backgroundColor = 'black'; 
+            }
+
+            disableScroll(); 
+        ");
+		}
+	}
 }

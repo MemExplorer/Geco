@@ -14,6 +14,7 @@
         <helpers:ChatAlignmentConverter x:Key="ChatAlignmentConverter" />
         <helpers:IsModelToBooleanConverter x:Key="IsModelToBooleanConverter" />
         <helpers:IsModelToShapeConverter x:Key="IsModelToShapeConverter" />
+        <helpers:HtmlConverter  x:Key="HtmlConverter" />
     </ContentPage.Resources>
 
     <StackLayout Padding="10"
@@ -90,9 +91,12 @@
                                     BackgroundColor="{AppThemeBinding Light=#e3e3e3,
                                                   Dark=#191919}"
                                     HorizontalOptions="{Binding Role, Converter={StaticResource ChatAlignmentConverter}}">
-                                <Label
-                                    Padding="15"
-                                    Text="{Binding Text}" />
+                                <WebView x:Name="chatWebView" Navigated="WebView_Navigated">
+                                    <WebView.Source>
+                                        <HtmlWebViewSource Html="{Binding Text, Converter={StaticResource HtmlConverter}}" />
+                                    </WebView.Source>
+                                </WebView>
+
                             </Border>
                         </Grid>
                     </Border>
