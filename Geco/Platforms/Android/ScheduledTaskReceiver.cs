@@ -20,14 +20,7 @@ namespace Geco;
 [IntentFilter(["com.ssbois.geco.ScheduledTaskReceiver"])]
 internal class ScheduledTaskReceiver : BroadcastReceiver
 {
-	static IServiceProvider SvcProvider { get; }
-	static INotificationManagerService NotificationSvc { get; }
-
-	static ScheduledTaskReceiver()
-	{
-		SvcProvider = App.Current?.Handler.MauiContext?.Services!;
-		NotificationSvc = SvcProvider.GetService<INotificationManagerService>()!;
-	}
+	static INotificationManagerService NotificationSvc = GlobalContext.Services.GetRequiredService<INotificationManagerService>();
 
 	public override async void OnReceive(Context? context, Intent? intent)
 	{
@@ -52,42 +45,18 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 
 	private async Task RunWeeklySummaryNotification()
 	{
-		var triggerRepo = SvcProvider.GetService<TriggerRepository>();
-		if (triggerRepo == null)
-			throw new Exception("TriggerRepository should not be null!");
-
-		var promptRepo = SvcProvider.GetService<PromptRepository>();
-		if (promptRepo == null)
-			throw new Exception("PromptRepository should not be null!");
-
-		string? likelihoodPrompt = await ConstructLikelihoodPrompt(triggerRepo, promptRepo);
+		string? likelihoodPrompt = await ConstructLikelihoodPrompt();
 		if (likelihoodPrompt == null)
 			return;
 
-		var geminiClient = new GeminiChat(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest");
-		var geminiSettings = new GeminiSettings
-		{
-			Conversational = false,
-			ResponseMimeType = "application/json",
-			ResponseSchema = new Schema(
-			SchemaType.ARRAY,
-			Items: new Schema(SchemaType.OBJECT,
-				Properties: new Dictionary<string, Schema>
-				{
-									{ "NotificationDescription", new Schema(SchemaType.STRING) },
-									{ "Content", new Schema(SchemaType.STRING) }
-				},
-				Required: ["NotificationDescription", "Content"]
-			)
-		)
-		};
-
 		try
 		{
+			var geminiClient = GlobalContext.Services.GetRequiredService<GeminiChat>();
+			var geminiSettings = GlobalContext.Services.GetKeyedService<GeminiSettings>(GlobalContext.GeminiNotification);
 			var weeklyReportResponse = await geminiClient.SendMessage(likelihoodPrompt, settings: geminiSettings);
-			var deserializedWeeklyReport = JsonSerializer.Deserialize<List<WeeklyReportContent>> (weeklyReportResponse.Text!)!;
+			var deserializedWeeklyReport = JsonSerializer.Deserialize<List<TunedNotificationInfo>> (weeklyReportResponse.Text!)!;
 			var firstItem = deserializedWeeklyReport.First();
-			NotificationSvc.SendInteractiveNotification("GECO Weekly Report", firstItem.NotificationDescription, firstItem.Content);
+			NotificationSvc.SendInteractiveNotification(firstItem.NotificationTitle, firstItem.NotificationDescription, firstItem.NotificationDescription);
 		}
 		catch (Exception ex)
 		{
@@ -95,9 +64,11 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		}
 	}
 
-	private async Task<string?> ConstructLikelihoodPrompt(TriggerRepository triggerRepo, PromptRepository promptRepo)
+	private async Task<string?> ConstructLikelihoodPrompt()
 	{
 		// fetch trigger records for current week
+		var triggerRepo = GlobalContext.Services.GetRequiredService<TriggerRepository>();
+		var promptRepo = GlobalContext.Services.GetRequiredService<PromptRepository>();
 		var currentWeekTriggerRecords = (await triggerRepo.FetchWeekOneTriggerRecords()).ToDictionary();
 		var currentWeekResult = GetLikelihoodPromptFromRecords(currentWeekTriggerRecords);
 		if (currentWeekResult == null)
@@ -193,7 +164,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		if (totalScreenTimeMs >= 25_200_000)
 		{
 			await triggerRepo.LogTrigger(DeviceInteractionTrigger.DeviceUsageUnsustainable, 1);
-			await CreateUnsustainableNotification(SvcProvider, DeviceInteractionTrigger.DeviceUsageUnsustainable);
+			await CreateUnsustainableNotification(DeviceInteractionTrigger.DeviceUsageUnsustainable);
 		}
 		else
 			await triggerRepo.LogTrigger(DeviceInteractionTrigger.DeviceUsageSustainable, 1);
@@ -206,33 +177,14 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 
 		// Verify if the user has used geco search within the last 24 hours
 		if (!await triggerRepo.IsTriggerInCooldown(DeviceInteractionTrigger.BrowserUsageSustainable, 86_400))
-			await CreateUnsustainableNotification(SvcProvider, DeviceInteractionTrigger.BrowserUsageUnsustainable);
+			await CreateUnsustainableNotification(DeviceInteractionTrigger.BrowserUsageUnsustainable);
 	}
 
-	private async Task CreateUnsustainableNotification(IServiceProvider svcProvider, DeviceInteractionTrigger triggerType)
+	private async Task CreateUnsustainableNotification(DeviceInteractionTrigger triggerType)
 	{
-		var promptRepo = svcProvider.GetService<PromptRepository>();
-		if (promptRepo == null)
-			throw new Exception("PromptRepository should not be null!");
-
-		var geminiClient = new GeminiChat(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest");
-		var geminiSettings = new GeminiSettings
-		{
-			Conversational = false,
-			ResponseMimeType = "application/json",
-			ResponseSchema = new Schema(
-			SchemaType.ARRAY,
-			Items: new Schema(SchemaType.OBJECT,
-				Properties: new Dictionary<string, Schema>
-				{
-						{ "NotificationTitle", new Schema(SchemaType.STRING) },
-						{ "NotificationDescription", new Schema(SchemaType.STRING) }
-				},
-				Required: ["NotificationTitle", "NotificationDescription"]
-			)
-		)
-		};
-
+		var promptRepo = GlobalContext.Services.GetRequiredService<PromptRepository>();
+		var geminiSettings = GlobalContext.Services.GetKeyedService<GeminiSettings>(GlobalContext.GeminiNotification);
+		var geminiClient = GlobalContext.Services.GetRequiredService<GeminiChat>();
 		string notificationPrompt = await promptRepo.GetPrompt(triggerType);
 		try
 		{

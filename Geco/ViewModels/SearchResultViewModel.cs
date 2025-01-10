@@ -22,33 +22,12 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 	[ObservableProperty] string? _searchInput;
 	bool _isPredefined;
 	[ObservableProperty] bool _isSearching;
-
-	GeminiChat GeminiClient { get; } = new(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest");
-
-	GeminiSettings GeminiConfig { get; } = new()
-	{
-		SystemInstructions =
-			"You are Geco, a large language model based on Google Gemini. You are developed by SS Bois. Your response should always be sustainability focused, your tone should be like a search engine, and you should always have 3 responses",
-		Conversational = false,
-		ResponseMimeType = "application/json",
-		ResponseSchema = new Schema(
-			SchemaType.ARRAY,
-			Items: new Schema(SchemaType.OBJECT,
-				Properties: new Dictionary<string, Schema>
-				{
-					{ "Title", new Schema(SchemaType.STRING) }, { "Description", new Schema(SchemaType.STRING) }
-				},
-				Required: ["Title", "Description"]
-			)
-		)
-	};
-
-	IServiceProvider SvcProvider { get; }
+	GeminiChat GeminiClient { get; }
 
 	public SearchResultViewModel()
 	{
 		_searchResults = [];
-		SvcProvider = App.Current?.Handler.MauiContext?.Services!;
+		GeminiClient = GlobalContext.Services.GetRequiredService<GeminiChat>();
 		GeminiClient.OnChatReceive += async (_, e) =>
 			await GeminiClientOnChatReceive(e);
 	}
@@ -71,9 +50,8 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 			SearchResults.Add(new GecoSearchResult(item.Title, item.Description));
 
 		// log usage
-		var triggerRepo = SvcProvider.GetService<TriggerRepository>();
-		if (triggerRepo != null)
-			await triggerRepo.LogTrigger(DeviceInteractionTrigger.BrowserUsageSustainable, 0);
+		var triggerRepo = GlobalContext.Services.GetRequiredService<TriggerRepository>();
+		await triggerRepo.LogTrigger(DeviceInteractionTrigger.BrowserUsageSustainable, 0);
 
 		IsSearching = false;
 	}
@@ -92,7 +70,6 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 
 		// hide keyboard after sending a message
 		await searchEntry.HideSoftInputAsync(CancellationToken.None);
-
 		SendSearch(false);
 	}
 
@@ -104,7 +81,8 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 				return;
 
 			string unescapeDataString = Uri.UnescapeDataString(SearchInput);
-			var promptRepo = ((AppShell)Shell.Current).SvcProvider.GetService<PromptRepository>()!;
+			var promptRepo = GlobalContext.Services.GetRequiredService<PromptRepository>()!;
+			var geminiConfig = GlobalContext.Services.GetKeyedService<GeminiSettings>(GlobalContext.GeminiSearch);
 
 			string prompt;
 			if (isPredefined &&
@@ -116,7 +94,7 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 			try
 			{
 				if (!string.IsNullOrEmpty(prompt))
-					await GeminiClient.SendMessage(prompt, settings: GeminiConfig);
+					await GeminiClient.SendMessage(prompt, settings: geminiConfig);
 			}
 			catch (Exception ex)
 			{

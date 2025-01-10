@@ -31,7 +31,7 @@ public partial class SettingsViewModel : ObservableObject
 			return;
 
 		var currShellViewModel = (AppShellViewModel)currentShell.BindingContext;
-		var chatRepo = currentShell.SvcProvider.GetService<ChatRepository>();
+		var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
 		currShellViewModel.ChatHistoryList.Clear();
 		await chatRepo!.DeleteAllHistory();
 	}

@@ -6,15 +6,13 @@ namespace Geco.Views;
 
 public partial class ChatPage : ContentPage
 {
-	IServiceProvider SvcProvider { get; }
 	ChatViewModel CurrentViewModel { get; init; }
 
-	public ChatPage(IServiceProvider sp, ChatViewModel vm)
+	public ChatPage(ChatViewModel vm)
 	{
 		InitializeComponent();
 		BindingContext = vm;
 		CurrentViewModel = vm;
-		SvcProvider = sp;
 
 		// Create new instance of chat page every time page is loaded
 		Appearing += async (_, _) =>
@@ -37,7 +35,7 @@ public partial class ChatPage : ContentPage
 		else
 		{
 			// Load history when the selected flyout is not the "Chat" flyout
-			var chatRepo = SvcProvider.GetService<ChatRepository>();
+			var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
 			var appShellCtx = (AppShellViewModel)Parent.BindingContext;
 			var currentHistory = appShellCtx.ChatHistoryList.First(x => x.Id == Parent.ClassId);
 

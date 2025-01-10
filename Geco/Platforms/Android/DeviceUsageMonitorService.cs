@@ -11,7 +11,6 @@ using Geco.Core.Models.ActionObserver;
 using Geco.Core.Models.Notification;
 using Geco.Notifications;
 using GoogleGeminiSDK;
-using GoogleGeminiSDK.Models.Components;
 
 namespace Geco;
 
@@ -22,34 +21,13 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 	const int ServiceId = 1000;
 	static bool _hasStarted;
 
-	private IServiceProvider SvcProvider { get; }
 	private INotificationManagerService NotificationSvc { get; }
 	private IDeviceStateObserver[] Observers { get; }
-	private GeminiChat GeminiChat { get; }
-	private GeminiSettings GeminiSettings { get; }
 
 	public DeviceUsageMonitorService()
 	{
-		SvcProvider = App.Current?.Handler.MauiContext?.Services!;
-		NotificationSvc = SvcProvider.GetService<INotificationManagerService>()!;
-		Observers = [.. SvcProvider.GetServices<IDeviceStateObserver>()];
-		GeminiChat = new GeminiChat(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest");
-		GeminiSettings = new GeminiSettings
-		{
-			Conversational = false,
-			ResponseMimeType = "application/json",
-			ResponseSchema = new Schema(
-				SchemaType.ARRAY,
-				Items: new Schema(SchemaType.OBJECT,
-					Properties: new Dictionary<string, Schema>
-					{
-						{ "NotificationTitle", new Schema(SchemaType.STRING) },
-						{ "NotificationDescription", new Schema(SchemaType.STRING) }
-					},
-					Required: ["NotificationTitle", "NotificationDescription"]
-				)
-			)
-		};
+		NotificationSvc = GlobalContext.Services.GetRequiredService<INotificationManagerService>()!;
+		Observers = [.. GlobalContext.Services.GetServices<IDeviceStateObserver>()];
 	}
 
 	public override StartCommandResult OnStartCommand(Intent? intent, [GeneratedEnum] StartCommandFlags flags,
@@ -191,15 +169,8 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 	{
 		try
 		{
-			var triggerRepo = SvcProvider.GetService<TriggerRepository>();
-			if (triggerRepo == null)
-				throw new Exception("TriggerRepository should not be null!");
-
-			var promptRepo = SvcProvider.GetService<PromptRepository>();
-			if (promptRepo == null)
-				throw new Exception("PromptRepository should not be null!");
-
 			// don't notify if trigger is in cooldown
+			var triggerRepo = GlobalContext.Services.GetRequiredService<TriggerRepository>();
 			if (await triggerRepo.IsTriggerInCooldown(e.TriggerType))
 				return;
 
@@ -221,11 +192,16 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 			if (e.TriggerType > 0)
 				return;
 
+
+			var promptRepo = GlobalContext.Services.GetRequiredService<PromptRepository>();
+			var geminiSettings = GlobalContext.Services.GetKeyedService<GeminiSettings>(GlobalContext.GeminiNotification);
+			var geminiChat = GlobalContext.Services.GetRequiredService<GeminiChat>();
+
 			// create notification for the unsustainable trigger
 			string notificationPrompt = await promptRepo.GetPrompt(e.TriggerType);
 			try
 			{
-				var tunedNotification = await GeminiChat.SendMessage(notificationPrompt, settings: GeminiSettings);
+				var tunedNotification = await geminiChat.SendMessage(notificationPrompt, settings: geminiSettings);
 				var deserializedStructuredMsg =
 					JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
 				var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();

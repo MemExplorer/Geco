@@ -52,7 +52,7 @@ public partial class AppShellViewModel : ObservableObject
 			return;
 
 		// get selected chat
-		var chatRepo = currentShell.SvcProvider.GetService<ChatRepository>();
+		var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
 		string? currentPageId = currentShell.CurrentPage.Parent.ClassId;
 		var selectedChat = ChatHistoryList.First(x => x.Id == currentPageId);
 

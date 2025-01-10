@@ -9,14 +9,11 @@ namespace Geco;
 
 public partial class AppShell : Shell
 {
-	internal IServiceProvider SvcProvider { get; }
 	AppShellViewModel Context { get; }
 
-	public AppShell(IServiceProvider provider)
+	public AppShell()
 	{
 		InitializeComponent();
-
-		SvcProvider = provider;
 		Context = (AppShellViewModel)BindingContext;
 		Context.ChatHistoryList.CollectionChanged += ChatHistoryList_CollectionChanged;
 		Navigated += AppShell_Navigated;
@@ -37,8 +34,8 @@ public partial class AppShell : Shell
 	{
 		// Adding an item to the Context.ChatHistoryList triggers an event that executes code to create 
 		// a new flyout item using the details from the chat history entry.
-		var chatRepo = SvcProvider.GetService<ChatRepository>();
-		await chatRepo!.LoadHistory(Context.ChatHistoryList);
+		var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
+		await chatRepo.LoadHistory(Context.ChatHistoryList);
 		Application.Current!.UserAppTheme = GecoSettings.DarkMode ? AppTheme.Dark : AppTheme.Light;
 	}
 
@@ -72,12 +69,13 @@ public partial class AppShell : Shell
 			var iconSrc = new FontImageSource { FontFamily = "FontAwesome", Glyph = IconFont.MessageLines };
 			iconSrc.SetAppThemeColor(FontImageSource.ColorProperty, Color.Parse("#262626"), Color.Parse("#D3D3D3"));
 
+			var chatPageTransient = GlobalContext.Services.GetRequiredService<ChatPage>();
 			var newChatPage = new ShellContent
 			{
 				ClassId = firstItem.Id,
 				Route = firstItem.Id,
 				Title = firstItem.Title,
-				Content = SvcProvider.GetService<ChatPage>(),
+				Content = chatPageTransient,
 				Icon = iconSrc
 			};
 
