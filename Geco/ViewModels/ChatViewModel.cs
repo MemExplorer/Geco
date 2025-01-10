@@ -159,7 +159,7 @@ public partial class ChatViewModel : ObservableObject
 		{
 			var chatRepo = currentShell.SvcProvider.GetService<ChatRepository>();
 			var shellViewModel = (AppShellViewModel)currentShell.BindingContext;
-			string chatTitle = String.IsNullOrWhiteSpace(ActionTitle) ? CreateChatTitle(gecoInitiated ? ChatMessages.First().Text! : inputContent) : CreateChatTitle(ActionTitle);
+			string chatTitle = CreateChatTitle(gecoInitiated ? ActionTitle! : inputContent);
 			var historyInstance = new GecoConversation(Guid.NewGuid().ToString(), chatTitle,
 				DateTimeOffset.UtcNow.ToUnixTimeSeconds(), ChatMessages);
 

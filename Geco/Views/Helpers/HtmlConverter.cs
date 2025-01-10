@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 
 namespace Geco.Views.Helpers;
 
@@ -8,12 +9,13 @@ public class HtmlConverter : IValueConverter
 	{
 		if (value is string htmlContent)
 		{
-			if (htmlContent.Length >= 11 && htmlContent.Trim().StartsWith("`"))
-			{
-				htmlContent = htmlContent.Substring(7, htmlContent.Length - 11);
-			}
-			string base64Html = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(htmlContent));
-			return $"data:text/html;base64,{base64Html}";
+			htmlContent = htmlContent.Trim();
+			if (htmlContent.StartsWith("```html", StringComparison.InvariantCultureIgnoreCase))
+				htmlContent = htmlContent[7 .. (htmlContent.Length - 3)].Trim();
+
+			string base64Html = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(htmlContent));
+			string urlEncodedHtmlContent = Uri.EscapeDataString(base64Html);
+			return $"data:text/html;base64,{urlEncodedHtmlContent}";
 		}
 		return null;
 	}
