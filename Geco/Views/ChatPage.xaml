@@ -13,6 +13,7 @@
     <ContentPage.Resources>
         <helpers:ChatAlignmentConverter x:Key="ChatAlignmentConverter" />
         <helpers:IsModelToBooleanConverter x:Key="IsModelToBooleanConverter" />
+        <helpers:IsUserToBooleanConverter x:Key="IsUserToBooleanConverter" />
         <helpers:IsModelToShapeConverter x:Key="IsModelToShapeConverter" />
         <helpers:HtmlConverter  x:Key="HtmlConverter" />
     </ContentPage.Resources>
@@ -91,12 +92,20 @@
                                     BackgroundColor="{AppThemeBinding Light=#e3e3e3,
                                                   Dark=#191919}"
                                     HorizontalOptions="{Binding Role, Converter={StaticResource ChatAlignmentConverter}}">
-                                <WebView x:Name="chatWebView" Navigated="WebView_Navigated">
-                                    <WebView.Source>
-                                        <HtmlWebViewSource Html="{Binding Text, Converter={StaticResource HtmlConverter}}" />
-                                    </WebView.Source>
-                                </WebView>
 
+                                <!-- WebView or Label based on Role -->
+                                <StackLayout>
+                                    <WebView 
+                                           IsVisible="{Binding Role, Converter={StaticResource IsModelToBooleanConverter}}"
+                                           Navigated="WebView_Navigated"
+                                           Source="{Binding Text, Converter={StaticResource HtmlConverter}}">
+                                    </WebView>
+                                    
+
+                                    <Label Padding="15"
+                                           Text="{Binding Text}"
+                                           IsVisible="{Binding Role, Converter={StaticResource IsUserToBooleanConverter}}" />
+                                </StackLayout>
                             </Border>
                         </Grid>
                     </Border>

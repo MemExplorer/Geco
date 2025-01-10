@@ -92,6 +92,7 @@ public class NotificationManagerService : INotificationManagerService
 			var intent = new Intent(Platform.AppContext, typeof(MainActivity));
 			intent.SetAction(IntentActionName);
 			intent.PutExtra("message", message);
+			intent.PutExtra("title", title);
 
 			var pendingIntentFlags = Build.VERSION.SdkInt >= BuildVersionCodes.S
 #pragma warning disable CA1416

@@ -1,27 +1,21 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Geco.Views.Helpers;
 
 public class HtmlConverter : IValueConverter
 {
-	public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+	public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
 	{
-		if (value is string text)
+		if (value is string htmlContent)
 		{
-			text = Regex.Replace(text, @"^```html|```$", string.Empty, RegexOptions.Multiline).Trim();
-
-			text = text.Replace("&lt;", "<")
-					   .Replace("&gt;", ">")
-					   .Replace("&quot;", "\"");
-			return text;
+			if (htmlContent.Length >= 11 && htmlContent.Trim().StartsWith("`"))
+			{
+				htmlContent = htmlContent.Substring(7, htmlContent.Length - 11);
+			}
+			string base64Html = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(htmlContent));
+			return $"data:text/html;base64,{base64Html}";
 		}
-		return value ?? string.Empty;
+		return null;
 	}
 
 	public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();
