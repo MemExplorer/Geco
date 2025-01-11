@@ -11,7 +11,6 @@ using Geco.Core.Models.ActionObserver;
 using Geco.Core.Models.Notification;
 using Geco.ViewModels;
 using Geco.Views;
-using Microsoft.Extensions.Logging;
 using Syncfusion.Maui.Toolkit.Hosting;
 using GoogleGeminiSDK;
 using GoogleGeminiSDK.Models.ContentGeneration;
@@ -62,7 +61,7 @@ public static class MauiProgram
 
 	static MauiAppBuilder InitializeGeminiServices(this MauiAppBuilder builder)
 	{
-		builder.Services.AddKeyedSingleton<GeminiSettings>(GlobalContext.GeminiChat, new GeminiSettings
+		builder.Services.AddKeyedSingleton(GlobalContext.GeminiChat, new GeminiSettings
 		{
 			Temperature = 0.2f,
 			TopP = 0.85f,
@@ -125,7 +124,7 @@ public static class MauiProgram
 			"""
 		});
 
-		builder.Services.AddKeyedSingleton<GeminiSettings>(GlobalContext.GeminiSearch, new GeminiSettings
+		builder.Services.AddKeyedSingleton(GlobalContext.GeminiSearch, new GeminiSettings
 		{
 			SystemInstructions =
 			"You are Geco, a large language model based on Google Gemini. You are developed by SS Bois. Your response should always be sustainability focused, your tone should be like a search engine, and you should always have 3 responses",
@@ -143,7 +142,7 @@ public static class MauiProgram
 		)
 		});
 
-		builder.Services.AddKeyedSingleton<GeminiSettings>(GlobalContext.GeminiNotification, new GeminiSettings
+		builder.Services.AddKeyedSingleton(GlobalContext.GeminiNotification, new GeminiSettings
 		{
 			SystemInstructions =
 			"You are Geco, a large language model based on Google Gemini. You are developed by SS Bois. Your response should always be sustainability focused. The contents of the 'FullContent' property must be presented in **Markdown style** but delivered as **HTML format**. The biggest font size must not exceed `<h2>`.",
@@ -214,20 +213,20 @@ public static class MauiProgram
 	{
 #if ANDROID
 		// Adjust header title position
-		ToolbarHandler.Mapper.AppendToMapping("CustomNavigationView", (handler, view) =>
+		ToolbarHandler.Mapper.AppendToMapping("CustomNavigationView", (handler, _) =>
 		{
 			handler.PlatformView.ContentInsetStartWithNavigation = 0;
 		});
 
 		// Remove underscore in Entry Control
-		EntryHandler.Mapper.AppendToMapping("NoUnderline", (h, v) =>
+		EntryHandler.Mapper.AppendToMapping("NoUnderline", (h, _) =>
 		{
 			h.PlatformView.BackgroundTintList =
 				ColorStateList.ValueOf(Colors.Transparent.ToPlatform());
 		});
 
 		// Remove underscore in Editor Control
-		EditorHandler.Mapper.AppendToMapping("NoUnderline", (h, v) =>
+		EditorHandler.Mapper.AppendToMapping("NoUnderline", (h, _) =>
 		{
 			h.PlatformView.BackgroundTintList =
 				ColorStateList.ValueOf(Colors.Transparent.ToPlatform());

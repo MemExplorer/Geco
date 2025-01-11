@@ -40,7 +40,7 @@ public partial class ChatPage : ContentPage
 			var currentHistory = appShellCtx.ChatHistoryList.First(x => x.Id == Parent.ClassId);
 
 			// load conversation data
-			await chatRepo!.LoadChats(currentHistory);
+			await chatRepo.LoadChats(currentHistory);
 			ctx.LoadHistory(currentHistory);
 		}
 	}

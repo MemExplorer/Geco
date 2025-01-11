@@ -17,8 +17,8 @@ public partial class AppShell : Shell
 		Context = (AppShellViewModel)BindingContext;
 		Context.ChatHistoryList.CollectionChanged += ChatHistoryList_CollectionChanged;
 		Navigated += AppShell_Navigated;
-		Loaded += async (s, e) =>
-			await AppShell_Loaded(s, e);
+		Loaded += async (_, e) =>
+			await AppShell_Loaded(e);
 
 		InitializeRoutes();
 	}
@@ -30,7 +30,7 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute(nameof(SearchResultPage), typeof(SearchResultPage));
 	}
 
-	async Task AppShell_Loaded(object? sender, EventArgs e)
+	async Task AppShell_Loaded(EventArgs e)
 	{
 		// Adding an item to the Context.ChatHistoryList triggers an event that executes code to create 
 		// a new flyout item using the details from the chat history entry.

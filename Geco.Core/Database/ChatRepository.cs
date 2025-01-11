@@ -11,7 +11,7 @@ public class ChatRepository : DbRepositoryBase
 	}
 
 	// Database table blueprint
-	internal override TblSchema[]? TableSchemas =>
+	internal override TblSchema[] TableSchemas =>
 	[
 		new TblSchema("TblChatHistory", [
 			new TblField("Id", TblFieldType.Text, true),

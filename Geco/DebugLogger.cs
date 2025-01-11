@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using Microsoft.Extensions.Primitives;
 
 namespace Geco;
 
@@ -29,7 +28,6 @@ internal class DebugLogger
 		sb.Append(message);
 		WriteToFile(sb.ToString());
 	}
-		
 
 	private void WriteToFile(string message)
 	{

@@ -7,7 +7,7 @@ namespace Geco.Core.Database;
 public class PromptRepository : DbRepositoryBase
 {
 	// Database table blueprint
-	internal override TblSchema[]? TableSchemas =>
+	internal override TblSchema[] TableSchemas =>
 	[
 		new TblSchema("TblPrompt", [
 			new TblField("Category", TblFieldType.Integer),

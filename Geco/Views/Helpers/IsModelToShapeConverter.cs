@@ -6,7 +6,7 @@ namespace Geco.Views.Helpers;
 
 public class IsModelToShapeConverter : IValueConverter
 {
-	public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+	public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
 	{
 		bool isModel = value is ChatRole { Value: "model" };
 		var modelBubbleShape = new CornerRadius(8, 8, 8, 8);
@@ -15,6 +15,6 @@ public class IsModelToShapeConverter : IValueConverter
 	}
 
 
-	public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+	public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
 		throw new NotImplementedException();
 }

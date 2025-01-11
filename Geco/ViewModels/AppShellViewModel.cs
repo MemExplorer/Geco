@@ -60,7 +60,7 @@ public partial class AppShellViewModel : ObservableObject
 		ChatHistoryList.Remove(selectedChat);
 
 		// delete history in database
-		await chatRepo!.DeleteHistory(currentPageId);
+		await chatRepo.DeleteHistory(currentPageId);
 
 		// go to new chat page
 		await currentShell.GoToAsync("//ChatPage");

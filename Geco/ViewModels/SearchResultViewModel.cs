@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Web;
-using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
@@ -10,9 +9,7 @@ using Geco.Core.Models;
 using Geco.Core.Models.ActionObserver;
 using Geco.Core.Models.Prompt;
 using GoogleGeminiSDK;
-using GoogleGeminiSDK.Models.Components;
 using ChatRole = Microsoft.Extensions.AI.ChatRole;
-using SchemaType = GoogleGeminiSDK.Models.Components.SchemaType;
 
 namespace Geco.ViewModels;
 
@@ -81,7 +78,7 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 				return;
 
 			string unescapeDataString = Uri.UnescapeDataString(SearchInput);
-			var promptRepo = GlobalContext.Services.GetRequiredService<PromptRepository>()!;
+			var promptRepo = GlobalContext.Services.GetRequiredService<PromptRepository>();
 			var geminiConfig = GlobalContext.Services.GetKeyedService<GeminiSettings>(GlobalContext.GeminiSearch);
 
 			string prompt;

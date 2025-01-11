@@ -5,13 +5,11 @@ using Android.App.Usage;
 using Android.Content;
 using Android.Net;
 using Android.Telephony;
-using CommunityToolkit.Maui.Alerts;
 using Geco.Core;
 using Geco.Core.Database;
 using Geco.Core.Models.ActionObserver;
 using Geco.Core.Models.Notification;
 using GoogleGeminiSDK;
-using GoogleGeminiSDK.Models.Components;
 using AndroidOS = Android.OS;
 
 namespace Geco;
@@ -131,11 +129,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 
 	private async Task RunDeviceUsageLogger()
 	{
-		var svcProvider = App.Current?.Handler.MauiContext?.Services!;
-		var triggerRepo = svcProvider.GetService<TriggerRepository>();
-		if (triggerRepo == null)
-			throw new Exception("TriggerRepository should not be null!");
-
+		var triggerRepo = GlobalContext.Services.GetRequiredService<TriggerRepository>();
 		var networkStatsManager = (NetworkStatsManager?)Platform.AppContext.GetSystemService("netstats");
 		var usageStatsManager = (UsageStatsManager?)Platform.AppContext.GetSystemService("usagestats");
 		if (usageStatsManager == null || networkStatsManager == null)
@@ -145,7 +139,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		long currTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 		long dayBeforeTimestamp = currTime - 86_400_000; // subtract current time by 1 day in ms
 		var usageQueryStatsResult =
-			usageStatsManager?.QueryUsageStats(UsageStatsInterval.Daily, dayBeforeTimestamp, currTime);
+			usageStatsManager.QueryUsageStats(UsageStatsInterval.Daily, dayBeforeTimestamp, currTime);
 		if (usageQueryStatsResult == null)
 			throw new Exception("Usage stats query is null");
 

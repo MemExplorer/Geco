@@ -5,7 +5,6 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
 using AndroidX.Core.Content;
-using CommunityToolkit.Maui.Alerts;
 using Geco.Core.Database;
 using Geco.Core.Models.ActionObserver;
 using Geco.Core.Models.Notification;
@@ -21,14 +20,8 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 	const int ServiceId = 1000;
 	static bool _hasStarted;
 
-	private INotificationManagerService NotificationSvc { get; }
-	private IDeviceStateObserver[] Observers { get; }
-
-	public DeviceUsageMonitorService()
-	{
-		NotificationSvc = GlobalContext.Services.GetRequiredService<INotificationManagerService>()!;
-		Observers = [.. GlobalContext.Services.GetServices<IDeviceStateObserver>()];
-	}
+	private INotificationManagerService NotificationSvc { get; } = GlobalContext.Services.GetRequiredService<INotificationManagerService>();
+	private IDeviceStateObserver[] Observers { get; } = [.. GlobalContext.Services.GetServices<IDeviceStateObserver>()];
 
 	public override StartCommandResult OnStartCommand(Intent? intent, [GeneratedEnum] StartCommandFlags flags,
 		int startId)
