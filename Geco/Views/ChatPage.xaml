@@ -13,7 +13,9 @@
     <ContentPage.Resources>
         <helpers:ChatAlignmentConverter x:Key="ChatAlignmentConverter" />
         <helpers:IsModelToBooleanConverter x:Key="IsModelToBooleanConverter" />
+        <helpers:IsUserToBooleanConverter x:Key="IsUserToBooleanConverter" />
         <helpers:IsModelToShapeConverter x:Key="IsModelToShapeConverter" />
+        <helpers:HtmlConverter  x:Key="HtmlConverter" />
     </ContentPage.Resources>
 
     <StackLayout Padding="10"
@@ -90,9 +92,20 @@
                                     BackgroundColor="{AppThemeBinding Light=#e3e3e3,
                                                   Dark=#191919}"
                                     HorizontalOptions="{Binding Role, Converter={StaticResource ChatAlignmentConverter}}">
-                                <Label
-                                    Padding="15"
-                                    Text="{Binding Text}" />
+
+                                <!-- WebView or Label based on Role -->
+                                <StackLayout>
+                                    <WebView 
+                                           IsVisible="{Binding Role, Converter={StaticResource IsModelToBooleanConverter}}"
+                                           Navigated="WebView_Navigated"
+                                           Source="{Binding Text, Converter={StaticResource HtmlConverter}}">
+                                    </WebView>
+
+
+                                    <Label Padding="15"
+                                           Text="{Binding Text}"
+                                           IsVisible="{Binding Role, Converter={StaticResource IsUserToBooleanConverter}}" />
+                                </StackLayout>
                             </Border>
                         </Grid>
                     </Border>
@@ -125,7 +138,8 @@
                         FontFamily="FontAwesome"
                         Text="{x:Static helpers:IconFont.PaperPlaneTop}"
                         Margin="3"
-                        VerticalOptions="Center">
+                        VerticalOptions="Center"
+                        IsEnabled="{Binding IsChatEnabled}">
                     <Button.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding ChatSendCommand}"
                                               CommandParameter="{x:Reference ChatEntry}" />

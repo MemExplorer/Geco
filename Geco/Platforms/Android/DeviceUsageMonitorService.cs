@@ -205,7 +205,7 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 				var deserializedStructuredMsg =
 					JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
 				var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();
-				NotificationSvc.SendInteractiveNotification(tunedNotificationInfoFirstEntry.NotificationTitle, tunedNotificationInfoFirstEntry.NotificationDescription);
+				NotificationSvc.SendInteractiveNotification(tunedNotificationInfoFirstEntry.NotificationTitle, tunedNotificationInfoFirstEntry.NotificationDescription, tunedNotificationInfoFirstEntry.FullContent);
 			}
 			catch (Exception geminiError)
 			{

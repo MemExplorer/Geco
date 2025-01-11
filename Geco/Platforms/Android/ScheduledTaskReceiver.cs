@@ -56,7 +56,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 			var weeklyReportResponse = await geminiClient.SendMessage(likelihoodPrompt, settings: geminiSettings);
 			var deserializedWeeklyReport = JsonSerializer.Deserialize<List<TunedNotificationInfo>> (weeklyReportResponse.Text!)!;
 			var firstItem = deserializedWeeklyReport.First();
-			NotificationSvc.SendInteractiveNotification(firstItem.NotificationTitle, firstItem.NotificationDescription, firstItem.NotificationDescription);
+			NotificationSvc.SendInteractiveNotification(firstItem.NotificationTitle, firstItem.NotificationDescription, firstItem.FullContent);
 		}
 		catch (Exception ex)
 		{
@@ -192,9 +192,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 			var deserializedStructuredMsg =
 				JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
 			var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();
-			(string Title, string Description) notificationInfo = (tunedNotificationInfoFirstEntry.NotificationTitle,
-				tunedNotificationInfoFirstEntry.NotificationDescription);
-			NotificationSvc.SendInteractiveNotification(notificationInfo.Title, notificationInfo.Description);
+			NotificationSvc.SendInteractiveNotification(tunedNotificationInfoFirstEntry.NotificationTitle, tunedNotificationInfoFirstEntry.NotificationDescription, tunedNotificationInfoFirstEntry.FullContent);
 		}
 		catch (Exception ex)
 		{

@@ -14,8 +14,10 @@ public partial class ChatViewModel : ObservableObject
 {
 	[ObservableProperty] ObservableCollection<ChatMessage> _chatMessages = [];
 	[ObservableProperty] bool _isAutoCompleteVisible = true;
+	[ObservableProperty] bool _isChatEnabled = true;
 	GeminiChat GeminiClient { get; }
 	string? HistoryId { get; set; }
+	string? ActionTitle { get; set; }
 
 	public ChatViewModel()
 	{
@@ -38,6 +40,9 @@ public partial class ChatViewModel : ObservableObject
 		// save chat message to database
 		if (HistoryId != null)
 			await chatRepo!.AppendChat(HistoryId, e.Message);
+
+		if (e.Message.Role != ChatRole.User)
+			IsChatEnabled = true;
 	}
 
 	/// <summary>
@@ -66,6 +71,7 @@ public partial class ChatViewModel : ObservableObject
 		if (intent?.Action == "GecoNotif")
 		{
 			string? msgContent = intent.GetStringExtra("message");
+			ActionTitle = intent.GetStringExtra("title");
 			var chatMsg = new ChatMessage(new ChatRole("model"), msgContent);
 			chatMsg.AdditionalProperties = new AdditionalPropertiesDictionary();
 			chatMsg.AdditionalProperties["id"] = (ulong)0;
@@ -121,6 +127,8 @@ public partial class ChatViewModel : ObservableObject
 
 		try
 		{
+			IsChatEnabled = false;
+
 			// send user message to Gemini and append its response
 			await GeminiClient.SendMessage(inputContent, settings: geminiConfig);
 		}
@@ -142,7 +150,7 @@ public partial class ChatViewModel : ObservableObject
 		{
 			var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
 			var shellViewModel = (AppShellViewModel)currentShell.BindingContext;
-			string chatTitle = CreateChatTitle(gecoInitiated ? ChatMessages.First().Text! : inputContent);
+			string chatTitle = CreateChatTitle(gecoInitiated ? ActionTitle! : inputContent);
 			var historyInstance = new GecoConversation(Guid.NewGuid().ToString(), chatTitle,
 				DateTimeOffset.UtcNow.ToUnixTimeSeconds(), ChatMessages);
 
