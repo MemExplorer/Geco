@@ -38,16 +38,26 @@ public static class MauiProgram
 			})
 			.InitializeUiServices()
 			.InitializeDatabaseServices()
+			.InitializeLoggerService()
 			.InitializeAndroidServices()
 			.InitializeGeminiServices();
-
-#if DEBUG
-		builder.Logging.AddDebug();
-#endif
+		
 		// platform specific modifications
 		ApplyAndroidUiModifications();
 
 		return builder.Build();
+	}
+
+	static MauiAppBuilder InitializeLoggerService(this MauiAppBuilder builder)
+	{
+#if ANDROID
+		string dataDir = Android.App.Application.Context.GetExternalFilesDir(null)!.AbsoluteFile.Path;
+#else
+		string dataDir = FileSystem.AppDataDirectory;
+#endif
+		string filePath = Path.Combine(dataDir, "log.txt");
+		builder.Services.AddSingleton<DebugLogger>(_ => new DebugLogger(filePath));
+		return builder;
 	}
 
 	static MauiAppBuilder InitializeGeminiServices(this MauiAppBuilder builder)

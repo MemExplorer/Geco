@@ -96,14 +96,14 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 				if (!string.IsNullOrEmpty(prompt))
 					await GeminiClient.SendMessage(prompt, settings: geminiConfig);
 			}
-			catch (Exception ex)
+			catch (Exception geminiException)
 			{
-				await Toast.Make(ex.ToString()).Show();
+				GlobalContext.Logger.Error<SearchViewModel>(geminiException);
 			}
 		}
-		catch
+		catch (Exception ex)
 		{
-			// do nothing
+			GlobalContext.Logger.Error<SearchViewModel>(ex);
 		}
 	}
 

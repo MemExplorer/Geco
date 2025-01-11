@@ -124,9 +124,9 @@ public partial class ChatViewModel : ObservableObject
 			// send user message to Gemini and append its response
 			await GeminiClient.SendMessage(inputContent, settings: geminiConfig);
 		}
-		catch
+		catch (Exception ex)
 		{
-			await Toast.Make("Failed sending message!").Show();
+			GlobalContext.Logger.Error<ChatViewModel>(ex);
 		}
 
 		if (isNewChat)

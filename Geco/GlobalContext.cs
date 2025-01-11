@@ -13,6 +13,8 @@ internal static class GlobalContext
 		}
 	}
 
+	internal static DebugLogger Logger => Services.GetRequiredService<DebugLogger>();
+
 	// Gemini Constants
 	internal const int GeminiChat = 0;
 	internal const int GeminiSearch = 1;

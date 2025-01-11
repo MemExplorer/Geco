@@ -22,8 +22,7 @@ public class BootReceiver : BroadcastReceiver
 		}
 		catch (Exception ex)
 		{
-			// CommunityToolkit Alert doesn't work properly here
-			Toast.MakeText(context, ex.Message, ToastLength.Short).Show();
+			GlobalContext.Logger.Error<BootReceiver>(ex);
 		}
 	}
 }

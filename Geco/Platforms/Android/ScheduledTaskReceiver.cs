@@ -37,9 +37,9 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 				DeviceUsageMonitorService.CreateScheduledWeeklySummary();
 			}
 		}
-		catch
+		catch (Exception ex)
 		{
-			// do nothing
+			GlobalContext.Logger.Error<ScheduledTaskReceiver>(ex);
 		}
 	}
 
@@ -60,7 +60,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		}
 		catch (Exception ex)
 		{
-			await Toast.Make(ex.ToString()).Show();
+			GlobalContext.Logger.Error<ScheduledTaskReceiver>(ex);
 		}
 	}
 
@@ -198,7 +198,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		}
 		catch (Exception ex)
 		{
-			await Toast.Make(ex.ToString()).Show();
+			GlobalContext.Logger.Error<ScheduledTaskReceiver>(ex);
 		}
 	}
 

@@ -207,14 +207,14 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 				var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();
 				NotificationSvc.SendInteractiveNotification(tunedNotificationInfoFirstEntry.NotificationTitle, tunedNotificationInfoFirstEntry.NotificationDescription);
 			}
-			catch (Exception ex)
+			catch (Exception geminiError)
 			{
-				await Toast.Make(ex.ToString()).Show();
+				GlobalContext.Logger.Error<DeviceUsageMonitorService>(geminiError);
 			}
 		}
-		catch
+		catch (Exception ex)
 		{
-			// do nothing
+			GlobalContext.Logger.Error<DeviceUsageMonitorService>(ex);
 		}
 	}
 
