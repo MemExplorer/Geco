@@ -5,12 +5,13 @@ namespace Geco;
 internal class DebugLogger
 {
 	string LogFilePath { get; }
-	internal DebugLogger(string writePath) => 
+
+	internal DebugLogger(string writePath) =>
 		LogFilePath = writePath;
 
 	internal void Info<TCurrentClass>(string message) =>
 		WriteToFile($"{typeof(TCurrentClass)} - {message}");
-	
+
 	internal void Info<TCurrentClass>(ReadOnlySpan<char> message) =>
 		WriteToFile($"{typeof(TCurrentClass)} - {message}");
 
@@ -24,14 +25,14 @@ internal class DebugLogger
 			sb.AppendLine(additionalDetails);
 			sb.Append("Stack Trace: ");
 		}
-		
+
 		sb.Append(message);
 		WriteToFile(sb.ToString());
 	}
 
 	private void WriteToFile(string message)
 	{
-		var fMessage = BuildMessage(message);
+		string fMessage = BuildMessage(message);
 		using var writer = new StreamWriter(LogFilePath, true);
 		writer.WriteLine(fMessage);
 	}

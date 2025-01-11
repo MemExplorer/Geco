@@ -1,5 +1,5 @@
-
 namespace Geco;
+
 internal static class GlobalContext
 {
 	internal static IServiceProvider Services
@@ -8,7 +8,8 @@ internal static class GlobalContext
 		{
 			var app = IPlatformApplication.Current;
 			if (app == null)
-				throw new InvalidOperationException("Cannot resolve current application. Services should be accessed after MauiProgram initialization.");
+				throw new InvalidOperationException(
+					"Cannot resolve current application. Services should be accessed after MauiProgram initialization.");
 			return app.Services;
 		}
 	}

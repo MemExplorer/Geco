@@ -6,7 +6,7 @@ namespace Geco.Views;
 
 public partial class ChatPage : ContentPage
 {
-	ChatViewModel CurrentViewModel { get; init; }
+	ChatViewModel CurrentViewModel { get; }
 
 	public ChatPage(ChatViewModel vm)
 	{

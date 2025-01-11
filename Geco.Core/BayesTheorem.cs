@@ -145,18 +145,20 @@ public class BayesTheorem
 			double attrTotalFreq = x.Positive + x.Negative;
 			if (_needSmoothing)
 				return a * ((x.Positive + Alpha) / (attrTotalFreq + Alpha * kValue));
-			else
-				return a * (x.Positive / attrTotalFreq);
-		}) * (_needSmoothing ? ((totalPositiveAttr + Alpha) / (sumTblFrequency + Alpha * kValue)) : (totalPositiveAttr / sumTblFrequency));
+			return a * (x.Positive / attrTotalFreq);
+		}) * (_needSmoothing
+			? (totalPositiveAttr + Alpha) / (sumTblFrequency + Alpha * kValue)
+			: totalPositiveAttr / sumTblFrequency);
 
 		double negativePosterior = _frequencyTbl.Values.Aggregate(1.0, (a, x) =>
 		{
 			double attrTotalFreq = x.Positive + x.Negative;
 			if (_needSmoothing)
 				return a * ((x.Negative + Alpha) / (attrTotalFreq + Alpha * kValue));
-			else
-				return a * (x.Negative / attrTotalFreq);
-		}) * (_needSmoothing ? ((totalNegativeAttr + Alpha) / (sumTblFrequency + Alpha * kValue)) : (totalNegativeAttr / sumTblFrequency));
+			return a * (x.Negative / attrTotalFreq);
+		}) * (_needSmoothing
+			? (totalNegativeAttr + Alpha) / (sumTblFrequency + Alpha * kValue)
+			: totalNegativeAttr / sumTblFrequency);
 
 
 		// proportional probability

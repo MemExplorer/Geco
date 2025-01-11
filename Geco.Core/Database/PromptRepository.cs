@@ -9,7 +9,7 @@ public class PromptRepository : DbRepositoryBase
 	// Database table blueprint
 	internal override TblSchema[] TableSchemas =>
 	[
-		new TblSchema("TblPrompt", [
+		new("TblPrompt", [
 			new TblField("Category", TblFieldType.Integer),
 			new TblField("Content", TblFieldType.Text)
 		])
@@ -30,8 +30,7 @@ public class PromptRepository : DbRepositoryBase
 		return await BuildPrompt(PromptCategory.SearchCtgBasedTemp,
 			new
 			{
-				PredefinedTopic = $"Sustainable {predefinedTopic}",
-				StoredPromptRefinement = randomPromptRefinement
+				PredefinedTopic = $"Sustainable {predefinedTopic}", StoredPromptRefinement = randomPromptRefinement
 			});
 	}
 

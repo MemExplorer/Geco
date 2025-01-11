@@ -1,10 +1,9 @@
-
 using Android.App;
 using Android.Content;
-using Android.Widget;
 using Geco.Core.Models.ActionObserver;
 
 namespace Geco;
+
 [BroadcastReceiver(Enabled = true, Exported = true, DirectBootAware = true)]
 [IntentFilter([Intent.ActionBootCompleted])]
 public class BootReceiver : BroadcastReceiver
@@ -26,4 +25,3 @@ public class BootReceiver : BroadcastReceiver
 		}
 	}
 }
-

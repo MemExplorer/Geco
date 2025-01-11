@@ -15,7 +15,7 @@
         <helpers:IsModelToBooleanConverter x:Key="IsModelToBooleanConverter" />
         <helpers:IsUserToBooleanConverter x:Key="IsUserToBooleanConverter" />
         <helpers:IsModelToShapeConverter x:Key="IsModelToShapeConverter" />
-        <helpers:HtmlConverter  x:Key="HtmlConverter" />
+        <helpers:HtmlConverter x:Key="HtmlConverter" />
     </ContentPage.Resources>
 
     <StackLayout Padding="10"
@@ -95,11 +95,10 @@
 
                                 <!-- WebView or Label based on Role -->
                                 <StackLayout>
-                                    <WebView 
-                                           IsVisible="{Binding Role, Converter={StaticResource IsModelToBooleanConverter}}"
-                                           Navigated="WebView_Navigated"
-                                           Source="{Binding Text, Converter={StaticResource HtmlConverter}}">
-                                    </WebView>
+                                    <WebView
+                                        IsVisible="{Binding Role, Converter={StaticResource IsModelToBooleanConverter}}"
+                                        Navigated="WebView_Navigated"
+                                        Source="{Binding Text, Converter={StaticResource HtmlConverter}}" />
 
 
                                     <Label Padding="15"
@@ -124,13 +123,13 @@
                 Spacing="5">
                 <!--  Chat Entry/Input  -->
                 <Editor x:Name="ChatEntry"
-                       Margin="20,0,7,0"
-                       FontSize="18"
-                       AutoSize="TextChanges"
-                       MaximumHeightRequest="100"
-                       HorizontalOptions="FillAndExpand"
-                       Placeholder="Message to GECO"
-                       TextChanged="ChatEntry_TextChanged"/>
+                        Margin="20,0,7,0"
+                        FontSize="18"
+                        AutoSize="TextChanges"
+                        MaximumHeightRequest="100"
+                        HorizontalOptions="FillAndExpand"
+                        Placeholder="Message to GECO"
+                        TextChanged="ChatEntry_TextChanged" />
 
                 <!--  Chat Send Button  -->
                 <Button CornerRadius="30"

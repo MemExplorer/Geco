@@ -63,9 +63,9 @@ public partial class ChatViewModel : ObservableObject
 #if ANDROID
 		// handle notification message
 		var intent = Platform.CurrentActivity?.Intent;
-		if (intent?.Action != "GecoNotif") 
+		if (intent?.Action != "GecoNotif")
 			return;
-		
+
 		string? msgContent = intent.GetStringExtra("message");
 		ActionTitle = intent.GetStringExtra("title");
 		var chatMsg = new ChatMessage(new ChatRole("model"), msgContent);

@@ -1,5 +1,6 @@
 using Android.Net;
 using Geco.Core.Models.ActionObserver;
+
 namespace Geco.Triggers.ActionObservers;
 
 public class NetworkStateObserver : IDeviceStateObserver

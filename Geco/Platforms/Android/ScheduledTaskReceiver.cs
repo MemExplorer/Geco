@@ -18,7 +18,8 @@ namespace Geco;
 [IntentFilter(["com.ssbois.geco.ScheduledTaskReceiver"])]
 internal class ScheduledTaskReceiver : BroadcastReceiver
 {
-	static INotificationManagerService NotificationSvc = GlobalContext.Services.GetRequiredService<INotificationManagerService>();
+	static readonly INotificationManagerService NotificationSvc =
+		GlobalContext.Services.GetRequiredService<INotificationManagerService>();
 
 	public override async void OnReceive(Context? context, Intent? intent)
 	{
@@ -50,11 +51,14 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		try
 		{
 			var geminiClient = GlobalContext.Services.GetRequiredService<GeminiChat>();
-			var geminiSettings = GlobalContext.Services.GetKeyedService<GeminiSettings>(GlobalContext.GeminiNotification);
+			var geminiSettings =
+				GlobalContext.Services.GetKeyedService<GeminiSettings>(GlobalContext.GeminiNotification);
 			var weeklyReportResponse = await geminiClient.SendMessage(likelihoodPrompt, settings: geminiSettings);
-			var deserializedWeeklyReport = JsonSerializer.Deserialize<List<TunedNotificationInfo>> (weeklyReportResponse.Text!)!;
+			var deserializedWeeklyReport =
+				JsonSerializer.Deserialize<List<TunedNotificationInfo>>(weeklyReportResponse.Text!)!;
 			var firstItem = deserializedWeeklyReport.First();
-			NotificationSvc.SendInteractiveNotification(firstItem.NotificationTitle, firstItem.NotificationDescription, firstItem.FullContent);
+			NotificationSvc.SendInteractiveNotification(firstItem.NotificationTitle, firstItem.NotificationDescription,
+				firstItem.FullContent);
 		}
 		catch (Exception ex)
 		{
@@ -89,18 +93,26 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 			}
 		}
 
-		return await promptRepo.GetLikelihoodPrompt(currentWeekResult.Value.Probability, currentWeekResult.Value.PositiveComputation,
-					currentWeekResult.Value.Frequency);
+		return await promptRepo.GetLikelihoodPrompt(currentWeekResult.Value.Probability,
+			currentWeekResult.Value.PositiveComputation,
+			currentWeekResult.Value.Frequency);
 	}
 
-	private (string PositiveComputation, string Frequency, string Probability)? GetLikelihoodPromptFromRecords(Dictionary<DeviceInteractionTrigger, int> currentWeekTriggerRecords)
+	private (string PositiveComputation, string Frequency, string Probability)? GetLikelihoodPromptFromRecords(
+		Dictionary<DeviceInteractionTrigger, int> currentWeekTriggerRecords)
 	{
-		var chargingPositive = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.ChargingSustainable, 0);
-		var chargingNegative = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.ChargingUnsustainable, 0);
-		var networkUsagePositive = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.NetworkUsageSustainable, 0);
-		var networkUsageNegative = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.NetworkUsageUnsustainable, 0);
-		var deviceUsagePositive = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.DeviceUsageSustainable, 0);
-		var deviceUsageNegative = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.DeviceUsageUnsustainable, 0);
+		int chargingPositive =
+			currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.ChargingSustainable, 0);
+		int chargingNegative =
+			currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.ChargingUnsustainable, 0);
+		int networkUsagePositive =
+			currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.NetworkUsageSustainable, 0);
+		int networkUsageNegative =
+			currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.NetworkUsageUnsustainable, 0);
+		int deviceUsagePositive =
+			currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.DeviceUsageSustainable, 0);
+		int deviceUsageNegative =
+			currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.DeviceUsageUnsustainable, 0);
 
 		if (chargingPositive == 0 && chargingNegative == 0)
 			return null;
@@ -124,7 +136,8 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		string currSustainableProportionalProbability = Math.Round(currWeekComputationResult.PositiveProbs, 2)
 			.ToString(CultureInfo.InvariantCulture) + "%";
 
-		return (currWeekComputationStr.PositiveComputation, currWeekFrequencyStr, currSustainableProportionalProbability);
+		return (currWeekComputationStr.PositiveComputation, currWeekFrequencyStr,
+			currSustainableProportionalProbability);
 	}
 
 	private async Task RunDeviceUsageLogger()
@@ -186,7 +199,8 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 			var deserializedStructuredMsg =
 				JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
 			var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();
-			NotificationSvc.SendInteractiveNotification(tunedNotificationInfoFirstEntry.NotificationTitle, tunedNotificationInfoFirstEntry.NotificationDescription, tunedNotificationInfoFirstEntry.FullContent);
+			NotificationSvc.SendInteractiveNotification(tunedNotificationInfoFirstEntry.NotificationTitle,
+				tunedNotificationInfoFirstEntry.NotificationDescription, tunedNotificationInfoFirstEntry.FullContent);
 		}
 		catch (Exception ex)
 		{

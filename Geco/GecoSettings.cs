@@ -1,6 +1,5 @@
 namespace Geco;
 
-
 public static class GecoSettings
 {
 	public static bool DarkMode
