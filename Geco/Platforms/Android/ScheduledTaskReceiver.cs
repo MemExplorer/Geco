@@ -44,12 +44,15 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 
 	private async Task RunWeeklySummaryNotification()
 	{
+		GlobalContext.Logger.Info<ScheduledTaskReceiver>("Running weekly report...");
 		string? likelihoodPrompt = await ConstructLikelihoodPrompt();
 		if (likelihoodPrompt == null)
 			return;
 
+		GlobalContext.Logger.Info<ScheduledTaskReceiver>("Created weekly report likelihood prompt.");
 		try
 		{
+			GlobalContext.Logger.Info<ScheduledTaskReceiver>("Executing Scheduled Weekly Summary Notification.");
 			var geminiClient = GlobalContext.Services.GetRequiredService<GeminiChat>();
 			var geminiSettings =
 				GlobalContext.Services.GetKeyedService<GeminiSettings>(GlobalContext.GeminiNotification);
@@ -62,7 +65,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		}
 		catch (Exception ex)
 		{
-			GlobalContext.Logger.Error<ScheduledTaskReceiver>(ex);
+			GlobalContext.Logger.Error<ScheduledTaskReceiver>(ex, "Weekly summary notification resulted into an error.");
 		}
 	}
 
@@ -142,6 +145,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 
 	private async Task RunDeviceUsageLogger()
 	{
+		GlobalContext.Logger.Info<ScheduledTaskReceiver>("Running daily activity logger...");
 		var triggerRepo = GlobalContext.Services.GetRequiredService<TriggerRepository>();
 		var networkStatsManager = (NetworkStatsManager?)Platform.AppContext.GetSystemService("netstats");
 		var usageStatsManager = (UsageStatsManager?)Platform.AppContext.GetSystemService("usagestats");
@@ -185,6 +189,8 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		// Verify if the user has used geco search within the last 24 hours
 		if (!await triggerRepo.IsTriggerInCooldown(DeviceInteractionTrigger.BrowserUsageSustainable, 86_400))
 			await CreateUnsustainableNotification(DeviceInteractionTrigger.BrowserUsageUnsustainable);
+
+		GlobalContext.Logger.Info<ScheduledTaskReceiver>("Finished running daily activity logger.");
 	}
 
 	private async Task CreateUnsustainableNotification(DeviceInteractionTrigger triggerType)
@@ -195,6 +201,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		string notificationPrompt = await promptRepo.GetPrompt(triggerType);
 		try
 		{
+			GlobalContext.Logger.Info<ScheduledTaskReceiver>($"Executing {triggerType} notification from daily activity logger.");
 			var tunedNotification = await geminiClient.SendMessage(notificationPrompt, settings: geminiSettings);
 			var deserializedStructuredMsg =
 				JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
@@ -204,7 +211,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		}
 		catch (Exception ex)
 		{
-			GlobalContext.Logger.Error<ScheduledTaskReceiver>(ex);
+			GlobalContext.Logger.Error<ScheduledTaskReceiver>(ex, "Daily activity notification resulted into an error.");
 		}
 	}
 
