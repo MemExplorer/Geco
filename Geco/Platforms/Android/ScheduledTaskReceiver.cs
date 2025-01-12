@@ -56,12 +56,15 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 			var geminiClient = GlobalContext.Services.GetRequiredService<GeminiChat>();
 			var geminiSettings =
 				GlobalContext.Services.GetKeyedService<GeminiSettings>(GlobalContext.GeminiNotification);
-			var weeklyReportResponse = await geminiClient.SendMessage(likelihoodPrompt, settings: geminiSettings);
-			var deserializedWeeklyReport =
-				JsonSerializer.Deserialize<List<TunedNotificationInfo>>(weeklyReportResponse.Text!)!;
-			var firstItem = deserializedWeeklyReport.First();
-			NotificationSvc.SendInteractiveNotification(firstItem.NotificationTitle, firstItem.NotificationDescription,
-				firstItem.FullContent);
+			await Utils.RetryAsyncTaskOrThrow<TaskCanceledException>(3, async () =>
+			{
+				var weeklyReportResponse = await geminiClient.SendMessage(likelihoodPrompt, settings: geminiSettings);
+				var deserializedWeeklyReport =
+					JsonSerializer.Deserialize<List<TunedNotificationInfo>>(weeklyReportResponse.Text!)!;
+				var firstItem = deserializedWeeklyReport.First();
+				NotificationSvc.SendInteractiveNotification(firstItem.NotificationTitle, firstItem.NotificationDescription,
+					firstItem.FullContent);
+			});
 		}
 		catch (Exception ex)
 		{
@@ -202,12 +205,15 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		try
 		{
 			GlobalContext.Logger.Info<ScheduledTaskReceiver>($"Executing {triggerType} notification from daily activity logger.");
-			var tunedNotification = await geminiClient.SendMessage(notificationPrompt, settings: geminiSettings);
-			var deserializedStructuredMsg =
-				JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
-			var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();
-			NotificationSvc.SendInteractiveNotification(tunedNotificationInfoFirstEntry.NotificationTitle,
-				tunedNotificationInfoFirstEntry.NotificationDescription, tunedNotificationInfoFirstEntry.FullContent);
+			await Utils.RetryAsyncTaskOrThrow<TaskCanceledException>(3, async () =>
+			{
+				var tunedNotification = await geminiClient.SendMessage(notificationPrompt, settings: geminiSettings);
+				var deserializedStructuredMsg =
+					JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
+				var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();
+				NotificationSvc.SendInteractiveNotification(tunedNotificationInfoFirstEntry.NotificationTitle,
+					tunedNotificationInfoFirstEntry.NotificationDescription, tunedNotificationInfoFirstEntry.FullContent);
+			});
 		}
 		catch (Exception ex)
 		{

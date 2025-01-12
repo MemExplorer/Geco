@@ -197,13 +197,16 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 			try
 			{
 				GlobalContext.Logger.Info<DeviceUsageMonitorService>($"Executing {e.TriggerType} trigger notification.");
-				var tunedNotification = await geminiChat.SendMessage(notificationPrompt, settings: geminiSettings);
-				var deserializedStructuredMsg =
-					JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
-				var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();
-				NotificationSvc.SendInteractiveNotification(tunedNotificationInfoFirstEntry.NotificationTitle,
-					tunedNotificationInfoFirstEntry.NotificationDescription,
-					tunedNotificationInfoFirstEntry.FullContent);
+				await Utils.RetryAsyncTaskOrThrow<TaskCanceledException>(3, async () =>
+				{
+					var tunedNotification = await geminiChat.SendMessage(notificationPrompt, settings: geminiSettings);
+					var deserializedStructuredMsg =
+						JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
+					var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();
+					NotificationSvc.SendInteractiveNotification(tunedNotificationInfoFirstEntry.NotificationTitle,
+						tunedNotificationInfoFirstEntry.NotificationDescription,
+						tunedNotificationInfoFirstEntry.FullContent);
+				});
 			}
 			catch (Exception geminiError)
 			{
