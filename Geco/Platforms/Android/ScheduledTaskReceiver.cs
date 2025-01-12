@@ -171,7 +171,12 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		if (queryStatsData == null || queryStatsWifi == null)
 			throw new Exception("Network query is null!");
 
-		long totalScreenTimeMs = usageQueryStatsResult.Where(s => s.TotalTimeInForeground > 0)
+		var activeApps = usageQueryStatsResult.Where(s => s.TotalTimeInForeground > 0);
+		var activeAppsLogMessage = string.Join('\n', activeApps.OrderByDescending(x => x.TotalTimeInForeground)
+			.Select(x => $"{x.PackageName} : {TimeSpan.FromMilliseconds(x.TotalTimeInForeground)}"));
+		GlobalContext.Logger.Info<ScheduledTaskReceiver>($"Device Usage Info:\n{activeAppsLogMessage}");
+
+		long totalScreenTimeMs = activeApps
 			.Sum(s => s.TotalTimeInForeground);
 
 		// check if screen time is equal or greater than 7 hrs in ms
