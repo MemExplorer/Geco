@@ -5,13 +5,11 @@ using Android.App.Usage;
 using Android.Content;
 using Android.Net;
 using Android.Telephony;
-using CommunityToolkit.Maui.Alerts;
 using Geco.Core;
 using Geco.Core.Database;
 using Geco.Core.Models.ActionObserver;
 using Geco.Core.Models.Notification;
 using GoogleGeminiSDK;
-using GoogleGeminiSDK.Models.Components;
 using AndroidOS = Android.OS;
 
 namespace Geco;
@@ -20,7 +18,8 @@ namespace Geco;
 [IntentFilter(["com.ssbois.geco.ScheduledTaskReceiver"])]
 internal class ScheduledTaskReceiver : BroadcastReceiver
 {
-	static INotificationManagerService NotificationSvc = GlobalContext.Services.GetRequiredService<INotificationManagerService>();
+	static readonly INotificationManagerService NotificationSvc =
+		GlobalContext.Services.GetRequiredService<INotificationManagerService>();
 
 	public override async void OnReceive(Context? context, Intent? intent)
 	{
@@ -45,22 +44,28 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 
 	private async Task RunWeeklySummaryNotification()
 	{
+		GlobalContext.Logger.Info<ScheduledTaskReceiver>("Running weekly report...");
 		string? likelihoodPrompt = await ConstructLikelihoodPrompt();
 		if (likelihoodPrompt == null)
 			return;
 
+		GlobalContext.Logger.Info<ScheduledTaskReceiver>("Created weekly report likelihood prompt.");
 		try
 		{
+			GlobalContext.Logger.Info<ScheduledTaskReceiver>("Executing Scheduled Weekly Summary Notification.");
 			var geminiClient = GlobalContext.Services.GetRequiredService<GeminiChat>();
-			var geminiSettings = GlobalContext.Services.GetKeyedService<GeminiSettings>(GlobalContext.GeminiNotification);
+			var geminiSettings =
+				GlobalContext.Services.GetKeyedService<GeminiSettings>(GlobalContext.GeminiNotification);
 			var weeklyReportResponse = await geminiClient.SendMessage(likelihoodPrompt, settings: geminiSettings);
-			var deserializedWeeklyReport = JsonSerializer.Deserialize<List<TunedNotificationInfo>> (weeklyReportResponse.Text!)!;
+			var deserializedWeeklyReport =
+				JsonSerializer.Deserialize<List<TunedNotificationInfo>>(weeklyReportResponse.Text!)!;
 			var firstItem = deserializedWeeklyReport.First();
-			NotificationSvc.SendInteractiveNotification(firstItem.NotificationTitle, firstItem.NotificationDescription, firstItem.NotificationDescription);
+			NotificationSvc.SendInteractiveNotification(firstItem.NotificationTitle, firstItem.NotificationDescription,
+				firstItem.FullContent);
 		}
 		catch (Exception ex)
 		{
-			GlobalContext.Logger.Error<ScheduledTaskReceiver>(ex);
+			GlobalContext.Logger.Error<ScheduledTaskReceiver>(ex, "Weekly summary notification resulted into an error.");
 		}
 	}
 
@@ -91,18 +96,26 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 			}
 		}
 
-		return await promptRepo.GetLikelihoodPrompt(currentWeekResult.Value.Probability, currentWeekResult.Value.PositiveComputation,
-					currentWeekResult.Value.Frequency);
+		return await promptRepo.GetLikelihoodPrompt(currentWeekResult.Value.Probability,
+			currentWeekResult.Value.PositiveComputation,
+			currentWeekResult.Value.Frequency);
 	}
 
-	private (string PositiveComputation, string Frequency, string Probability)? GetLikelihoodPromptFromRecords(Dictionary<DeviceInteractionTrigger, int> currentWeekTriggerRecords)
+	private (string PositiveComputation, string Frequency, string Probability)? GetLikelihoodPromptFromRecords(
+		Dictionary<DeviceInteractionTrigger, int> currentWeekTriggerRecords)
 	{
-		var chargingPositive = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.ChargingSustainable, 0);
-		var chargingNegative = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.ChargingUnsustainable, 0);
-		var networkUsagePositive = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.NetworkUsageSustainable, 0);
-		var networkUsageNegative = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.NetworkUsageUnsustainable, 0);
-		var deviceUsagePositive = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.DeviceUsageSustainable, 0);
-		var deviceUsageNegative = currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.DeviceUsageUnsustainable, 0);
+		int chargingPositive =
+			currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.ChargingSustainable, 0);
+		int chargingNegative =
+			currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.ChargingUnsustainable, 0);
+		int networkUsagePositive =
+			currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.NetworkUsageSustainable, 0);
+		int networkUsageNegative =
+			currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.NetworkUsageUnsustainable, 0);
+		int deviceUsagePositive =
+			currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.DeviceUsageSustainable, 0);
+		int deviceUsageNegative =
+			currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.DeviceUsageUnsustainable, 0);
 
 		if (chargingPositive == 0 && chargingNegative == 0)
 			return null;
@@ -126,16 +139,14 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		string currSustainableProportionalProbability = Math.Round(currWeekComputationResult.PositiveProbs, 2)
 			.ToString(CultureInfo.InvariantCulture) + "%";
 
-		return (currWeekComputationStr.PositiveComputation, currWeekFrequencyStr, currSustainableProportionalProbability);
+		return (currWeekComputationStr.PositiveComputation, currWeekFrequencyStr,
+			currSustainableProportionalProbability);
 	}
 
 	private async Task RunDeviceUsageLogger()
 	{
-		var svcProvider = App.Current?.Handler.MauiContext?.Services!;
-		var triggerRepo = svcProvider.GetService<TriggerRepository>();
-		if (triggerRepo == null)
-			throw new Exception("TriggerRepository should not be null!");
-
+		GlobalContext.Logger.Info<ScheduledTaskReceiver>("Running daily activity logger...");
+		var triggerRepo = GlobalContext.Services.GetRequiredService<TriggerRepository>();
 		var networkStatsManager = (NetworkStatsManager?)Platform.AppContext.GetSystemService("netstats");
 		var usageStatsManager = (UsageStatsManager?)Platform.AppContext.GetSystemService("usagestats");
 		if (usageStatsManager == null || networkStatsManager == null)
@@ -145,7 +156,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		long currTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 		long dayBeforeTimestamp = currTime - 86_400_000; // subtract current time by 1 day in ms
 		var usageQueryStatsResult =
-			usageStatsManager?.QueryUsageStats(UsageStatsInterval.Daily, dayBeforeTimestamp, currTime);
+			usageStatsManager.QueryUsageStats(UsageStatsInterval.Daily, dayBeforeTimestamp, currTime);
 		if (usageQueryStatsResult == null)
 			throw new Exception("Usage stats query is null");
 
@@ -178,6 +189,8 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		// Verify if the user has used geco search within the last 24 hours
 		if (!await triggerRepo.IsTriggerInCooldown(DeviceInteractionTrigger.BrowserUsageSustainable, 86_400))
 			await CreateUnsustainableNotification(DeviceInteractionTrigger.BrowserUsageUnsustainable);
+
+		GlobalContext.Logger.Info<ScheduledTaskReceiver>("Finished running daily activity logger.");
 	}
 
 	private async Task CreateUnsustainableNotification(DeviceInteractionTrigger triggerType)
@@ -188,17 +201,17 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		string notificationPrompt = await promptRepo.GetPrompt(triggerType);
 		try
 		{
+			GlobalContext.Logger.Info<ScheduledTaskReceiver>($"Executing {triggerType} notification from daily activity logger.");
 			var tunedNotification = await geminiClient.SendMessage(notificationPrompt, settings: geminiSettings);
 			var deserializedStructuredMsg =
 				JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
 			var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();
-			(string Title, string Description) notificationInfo = (tunedNotificationInfoFirstEntry.NotificationTitle,
-				tunedNotificationInfoFirstEntry.NotificationDescription);
-			NotificationSvc.SendInteractiveNotification(notificationInfo.Title, notificationInfo.Description);
+			NotificationSvc.SendInteractiveNotification(tunedNotificationInfoFirstEntry.NotificationTitle,
+				tunedNotificationInfoFirstEntry.NotificationDescription, tunedNotificationInfoFirstEntry.FullContent);
 		}
 		catch (Exception ex)
 		{
-			GlobalContext.Logger.Error<ScheduledTaskReceiver>(ex);
+			GlobalContext.Logger.Error<ScheduledTaskReceiver>(ex, "Daily activity notification resulted into an error.");
 		}
 	}
 

@@ -7,9 +7,9 @@ namespace Geco.Core.Database;
 public class PromptRepository : DbRepositoryBase
 {
 	// Database table blueprint
-	internal override TblSchema[]? TableSchemas =>
+	internal override TblSchema[] TableSchemas =>
 	[
-		new TblSchema("TblPrompt", [
+		new("TblPrompt", [
 			new TblField("Category", TblFieldType.Integer),
 			new TblField("Content", TblFieldType.Text)
 		])
@@ -30,8 +30,7 @@ public class PromptRepository : DbRepositoryBase
 		return await BuildPrompt(PromptCategory.SearchCtgBasedTemp,
 			new
 			{
-				PredefinedTopic = $"Sustainable {predefinedTopic}",
-				StoredPromptRefinement = randomPromptRefinement
+				PredefinedTopic = $"Sustainable {predefinedTopic}", StoredPromptRefinement = randomPromptRefinement
 			});
 	}
 
@@ -93,11 +92,11 @@ public class PromptRepository : DbRepositoryBase
 			((int)PromptCategory.SearchCtgBasedTemp,
 				"Using the tone of a search engine and based on the topic of {PredefinedTopic}, generate three responses focusing on the {StoredPromptRefinement}."),
 			((int)PromptCategory.TriggerNotifTemp,
-				"Given the unsustainable action based on {ActionTrigger}, the user overstepped the sustainable baseline data {SustainableBaselineData}. Give a notification-like message focusing on {StoredPromptRefinement} and explicitly include the exact and complete given sustainable baseline data in the notification description. The title of the notification should point out the unsustainable action while the description should always be in passive voice and shall be one sentence only."),
+				"Given the unsustainable action based on {ActionTrigger}, the user overstepped the sustainable baseline data of {SustainableBaselineData}. Give a notification-like message for NotificationDescription, focusing on {StoredPromptRefinement}, explicitly include the exact and complete given sustainable baseline data in the notification description. The title of the notification, the NotificationTitle, should point out the unsustainable action while the description should always be in passive voice and shall be one sentence only. Also, provide an analytical overview in HTML format, for the 'FullContent' regarding this unsustainable action. Highlight on why the user should be aware of this and how the correction of this action will be of benefit in terms of achieving sustainability."),
 			((int)PromptCategory.LikelihoodWithPrevDataTemp,
-				"The current computed likelihood of sustainable use of mobile is {CurrentSustainabilityLikelihood}, the computation is as follows {CurrentLikelihoodComputation}. The values used are based on frequency, specifically: {CurrentFrequencyData}. The previous week computed likelihood of sustainable use of mobile is {PreviousSustainabilityLikelihood}, its computation is as follows {PreviousLikelihoodComputation}. The previous week computation made use of these frequencies: {PreviousFrequencyData}. Provide an analytical overview regarding the given sustainability data while including recommendations to improve involved sustainable practice. Also, if the previous week data is given, perform a comparison of the current and previous sustainability likelihood computation and value."),
+				"The current computed likelihood of sustainable use of mobile is {CurrentSustainabilityLikelihood}, the computation is as follows {CurrentLikelihoodComputation}. The values used are based on frequency, specifically: {CurrentFrequencyData}. The previous week computed likelihood of sustainable use of mobile is {PreviousSustainabilityLikelihood}, its computation is as follows {PreviousLikelihoodComputation}. The previous week computation made use of these frequencies: {PreviousFrequencyData}. For the property 'FullContent', provide a html of an analytical overview to the property regarding the given sustainability data while including recommendation to improve involved sustainable practice. For the other properties, keep it simple and as much as possible do not use symbols. Also, perform a comparison of the current and previous sustainability likelihood computation and value."),
 			((int)PromptCategory.LikelihoodNoPrevDataTemp,
-				"The current computed likelihood of sustainable use of mobile is {CurrentSustainabilityLikelihood}, the computation is as follows {CurrentLikelihoodComputation}. The values used are based on frequency, specifically: {CurrentFrequencyData}. Provide an analytical overview regarding the given sustainability data while including recommendation to improve involved sustainable practice."),
+				"The current computed likelihood of sustainable use of mobile is {CurrentSustainabilityLikelihood}, the computation is as follows {CurrentLikelihoodComputation}. The values used are based on frequency, specifically: {CurrentFrequencyData}. For the property 'FullContent', provide a html of an analytical overview to the property regarding the given sustainability data while including recommendation to improve involved sustainable practice. For the other properties, keep it simple and as much as possible do not use symbols."),
 			((int)PromptCategory.EnergySearchRefinement, "Awareness and Advocacy"),
 			((int)PromptCategory.EnergySearchRefinement, "Comparative Analysis"),
 			((int)PromptCategory.EnergySearchRefinement, "Technological Innovations"),

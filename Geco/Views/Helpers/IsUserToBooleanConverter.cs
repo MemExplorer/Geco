@@ -3,10 +3,10 @@ using Microsoft.Extensions.AI;
 
 namespace Geco.Views.Helpers;
 
-public class IsModelToBooleanConverter : IValueConverter
+public class IsUserToBooleanConverter : IValueConverter
 {
 	public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
-		value is ChatRole { Value: "model" };
+		value is ChatRole { Value: "user" };
 
 	public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
 		throw new NotImplementedException();

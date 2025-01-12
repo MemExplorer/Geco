@@ -6,9 +6,9 @@ public record BayesTheoremAttribute(int Positive, int Negative);
 
 public class BayesTheorem
 {
-	const double ALPHA = 0.1;
+	const double Alpha = 0.1;
 	readonly Dictionary<string, BayesTheoremAttribute> _frequencyTbl = new();
-	private bool _needSmoothing = false;
+	private bool _needSmoothing;
 
 	public void AppendData(string attrName, int positive, int negative)
 	{
@@ -52,11 +52,11 @@ public class BayesTheorem
 				positiveComputation.Append("((");
 				positiveComputation.Append(x.Positive);
 				positiveComputation.Append('+');
-				positiveComputation.Append(ALPHA);
+				positiveComputation.Append(Alpha);
 				positiveComputation.Append(")/(");
 				positiveComputation.Append(attrTotalFreq);
 				positiveComputation.Append('+');
-				positiveComputation.Append(ALPHA);
+				positiveComputation.Append(Alpha);
 				positiveComputation.Append('*');
 				positiveComputation.Append(kValue);
 				positiveComputation.Append(")) * ");
@@ -64,11 +64,11 @@ public class BayesTheorem
 				negativeComputation.Append("((");
 				negativeComputation.Append(x.Negative);
 				negativeComputation.Append('+');
-				negativeComputation.Append(ALPHA);
+				negativeComputation.Append(Alpha);
 				negativeComputation.Append(")/(");
 				negativeComputation.Append(attrTotalFreq);
 				negativeComputation.Append('+');
-				negativeComputation.Append(ALPHA);
+				negativeComputation.Append(Alpha);
 				negativeComputation.Append('*');
 				negativeComputation.Append(kValue);
 				negativeComputation.Append(")) * ");
@@ -94,11 +94,11 @@ public class BayesTheorem
 			positiveComputation.Append("((");
 			positiveComputation.Append(totalPositiveAttr);
 			positiveComputation.Append('+');
-			positiveComputation.Append(ALPHA);
+			positiveComputation.Append(Alpha);
 			positiveComputation.Append(")/(");
 			positiveComputation.Append(sumTblFrequency);
 			positiveComputation.Append('+');
-			positiveComputation.Append(ALPHA);
+			positiveComputation.Append(Alpha);
 			positiveComputation.Append('*');
 			positiveComputation.Append(kValue);
 			positiveComputation.Append("))");
@@ -106,11 +106,11 @@ public class BayesTheorem
 			negativeComputation.Append("((");
 			negativeComputation.Append(totalNegativeAttr);
 			negativeComputation.Append('+');
-			negativeComputation.Append(ALPHA);
+			negativeComputation.Append(Alpha);
 			negativeComputation.Append(")/(");
 			negativeComputation.Append(sumTblFrequency);
 			negativeComputation.Append('+');
-			negativeComputation.Append(ALPHA);
+			negativeComputation.Append(Alpha);
 			negativeComputation.Append('*');
 			negativeComputation.Append(kValue);
 			negativeComputation.Append("))");
@@ -144,19 +144,21 @@ public class BayesTheorem
 		{
 			double attrTotalFreq = x.Positive + x.Negative;
 			if (_needSmoothing)
-				return a * ((x.Positive + ALPHA) / (attrTotalFreq + ALPHA * kValue));
-			else
-				return a * (x.Positive / attrTotalFreq);
-		}) * (_needSmoothing ? ((totalPositiveAttr + ALPHA) / (sumTblFrequency + ALPHA * kValue)) : (totalPositiveAttr / sumTblFrequency));
+				return a * ((x.Positive + Alpha) / (attrTotalFreq + Alpha * kValue));
+			return a * (x.Positive / attrTotalFreq);
+		}) * (_needSmoothing
+			? (totalPositiveAttr + Alpha) / (sumTblFrequency + Alpha * kValue)
+			: totalPositiveAttr / sumTblFrequency);
 
 		double negativePosterior = _frequencyTbl.Values.Aggregate(1.0, (a, x) =>
 		{
 			double attrTotalFreq = x.Positive + x.Negative;
 			if (_needSmoothing)
-				return a * ((x.Negative + ALPHA) / (attrTotalFreq + ALPHA * kValue));
-			else
-				return a * (x.Negative / attrTotalFreq);
-		}) * (_needSmoothing ? ((totalNegativeAttr + ALPHA) / (sumTblFrequency + ALPHA * kValue)) : (totalNegativeAttr / sumTblFrequency));
+				return a * ((x.Negative + Alpha) / (attrTotalFreq + Alpha * kValue));
+			return a * (x.Negative / attrTotalFreq);
+		}) * (_needSmoothing
+			? (totalNegativeAttr + Alpha) / (sumTblFrequency + Alpha * kValue)
+			: totalNegativeAttr / sumTblFrequency);
 
 
 		// proportional probability

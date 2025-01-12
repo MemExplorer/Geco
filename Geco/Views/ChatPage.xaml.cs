@@ -6,7 +6,7 @@ namespace Geco.Views;
 
 public partial class ChatPage : ContentPage
 {
-	ChatViewModel CurrentViewModel { get; init; }
+	ChatViewModel CurrentViewModel { get; }
 
 	public ChatPage(ChatViewModel vm)
 	{
@@ -40,7 +40,7 @@ public partial class ChatPage : ContentPage
 			var currentHistory = appShellCtx.ChatHistoryList.First(x => x.Id == Parent.ClassId);
 
 			// load conversation data
-			await chatRepo!.LoadChats(currentHistory);
+			await chatRepo.LoadChats(currentHistory);
 			ctx.LoadHistory(currentHistory);
 		}
 	}
@@ -53,5 +53,25 @@ public partial class ChatPage : ContentPage
 		if (sender is SfChip c)
 			CurrentViewModel.ChipClick(c, ChatEntry);
 	}
-		
+
+	private void WebView_Navigated(object sender, WebNavigatedEventArgs e)
+	{
+		if (sender is WebView w)
+		{
+			string backgroundColor = GecoSettings.DarkMode ? "#191919" : "#e3e3e3";
+			string textColor = GecoSettings.DarkMode ? "#ffffff" : "#000000";
+
+			w.EvaluateJavaScriptAsync(@$"
+				(function() {{
+					function modifyStyles(backgroundColor, textColor) {{
+						document.body.style.overflow = 'hidden'; 
+						document.body.style.backgroundColor = backgroundColor; 
+						document.body.style.color = textColor; 
+					}}
+
+					modifyStyles('{backgroundColor}', '{textColor}');
+				}})();
+			");
+		}
+	}
 }

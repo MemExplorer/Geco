@@ -5,7 +5,6 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
 using AndroidX.Core.Content;
-using CommunityToolkit.Maui.Alerts;
 using Geco.Core.Database;
 using Geco.Core.Models.ActionObserver;
 using Geco.Core.Models.Notification;
@@ -21,21 +20,16 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 	const int ServiceId = 1000;
 	static bool _hasStarted;
 
-	private INotificationManagerService NotificationSvc { get; }
-	private IDeviceStateObserver[] Observers { get; }
+	private INotificationManagerService NotificationSvc { get; } =
+		GlobalContext.Services.GetRequiredService<INotificationManagerService>();
 
-	public DeviceUsageMonitorService()
-	{
-		NotificationSvc = GlobalContext.Services.GetRequiredService<INotificationManagerService>()!;
-		Observers = [.. GlobalContext.Services.GetServices<IDeviceStateObserver>()];
-	}
+	private IDeviceStateObserver[] Observers { get; } = [.. GlobalContext.Services.GetServices<IDeviceStateObserver>()];
 
 	public override StartCommandResult OnStartCommand(Intent? intent, [GeneratedEnum] StartCommandFlags flags,
 		int startId)
 	{
 		if (intent?.Action == "START_SERVICE" && _hasStarted)
 		{
-			
 			if (NotificationSvc is not NotificationManagerService nms)
 				return StartCommandResult.Sticky;
 
@@ -119,16 +113,16 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 	public static void CreateDeviceUsageScheduledLogger()
 	{
 		DateTime nextDay;
-		if(DateTime.Now > GecoSettings.DailyReportDateTime.Subtract(new TimeSpan(0, 5, 0)))
+		if (DateTime.Now > GecoSettings.DailyReportDateTime.Subtract(new TimeSpan(0, 5, 0)))
 		{
 			nextDay = DateTime.Today.AddDays(1);
 			GecoSettings.DailyReportDateTime = nextDay;
-		}	
+		}
 		else
 			nextDay = GecoSettings.DailyReportDateTime;
 
 		InternalCreateScheduledTask("schedtaskcmd", nextDay);
-	}	
+	}
 
 	private static void InternalCancelScheduledTask(string action)
 	{
@@ -177,15 +171,15 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 			// Log trigger first
 			switch (e.TriggerType)
 			{
-				case DeviceInteractionTrigger.ChargingUnsustainable:
-				case DeviceInteractionTrigger.ChargingSustainable:
-					await triggerRepo.LogTrigger(e.TriggerType, 1);
-					break;
-				// don't count the triggers below
-				case DeviceInteractionTrigger.NetworkUsageUnsustainable:
-				case DeviceInteractionTrigger.LocationUsageUnsustainable:
-					await triggerRepo.LogTrigger(e.TriggerType, 0);
-					break;
+			case DeviceInteractionTrigger.ChargingUnsustainable:
+			case DeviceInteractionTrigger.ChargingSustainable:
+				await triggerRepo.LogTrigger(e.TriggerType, 1);
+				break;
+			// don't count the triggers below
+			case DeviceInteractionTrigger.NetworkUsageUnsustainable:
+			case DeviceInteractionTrigger.LocationUsageUnsustainable:
+				await triggerRepo.LogTrigger(e.TriggerType, 0);
+				break;
 			}
 
 			// ensure that we are only creating notifications for unsustainable trigger types
@@ -194,22 +188,26 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 
 
 			var promptRepo = GlobalContext.Services.GetRequiredService<PromptRepository>();
-			var geminiSettings = GlobalContext.Services.GetKeyedService<GeminiSettings>(GlobalContext.GeminiNotification);
+			var geminiSettings =
+				GlobalContext.Services.GetKeyedService<GeminiSettings>(GlobalContext.GeminiNotification);
 			var geminiChat = GlobalContext.Services.GetRequiredService<GeminiChat>();
 
 			// create notification for the unsustainable trigger
 			string notificationPrompt = await promptRepo.GetPrompt(e.TriggerType);
 			try
 			{
+				GlobalContext.Logger.Info<DeviceUsageMonitorService>($"Executing {e.TriggerType} trigger notification.");
 				var tunedNotification = await geminiChat.SendMessage(notificationPrompt, settings: geminiSettings);
 				var deserializedStructuredMsg =
 					JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
 				var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();
-				NotificationSvc.SendInteractiveNotification(tunedNotificationInfoFirstEntry.NotificationTitle, tunedNotificationInfoFirstEntry.NotificationDescription);
+				NotificationSvc.SendInteractiveNotification(tunedNotificationInfoFirstEntry.NotificationTitle,
+					tunedNotificationInfoFirstEntry.NotificationDescription,
+					tunedNotificationInfoFirstEntry.FullContent);
 			}
 			catch (Exception geminiError)
 			{
-				GlobalContext.Logger.Error<DeviceUsageMonitorService>(geminiError);
+				GlobalContext.Logger.Error<DeviceUsageMonitorService>(geminiError, "Trigger notification resulted into an error.");
 			}
 		}
 		catch (Exception ex)

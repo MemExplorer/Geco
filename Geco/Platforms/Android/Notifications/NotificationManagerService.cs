@@ -47,9 +47,9 @@ public class NotificationManagerService : INotificationManagerService
 		_compatManager.Notify(_messageId, notification);
 	}
 
-	public Notification? SendPersistentNotification(string title, string description)
+	public Notification SendPersistentNotification(string title, string description)
 	{
-		var notificationInst = InternalSendNotification(title, description, description, false, false)!;
+		var notificationInst = InternalSendNotification(title, description, description, false, false);
 		notificationInst.Flags = NotificationFlags.OngoingEvent;
 		return notificationInst;
 	}
@@ -60,7 +60,7 @@ public class NotificationManagerService : INotificationManagerService
 	public void SendInteractiveNotification(string title, string description, string message) =>
 		InternalSendNotification(title, description, message, true);
 
-	private Notification? InternalSendNotification(string title, string description, string message, bool interactive,
+	private Notification InternalSendNotification(string title, string description, string message, bool interactive,
 		bool notify = true)
 	{
 		if (!_channelInitialized)
@@ -92,6 +92,7 @@ public class NotificationManagerService : INotificationManagerService
 			var intent = new Intent(Platform.AppContext, typeof(MainActivity));
 			intent.SetAction(IntentActionName);
 			intent.PutExtra("message", message);
+			intent.PutExtra("title", title);
 
 			var pendingIntentFlags = Build.VERSION.SdkInt >= BuildVersionCodes.S
 #pragma warning disable CA1416

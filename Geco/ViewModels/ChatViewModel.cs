@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
@@ -14,8 +13,10 @@ public partial class ChatViewModel : ObservableObject
 {
 	[ObservableProperty] ObservableCollection<ChatMessage> _chatMessages = [];
 	[ObservableProperty] bool _isAutoCompleteVisible = true;
+	[ObservableProperty] bool _isChatEnabled = true;
 	GeminiChat GeminiClient { get; }
 	string? HistoryId { get; set; }
+	string? ActionTitle { get; set; }
 
 	public ChatViewModel()
 	{
@@ -31,13 +32,12 @@ public partial class ChatViewModel : ObservableObject
 	async Task GeminiClientOnChatReceive(ChatReceiveEventArgs e)
 	{
 		// append received message to chat UI
-		var currentShell = (AppShell)Shell.Current;
 		var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
 		ChatMessages.Add(e.Message);
 
 		// save chat message to database
 		if (HistoryId != null)
-			await chatRepo!.AppendChat(HistoryId, e.Message);
+			await chatRepo.AppendChat(HistoryId, e.Message);
 	}
 
 	/// <summary>
@@ -63,36 +63,29 @@ public partial class ChatViewModel : ObservableObject
 #if ANDROID
 		// handle notification message
 		var intent = Platform.CurrentActivity?.Intent;
-		if (intent?.Action == "GecoNotif")
-		{
-			string? msgContent = intent.GetStringExtra("message");
-			var chatMsg = new ChatMessage(new ChatRole("model"), msgContent);
-			chatMsg.AdditionalProperties = new AdditionalPropertiesDictionary();
-			chatMsg.AdditionalProperties["id"] = (ulong)0;
-			ChatMessages.Add(chatMsg);
-			intent.SetAction(null);
-		}
+		if (intent?.Action != "GecoNotif")
+			return;
+
+		string? msgContent = intent.GetStringExtra("message");
+		ActionTitle = intent.GetStringExtra("title");
+		var chatMsg = new ChatMessage(new ChatRole("model"), msgContent);
+		chatMsg.AdditionalProperties = new AdditionalPropertiesDictionary { ["id"] = (ulong)0 };
+		ChatMessages.Add(chatMsg);
+		intent.SetAction(null);
 #endif
 	}
 
 	internal void ChipClick(SfChip chip, Editor chatEditor)
 	{
 		IsAutoCompleteVisible = false;
-		switch (chip.Text)
+		chatEditor.Text = chip.Text switch
 		{
-			case "Impacts of fast fashion":
-				chatEditor.Text = "Can you tell me what are the impacts of the fast fashion to the environment?";
-			break;
-			case "Surprise me":
-				chatEditor.Text = "Surprise me with anything about sustainability.";
-			break;
-			case "Sustainability Advice":
-				chatEditor.Text = "Can you give me some advice related to being more sustainable?";
-			break;
-			case "Tutorial":
-				chatEditor.Text = "Can you teach me how to use this application?";
-			break;
-		}
+			"Impacts of fast fashion" => "Can you tell me what are the impacts of the fast fashion to the environment?",
+			"Surprise me" => "Surprise me with anything about sustainability.",
+			"Sustainability Advice" => "Can you give me some advice related to being more sustainable?",
+			"Tutorial" => "Can you teach me how to use this application?",
+			_ => chatEditor.Text
+		};
 	}
 
 	internal void ChatTextChanged(TextChangedEventArgs e)
@@ -121,6 +114,8 @@ public partial class ChatViewModel : ObservableObject
 
 		try
 		{
+			IsChatEnabled = false;
+
 			// send user message to Gemini and append its response
 			await GeminiClient.SendMessage(inputContent, settings: geminiConfig);
 		}
@@ -129,6 +124,7 @@ public partial class ChatViewModel : ObservableObject
 			GlobalContext.Logger.Error<ChatViewModel>(ex);
 		}
 
+		IsChatEnabled = true;
 		if (isNewChat)
 			await currentShell.GoToAsync("//" + HistoryId);
 	}
@@ -142,7 +138,7 @@ public partial class ChatViewModel : ObservableObject
 		{
 			var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
 			var shellViewModel = (AppShellViewModel)currentShell.BindingContext;
-			string chatTitle = CreateChatTitle(gecoInitiated ? ChatMessages.First().Text! : inputContent);
+			string chatTitle = CreateChatTitle(gecoInitiated ? ActionTitle! : inputContent);
 			var historyInstance = new GecoConversation(Guid.NewGuid().ToString(), chatTitle,
 				DateTimeOffset.UtcNow.ToUnixTimeSeconds(), ChatMessages);
 
@@ -150,7 +146,7 @@ public partial class ChatViewModel : ObservableObject
 			shellViewModel.ChatHistoryList.Add(historyInstance);
 
 			// save to database
-			await chatRepo!.AppendHistory(historyInstance);
+			await chatRepo.AppendHistory(historyInstance);
 
 			// set new history id
 			HistoryId = historyInstance.Id;

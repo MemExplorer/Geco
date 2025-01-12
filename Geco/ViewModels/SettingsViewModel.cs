@@ -33,7 +33,7 @@ public partial class SettingsViewModel : ObservableObject
 		var currShellViewModel = (AppShellViewModel)currentShell.BindingContext;
 		var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
 		currShellViewModel.ChatHistoryList.Clear();
-		await chatRepo!.DeleteAllHistory();
+		await chatRepo.DeleteAllHistory();
 	}
 
 	[RelayCommand]
