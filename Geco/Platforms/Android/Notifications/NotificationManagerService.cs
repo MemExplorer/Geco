@@ -2,7 +2,6 @@ using _Microsoft.Android.Resource.Designer;
 using Android.App;
 using Android.Content;
 using Android.Graphics;
-using Android.OS;
 using AndroidX.Core.App;
 using Geco.Core.Models.Notification;
 using String = Java.Lang.String;
@@ -94,11 +93,9 @@ public class NotificationManagerService : INotificationManagerService
 			intent.PutExtra("message", message);
 			intent.PutExtra("title", title);
 
-			var pendingIntentFlags = Build.VERSION.SdkInt >= BuildVersionCodes.S
-#pragma warning disable CA1416
+			var pendingIntentFlags = OperatingSystem.IsAndroidVersionAtLeast(31)
 				? PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable
 				: PendingIntentFlags.UpdateCurrent;
-#pragma warning restore CA1416
 
 			var pendingIntent =
 				PendingIntent.GetActivity(Platform.AppContext, _pendingIntentId++, intent, pendingIntentFlags);
@@ -111,18 +108,14 @@ public class NotificationManagerService : INotificationManagerService
 	void CreateNotificationChannel()
 	{
 		// Create the notification channel, but only on API 26+.
-		if (Build.VERSION.SdkInt < BuildVersionCodes.O)
+		if (!OperatingSystem.IsAndroidVersionAtLeast(26))
 			return;
 
 		var channelNameJava = new String(ChannelName);
-#pragma warning disable CA1416
-		var channel = new NotificationChannel(ChannelId, channelNameJava, NotificationImportance.None);
-#pragma warning restore CA1416
+		var channel = new NotificationChannel(ChannelId, channelNameJava, NotificationImportance.Default);
 		// Register the channel
 		var manager = (NotificationManager)Platform.AppContext.GetSystemService(Context.NotificationService)!;
-#pragma warning disable CA1416
 		manager.CreateNotificationChannel(channel);
-#pragma warning restore CA1416
 		_channelInitialized = true;
 	}
 }
