@@ -115,7 +115,7 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 		DateTime nextDay;
 		if (DateTime.Now > GecoSettings.DailyReportDateTime.Subtract(new TimeSpan(0, 5, 0)))
 		{
-			nextDay = DateTime.Today.AddDays(1);
+			nextDay = DateTime.Today.AddDays(1).AddMinutes(30);
 			GecoSettings.DailyReportDateTime = nextDay;
 		}
 		else

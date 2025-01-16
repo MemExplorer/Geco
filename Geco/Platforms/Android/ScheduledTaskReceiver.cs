@@ -27,13 +27,13 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		{
 			if (intent?.Action == "schedtaskcmd")
 			{
-				await RunDeviceUsageLogger();
 				DeviceUsageMonitorService.CreateDeviceUsageScheduledLogger();
+				await RunDeviceUsageLogger();
 			}
 			else if (intent?.Action == "weektasksummarycmd")
 			{
-				await RunWeeklySummaryNotification();
 				DeviceUsageMonitorService.CreateScheduledWeeklySummary();
+				await RunWeeklySummaryNotification();
 			}
 		}
 		catch (Exception ex)
