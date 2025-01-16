@@ -158,10 +158,6 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		var fetchSubId = await GetSubscriptionId();
 		long currTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 		long dayBeforeTimestamp = currTime - 86_400_000; // subtract current time by 1 day in ms
-		var usageQueryStatsResult =
-			usageStatsManager.QueryUsageStats(UsageStatsInterval.Daily, dayBeforeTimestamp, currTime);
-		if (usageQueryStatsResult == null)
-			throw new Exception("Usage stats query is null");
 
 		var queryStatsData = networkStatsManager.QuerySummaryForDevice(ConnectivityType.Mobile, fetchSubId.SubId,
 			dayBeforeTimestamp, currTime);
@@ -171,13 +167,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		if (queryStatsData == null || queryStatsWifi == null)
 			throw new Exception("Network query is null!");
 
-		var activeApps = usageQueryStatsResult.Where(s => s.TotalTimeInForeground > 0);
-		var activeAppsLogMessage = string.Join('\n', activeApps.OrderByDescending(x => x.TotalTimeInForeground)
-			.Select(x => $"{x.PackageName} : {TimeSpan.FromMilliseconds(x.TotalTimeInForeground)}"));
-		GlobalContext.Logger.Info<ScheduledTaskReceiver>($"Device Usage Info:\n{activeAppsLogMessage}");
-
-		long totalScreenTimeMs = activeApps
-			.Sum(s => s.TotalTimeInForeground);
+		long totalScreenTimeMs = GetDeviceScreenTime(usageStatsManager);
 
 		// check if screen time is equal or greater than 7 hrs in ms
 		if (totalScreenTimeMs >= 25_200_000)
@@ -199,6 +189,81 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 			await CreateUnsustainableNotification(DeviceInteractionTrigger.BrowserUsageUnsustainable);
 
 		GlobalContext.Logger.Info<ScheduledTaskReceiver>("Finished running daily activity logger.");
+	}
+
+	// Inspired from https://stackoverflow.com/a/45380396
+	private long GetDeviceScreenTime(UsageStatsManager usageStatsManager)
+	{
+		var allEvents = new List<UsageEvents.Event>();
+		var appMap = new Dictionary<string, AppEventInfo>();
+		var appStateMap = new Dictionary<string, UsageEvents.Event?>();
+
+		// I have verified that local time is more accurate than UTC
+		long currTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+		long startTime = currTime - 86_400_000; // querying past 1 day
+
+		var usageEvents = usageStatsManager.QueryEvents(startTime, currTime);
+		if (usageEvents == null)
+			return 0;
+
+		// capturing all events in a array to compare with next element
+		// we assume that all subsequent events have a TimeStamp value that is equal to or greater than the previous one
+		UsageEvents.Event currentEvent;
+		while (usageEvents.HasNextEvent)
+		{
+			currentEvent = new UsageEvents.Event();
+			usageEvents.GetNextEvent(currentEvent);
+			switch(currentEvent.EventType)
+			{
+				case UsageEventType.MoveToForeground:
+				case UsageEventType.MoveToBackground:
+				case UsageEventType evt when OperatingSystem.IsAndroidVersionAtLeast(29) && evt == UsageEventType.ActivityStopped:
+				
+				if (currentEvent.PackageName == null || currentEvent.ClassName == null)
+					continue;
+
+				var key = currentEvent.PackageName + currentEvent.ClassName;
+
+				// taking it into a collection to access by package name
+				if (!appMap.ContainsKey(key))
+					appMap.Add(key, new AppEventInfo(currentEvent.PackageName, currentEvent.ClassName));
+
+				bool appResumed = currentEvent.EventType == UsageEventType.MoveToForeground;
+				if (appResumed && (appStateMap.ContainsKey(key) && appStateMap[key] != null))
+					throw new Exception("Unhandled case!");
+
+				// The app is either paused or stopped already
+				if (!appResumed && (appStateMap.ContainsKey(key) && appStateMap[key] == null))
+					continue;
+
+				if (appResumed)
+					appStateMap[key] = currentEvent;
+				else if (!appStateMap.ContainsKey(key))
+					continue; // skip when the first event is a paused or stopped event
+				else
+				{
+					// handle stop or pause
+					long timeElapsed = currentEvent.TimeStamp - appStateMap[key]!.TimeStamp;
+					appMap[key].TimeInForeground += timeElapsed;
+					appStateMap[key] = null;
+				}
+				break;
+			}
+		}
+
+		// log active app usage
+		var groupedData = appMap.GroupBy(x => x.Value.PackageName, y => y.Value.TimeInForeground).ToDictionary(x => x.Key, y => y.AsEnumerable().Sum());
+		var activeAppsLogMessage = string.Join('\n', groupedData.OrderByDescending(x => x.Value)
+			.Select(x => $"{x.Key} : {TimeSpan.FromMilliseconds(x.Value)}"));
+		GlobalContext.Logger.Info<ScheduledTaskReceiver>($"Device Usage Info:\n{activeAppsLogMessage}");
+		return appMap.Values.Sum(x => x.TimeInForeground);
+	}
+
+	class AppEventInfo(string PackageName, string ClassName)
+	{
+		public string PackageName = PackageName;
+		public string ClassName = ClassName;
+		public long TimeInForeground { get; set; } = 0;
 	}
 
 	private async Task CreateUnsustainableNotification(DeviceInteractionTrigger triggerType)
