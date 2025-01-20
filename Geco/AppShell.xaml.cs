@@ -28,6 +28,7 @@ public partial class AppShell : Shell
 		// register routes
 		Routing.RegisterRoute(nameof(SettingsPage), typeof(SettingsPage));
 		Routing.RegisterRoute(nameof(SearchResultPage), typeof(SearchResultPage));
+		Routing.RegisterRoute(nameof(WeeklyReportChatPage), typeof(WeeklyReportChatPage));
 	}
 
 	async Task AppShell_Loaded(EventArgs e)

@@ -8,8 +8,10 @@ using Android.Telephony;
 using Geco.Core;
 using Geco.Core.Database;
 using Geco.Core.Models.ActionObserver;
+using Geco.Core.Models.Chat;
 using Geco.Core.Models.Notification;
 using GoogleGeminiSDK;
+using Microsoft.Extensions.AI;
 using AndroidOS = Android.OS;
 
 namespace Geco;
@@ -62,6 +64,15 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 				var deserializedWeeklyReport =
 					JsonSerializer.Deserialize<List<TunedNotificationInfo>>(weeklyReportResponse.Text!)!;
 				var firstItem = deserializedWeeklyReport.First();
+				
+				// create chat history
+				var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
+				var chatMsg = new ChatMessage(new ChatRole("model"), firstItem.FullContent);
+				chatMsg.AdditionalProperties = new AdditionalPropertiesDictionary { ["id"] = (ulong)0 };
+				string chatTitle = firstItem.NotificationTitle;
+				var historyInstance = new GecoConversation(Guid.NewGuid().ToString(), HistoryType.WeeklyReportConversation, chatTitle,
+					DateTimeOffset.UtcNow.ToUnixTimeSeconds(), [chatMsg], firstItem.NotificationDescription, firstItem.FullContent);
+				await chatRepo.AppendHistory(historyInstance);
 				NotificationSvc.SendInteractiveNotification(firstItem.NotificationTitle, firstItem.NotificationDescription,
 					firstItem.FullContent);
 			});

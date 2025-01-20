@@ -39,7 +39,7 @@
         </StackLayout>
     </Shell.TitleView>
 
-    <!-- Default flyout Items (Chat, Search)-->
+    <!-- Default flyout Items (Chat, Search, Reports)-->
     <FlyoutItem x:Name="MainFlyout" FlyoutDisplayOptions="AsMultipleItems">
         <ShellContent ContentTemplate="{DataTemplate local:ChatPage}"
                       Title="Chat"
@@ -59,6 +59,16 @@
                 <FontImageSource Color="{AppThemeBinding Light=#262626, Dark=#D3D3D3}"
                                  FontFamily="FontAwesome"
                                  Glyph="{x:Static helpers:IconFont.MagnifyingGlass}" />
+            </ShellContent.Icon>
+        </ShellContent>
+        <ShellContent ContentTemplate="{DataTemplate local:ReportsPage}"
+                      Title="Weekly Report"
+                      ClassId="ReportsPage"
+                      Route="ReportsPage">
+            <ShellContent.Icon>
+                <FontImageSource Color="{AppThemeBinding Light=#262626, Dark=#D3D3D3}"
+                                 FontFamily="FontAwesome"
+                                 Glyph="{x:Static helpers:IconFont.Memo}" />
             </ShellContent.Icon>
         </ShellContent>
     </FlyoutItem>

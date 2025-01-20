@@ -178,6 +178,10 @@ public static class MauiProgram
 		builder.Services.AddSingleton<SearchViewModel>();
 		builder.Services.AddTransient<SearchResultPage>();
 		builder.Services.AddTransient<SearchResultViewModel>();
+		builder.Services.AddTransient<ReportsPage>();
+		builder.Services.AddTransient<ReportsViewModel>();
+		builder.Services.AddTransient<WeeklyReportChatPage>();
+		builder.Services.AddTransient<WeeklyReportChatViewModel>();
 		return builder;
 	}
 

@@ -17,6 +17,8 @@ public class ChatRepository : DbRepositoryBase
 			new TblField("Id", TblFieldType.Text, true),
 			new TblField("Type", TblFieldType.Integer),
 			new TblField("Title", TblFieldType.Integer),
+			new TblField("Description", TblFieldType.Text),
+			new TblField("FullContent", TblFieldType.Text),
 			new TblField("DateCreated", TblFieldType.Integer)
 		]),
 		new("TblChatMessage", [
@@ -32,8 +34,8 @@ public class ChatRepository : DbRepositoryBase
 		await Initialize();
 
 		using var db = await SqliteDb.GetTransient(DatabaseDir);
-		await db.ExecuteNonQuery("INSERT INTO TblChatHistory VALUES(?, ?, ?, ?)", history.Id, (long)history.Type, history.Title,
-			history.DateCreated);
+		await db.ExecuteNonQuery("INSERT INTO TblChatHistory VALUES(?, ?, ?, ?, ?, ?)", history.Id, (long)history.Type,
+			history.Title, history.Description, history.FullContent, history.DateCreated);
 		foreach (var message in history.Messages)
 			await AppendChat(history.Id, message);
 	}
@@ -59,11 +61,16 @@ public class ChatRepository : DbRepositoryBase
 		await Initialize();
 
 		using var db = await SqliteDb.GetTransient(DatabaseDir);
-		await using var historyReader = await db.ExecuteReader("SELECT * FROM TblChatHistory WHERE Type = ? ORDER BY DateCreated ASC", (long)historyType);
+		await using var historyReader =
+			await db.ExecuteReader("SELECT * FROM TblChatHistory WHERE Type = ? ORDER BY DateCreated ASC",
+				(long)historyType);
 		while (historyReader.Read())
 		{
-			var historyEntry = new GecoConversation((string)historyReader["Id"], (HistoryType)(long)historyReader["Type"], (string)historyReader["Title"],
-				(long)historyReader["DateCreated"], []);
+			object a = historyReader["Description"];
+			object b = historyReader["FullContent"];
+			var historyEntry = new GecoConversation((string)historyReader["Id"],
+				(HistoryType)(long)historyReader["Type"], (string)historyReader["Title"],
+				(long)historyReader["DateCreated"], [], (string?)a, (string?)b);
 			historyData.Add(historyEntry);
 		}
 	}
@@ -104,12 +111,12 @@ public class ChatRepository : DbRepositoryBase
 		await db.ExecuteNonQuery("DELETE FROM TblChatMessage WHERE HistoryId = ?", historyId);
 	}
 
-	public async Task DeleteAllHistory()
+	public async Task DeleteAllHistory(HistoryType historyType)
 	{
 		await Initialize();
 
-		using var db = await SqliteDb.GetTransient(DatabaseDir);
-		await db.ExecuteNonQuery("DELETE FROM TblChatHistory");
-		await db.ExecuteNonQuery("DELETE FROM TblChatMessage");
+		using var db = await SqliteDb.GetTransient(DatabaseDir); 
+		await db.ExecuteNonQuery("DELETE FROM TblChatMessage WHERE HistoryId IN (SELECT Id FROM TblChatHistory WHERE Type = ?)" , (long)historyType);
+		await db.ExecuteNonQuery("DELETE FROM TblChatHistory WHERE Type = ?", (long)historyType);
 	}
 }

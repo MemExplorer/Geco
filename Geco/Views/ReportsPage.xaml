@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Geco.ViewModels"
+             xmlns:chat="clr-namespace:Geco.Core.Models.Chat;assembly=Geco.Core"
+             xmlns:helpers="clr-namespace:Geco.Views.Helpers"
+             x:Class="Geco.Views.ReportsPage"
+             x:DataType="vm:ReportsViewModel"
+             Title="Weekly Report">
+    <ContentPage.Resources>
+        <helpers:HtmlConverter x:Key="HtmlConverter" />
+        <helpers:UnixTimeStampToStringConverter x:Key="UnixTimeStampToStringConverter"/>
+    </ContentPage.Resources>
+    <ContentPage.BindingContext>
+        <vm:ReportsViewModel />
+    </ContentPage.BindingContext>
+    <StackLayout Orientation="Vertical" Padding="0,10,0,0">
+        <CollectionView ItemsSource="{Binding WeeklyReportHistory}">
+            <CollectionView.EmptyView>
+                <Label Padding="0,300,0,0" Text="Currently, you have no weekly reports."
+                       HorizontalOptions="Center"  />
+            </CollectionView.EmptyView>
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="chat:GecoConversation">
+                    <Border Stroke="transparent"
+                            StrokeThickness="1"
+                            Padding="5"
+                            StrokeShape="RoundRectangle 10"
+                            BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped"
+                                                  CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+                        <StackLayout Padding="10">
+                            <Grid Padding="0,0,0,5" ColumnDefinitions="40*, 30*, auto">
+                                <VerticalStackLayout Grid.Column="0">
+                                    <Label 
+                                        Text="{Binding Title}"
+                                        FontAttributes="Bold"
+                                        FontSize="25"
+                                        FontFamily="Poppins"
+                                        LineBreakMode="TailTruncation" />
+                                    <Label
+                                        Text="{Binding DateCreated, Converter={StaticResource UnixTimeStampToStringConverter}}"
+                                        FontSize="12"
+                                        FontFamily="Poppins"
+                                        VerticalTextAlignment="Center"
+                                        LineBreakMode="TailTruncation" />
+                                </VerticalStackLayout>
+                                <Label Grid.Column="2" 
+                                       HorizontalOptions="End"
+                                       VerticalOptions="Start"
+                                       FontFamily="FontAwesome"
+                                       FontSize="20"
+                                       Margin="0,6,5,0"
+                                       Text="{x:Static helpers:IconFont.TrashCan}">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped"
+                                                              CommandParameter="{Binding .}"/>
+                                    </Label.GestureRecognizers>
+                                </Label>
+                            </Grid>
+                            <Grid>
+                                <WebView
+                                    MaximumHeightRequest="150"
+                                    Margin="0,0,0,3"
+                                    Navigated="WebView_OnNavigated"
+                                    Source="{Binding FullContent, Converter={StaticResource HtmlConverter}}" />
+                                <Border Stroke="transparent">
+                                    <Border.Background>
+                                        <LinearGradientBrush EndPoint="0,1">
+                                            <GradientStop Color="Transparent"
+                                                          Offset="0.1" />
+                                            <GradientStop Color="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
+                                                          Offset="1.0" />
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped"
+                                                              CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                </Border>
+                            </Grid>
+                        </StackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </StackLayout>
+</ContentPage>

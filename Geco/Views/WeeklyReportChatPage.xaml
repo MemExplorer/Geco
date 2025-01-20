@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Geco.Views.WeeklyReportChatPage"
+             x:DataType="vm:WeeklyReportChatViewModel"
+             xmlns:mai="clr-namespace:Microsoft.Extensions.AI;assembly=Microsoft.Extensions.AI.Abstractions"
+             xmlns:helpers="clr-namespace:Geco.Views.Helpers"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:vm="clr-namespace:Geco.ViewModels"
+             Title="Chat"
+             Shell.FlyoutBehavior="Disabled">
+    <ContentPage.Resources>
+        <helpers:ChatAlignmentConverter x:Key="ChatAlignmentConverter" />
+        <helpers:IsModelToBooleanConverter x:Key="IsModelToBooleanConverter" />
+        <helpers:IsUserToBooleanConverter x:Key="IsUserToBooleanConverter" />
+        <helpers:IsModelToShapeConverter x:Key="IsModelToShapeConverter" />
+        <helpers:HtmlConverter x:Key="HtmlConverter" />
+    </ContentPage.Resources>
+    <ContentPage.BindingContext>
+        <vm:WeeklyReportChatViewModel/>
+    </ContentPage.BindingContext>
+        <StackLayout Padding="10"
+                 Spacing="10">
+        <!--  Chat View  -->
+        <CollectionView ItemsSource="{Binding ChatMessages}"
+                        ItemsUpdatingScrollMode="KeepLastItemInView"
+                        VerticalOptions="EndAndExpand">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="mai:ChatMessage">
+                    <Border Padding="0,10"
+                            Stroke="Transparent">
+                        <Grid ColumnDefinitions="auto, *">
+                            <Image Grid.Column="0"
+                                   Source="geco_logo.png"
+                                   MaximumWidthRequest="50"
+                                   MaximumHeightRequest="50"
+                                   Margin="5"
+                                   VerticalOptions="End"
+                                   IsVisible="{Binding Role, Converter={StaticResource IsModelToBooleanConverter}}" />
+                            <Border Margin="2"
+                                    Grid.Column="1"
+                                    StrokeShape="{Binding Role, Converter={StaticResource IsModelToShapeConverter}}"
+                                    BackgroundColor="{AppThemeBinding Light=#e3e3e3,
+                                                  Dark=#191919}"
+                                    HorizontalOptions="{Binding Role, Converter={StaticResource ChatAlignmentConverter}}">
+
+                                <!-- WebView or Label based on Role -->
+                                <StackLayout>
+                                    <WebView
+                                        IsVisible="{Binding Role, Converter={StaticResource IsModelToBooleanConverter}}"
+                                        Navigated="WebView_Navigated"
+                                        Source="{Binding Text, Converter={StaticResource HtmlConverter}}" />
+
+
+                                    <Label Padding="15"
+                                           Text="{Binding Text}"
+                                           IsVisible="{Binding Role, Converter={StaticResource IsUserToBooleanConverter}}" />
+                                </StackLayout>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Border Padding="5"
+                BackgroundColor="{AppThemeBinding Light=#e3e3e3,
+                                                  Dark=#191919}"
+                HorizontalOptions="FillAndExpand"
+                Stroke="Transparent"
+                StrokeShape="RoundRectangle 30,30,30,30">
+            <StackLayout
+                Orientation="Horizontal"
+                Spacing="5">
+                <!--  Chat Entry/Input  -->
+                <Editor x:Name="ChatEntry"
+                        Margin="20,0,7,0"
+                        FontSize="18"
+                        AutoSize="TextChanges"
+                        MaximumHeightRequest="100"
+                        HorizontalOptions="FillAndExpand"
+                        Placeholder="Message to GECO" />
+
+                <!--  Chat Send Button  -->
+                <Button CornerRadius="30"
+                        HorizontalOptions="Center"
+                        FontFamily="FontAwesome"
+                        Text="{x:Static helpers:IconFont.PaperPlaneTop}"
+                        Margin="3"
+                        VerticalOptions="Center"
+                        IsEnabled="{Binding IsChatEnabled}">
+                    <Button.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ChatSendCommand}"
+                                              CommandParameter="{x:Reference ChatEntry}" />
+                    </Button.GestureRecognizers>
+                    <Button.Behaviors>
+
+                        <toolkit:AnimationBehavior>
+                            <toolkit:AnimationBehavior.AnimationType>
+                                <toolkit:FadeAnimation Opacity="0.5" />
+                            </toolkit:AnimationBehavior.AnimationType>
+                        </toolkit:AnimationBehavior>
+                    </Button.Behaviors>
+                </Button>
+            </StackLayout>
+        </Border>
+    </StackLayout>
+</ContentPage>

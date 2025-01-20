@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
 using Geco.Core.Models.ActionObserver;
+using Geco.Core.Models.Chat;
 using Application = Microsoft.Maui.Controls.Application;
 #if ANDROID
 using Geco.PermissionHelpers;
@@ -33,7 +34,7 @@ public partial class SettingsViewModel : ObservableObject
 		var currShellViewModel = (AppShellViewModel)currentShell.BindingContext;
 		var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
 		currShellViewModel.ChatHistoryList.Clear();
-		await chatRepo.DeleteAllHistory();
+		await chatRepo.DeleteAllHistory(HistoryType.DefaultConversation);
 	}
 
 	[RelayCommand]
