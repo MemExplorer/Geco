@@ -18,9 +18,9 @@
         <helpers:HtmlConverter x:Key="HtmlConverter" />
     </ContentPage.Resources>
     <ContentPage.BindingContext>
-        <vm:WeeklyReportChatViewModel/>
+        <vm:WeeklyReportChatViewModel />
     </ContentPage.BindingContext>
-        <StackLayout Padding="10"
+    <StackLayout Padding="10"
                  Spacing="10">
         <!--  Chat View  -->
         <CollectionView ItemsSource="{Binding ChatMessages}"

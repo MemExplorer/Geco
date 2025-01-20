@@ -64,22 +64,26 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 				var deserializedWeeklyReport =
 					JsonSerializer.Deserialize<List<TunedNotificationInfo>>(weeklyReportResponse.Text!)!;
 				var firstItem = deserializedWeeklyReport.First();
-				
+
 				// create chat history
 				var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
 				var chatMsg = new ChatMessage(new ChatRole("model"), firstItem.FullContent);
 				chatMsg.AdditionalProperties = new AdditionalPropertiesDictionary { ["id"] = (ulong)0 };
 				string chatTitle = firstItem.NotificationTitle;
-				var historyInstance = new GecoConversation(Guid.NewGuid().ToString(), HistoryType.WeeklyReportConversation, chatTitle,
-					DateTimeOffset.UtcNow.ToUnixTimeSeconds(), [chatMsg], firstItem.NotificationDescription, firstItem.FullContent);
+				var historyInstance = new GecoConversation(Guid.NewGuid().ToString(),
+					HistoryType.WeeklyReportConversation, chatTitle,
+					DateTimeOffset.UtcNow.ToUnixTimeSeconds(), [chatMsg], firstItem.NotificationDescription,
+					firstItem.FullContent);
 				await chatRepo.AppendHistory(historyInstance);
-				NotificationSvc.SendInteractiveNotification(firstItem.NotificationTitle, firstItem.NotificationDescription,
+				NotificationSvc.SendInteractiveNotification(firstItem.NotificationTitle,
+					firstItem.NotificationDescription,
 					firstItem.FullContent);
 			});
 		}
 		catch (Exception ex)
 		{
-			GlobalContext.Logger.Error<ScheduledTaskReceiver>(ex, "Weekly summary notification resulted into an error.");
+			GlobalContext.Logger.Error<ScheduledTaskReceiver>(ex,
+				"Weekly summary notification resulted into an error.");
 		}
 	}
 
@@ -224,12 +228,13 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		{
 			currentEvent = new UsageEvents.Event();
 			usageEvents.GetNextEvent(currentEvent);
-			switch(currentEvent.EventType)
+			switch (currentEvent.EventType)
 			{
-				case UsageEventType.MoveToForeground:
-				case UsageEventType.MoveToBackground:
-				case UsageEventType evt when OperatingSystem.IsAndroidVersionAtLeast(29) && evt == UsageEventType.ActivityStopped:
-				
+			case UsageEventType.MoveToForeground:
+			case UsageEventType.MoveToBackground:
+			case UsageEventType evt
+				when OperatingSystem.IsAndroidVersionAtLeast(29) && evt == UsageEventType.ActivityStopped:
+
 				if (currentEvent.PackageName == null || currentEvent.ClassName == null)
 					continue;
 
@@ -258,12 +263,14 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 					appMap[key].TimeInForeground += timeElapsed;
 					appStateMap[key] = null;
 				}
+
 				break;
 			}
 		}
 
 		// log active app usage
-		var groupedData = appMap.GroupBy(x => x.Value.PackageName, y => y.Value.TimeInForeground).ToDictionary(x => x.Key, y => y.AsEnumerable().Sum());
+		var groupedData = appMap.GroupBy(x => x.Value.PackageName, y => y.Value.TimeInForeground)
+			.ToDictionary(x => x.Key, y => y.AsEnumerable().Sum());
 		var activeAppsLogMessage = string.Join('\n', groupedData.OrderByDescending(x => x.Value)
 			.Select(x => $"{x.Key} : {TimeSpan.FromMilliseconds(x.Value)}"));
 		GlobalContext.Logger.Info<ScheduledTaskReceiver>($"Device Usage Info:\n{activeAppsLogMessage}");
@@ -285,7 +292,8 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		string notificationPrompt = await promptRepo.GetPrompt(triggerType);
 		try
 		{
-			GlobalContext.Logger.Info<ScheduledTaskReceiver>($"Executing {triggerType} notification from daily activity logger.");
+			GlobalContext.Logger.Info<ScheduledTaskReceiver>(
+				$"Executing {triggerType} notification from daily activity logger.");
 			await Utils.RetryAsyncTaskOrThrow<TaskCanceledException>(3, async () =>
 			{
 				var tunedNotification = await geminiClient.SendMessage(notificationPrompt, settings: geminiSettings);
@@ -293,12 +301,14 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 					JsonSerializer.Deserialize<List<TunedNotificationInfo>>(tunedNotification.Text!)!;
 				var tunedNotificationInfoFirstEntry = deserializedStructuredMsg.First();
 				NotificationSvc.SendInteractiveNotification(tunedNotificationInfoFirstEntry.NotificationTitle,
-					tunedNotificationInfoFirstEntry.NotificationDescription, tunedNotificationInfoFirstEntry.FullContent);
+					tunedNotificationInfoFirstEntry.NotificationDescription,
+					tunedNotificationInfoFirstEntry.FullContent);
 			});
 		}
 		catch (Exception ex)
 		{
-			GlobalContext.Logger.Error<ScheduledTaskReceiver>(ex, "Daily activity notification resulted into an error.");
+			GlobalContext.Logger.Error<ScheduledTaskReceiver>(ex,
+				"Daily activity notification resulted into an error.");
 		}
 	}
 

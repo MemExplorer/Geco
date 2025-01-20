@@ -186,7 +186,8 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 			string notificationPrompt = await promptRepo.GetPrompt(e.TriggerType);
 			try
 			{
-				GlobalContext.Logger.Info<DeviceUsageMonitorService>($"Executing {e.TriggerType} trigger notification.");
+				GlobalContext.Logger.Info<DeviceUsageMonitorService>(
+					$"Executing {e.TriggerType} trigger notification.");
 				await Utils.RetryAsyncTaskOrThrow<TaskCanceledException>(3, async () =>
 				{
 					var tunedNotification = await geminiChat.SendMessage(notificationPrompt, settings: geminiSettings);
@@ -200,7 +201,8 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 			}
 			catch (Exception geminiError)
 			{
-				GlobalContext.Logger.Error<DeviceUsageMonitorService>(geminiError, "Trigger notification resulted into an error.");
+				GlobalContext.Logger.Error<DeviceUsageMonitorService>(geminiError,
+					"Trigger notification resulted into an error.");
 			}
 		}
 		catch (Exception ex)

@@ -10,7 +10,7 @@
              Title="Weekly Report">
     <ContentPage.Resources>
         <helpers:HtmlConverter x:Key="HtmlConverter" />
-        <helpers:UnixTimeStampToStringConverter x:Key="UnixTimeStampToStringConverter"/>
+        <helpers:UnixTimeStampToStringConverter x:Key="UnixTimeStampToStringConverter" />
     </ContentPage.Resources>
     <ContentPage.BindingContext>
         <vm:ReportsViewModel />
@@ -19,7 +19,7 @@
         <CollectionView ItemsSource="{Binding WeeklyReportHistory}">
             <CollectionView.EmptyView>
                 <Label Padding="0,300,0,0" Text="Currently, you have no weekly reports."
-                       HorizontalOptions="Center"  />
+                       HorizontalOptions="Center" />
             </CollectionView.EmptyView>
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
@@ -38,7 +38,7 @@
                         <StackLayout Padding="10">
                             <Grid Padding="0,0,0,5" ColumnDefinitions="40*, 30*, auto">
                                 <VerticalStackLayout Grid.Column="0">
-                                    <Label 
+                                    <Label
                                         Text="{Binding Title}"
                                         FontAttributes="Bold"
                                         FontSize="25"
@@ -51,7 +51,7 @@
                                         VerticalTextAlignment="Center"
                                         LineBreakMode="TailTruncation" />
                                 </VerticalStackLayout>
-                                <Label Grid.Column="2" 
+                                <Label Grid.Column="2"
                                        HorizontalOptions="End"
                                        VerticalOptions="Start"
                                        FontFamily="FontAwesome"
@@ -60,7 +60,7 @@
                                        Text="{x:Static helpers:IconFont.TrashCan}">
                                     <Label.GestureRecognizers>
                                         <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped"
-                                                              CommandParameter="{Binding .}"/>
+                                                              CommandParameter="{Binding .}" />
                                     </Label.GestureRecognizers>
                                 </Label>
                             </Grid>

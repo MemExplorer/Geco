@@ -1,8 +1,9 @@
-
 namespace Geco;
+
 internal class Utils
 {
-	internal static async Task RetryAsyncTaskOrThrow<TErrorType>(int retryCount, Func<Task> taskToRun) where TErrorType : Exception
+	internal static async Task RetryAsyncTaskOrThrow<TErrorType>(int retryCount, Func<Task> taskToRun)
+		where TErrorType : Exception
 	{
 		int counter = 0;
 		bool hasError;
@@ -24,7 +25,6 @@ internal class Utils
 				if (counter >= 3)
 					throw;
 			}
-		}
-		while (hasError);
+		} while (hasError);
 	}
 }

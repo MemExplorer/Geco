@@ -21,7 +21,7 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 		GeminiClient.OnChatReceive += async (_, e) =>
 			await GeminiClientOnChatReceive(e);
 	}
-	
+
 	/// <summary>
 	///     Handles chat send and receive events from Gemini
 	/// </summary>
@@ -36,7 +36,7 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 		if (HistoryId != null)
 			await chatRepo.AppendChat(HistoryId, e.Message);
 	}
-	
+
 	[RelayCommand]
 	async Task ChatSend(Editor inputEditor)
 	{
@@ -72,7 +72,7 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 	{
 		if (!(query.TryGetValue("cdata", out object? obj) && obj is GecoConversation cdata))
 			return;
-		
+
 		var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
 		var loadChatTask = chatRepo.LoadChats(cdata);
 		loadChatTask.ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);

@@ -139,7 +139,8 @@ public partial class ChatViewModel : ObservableObject
 			var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
 			var shellViewModel = (AppShellViewModel)currentShell.BindingContext;
 			string chatTitle = CreateChatTitle(gecoInitiated ? ActionTitle! : inputContent);
-			var historyInstance = new GecoConversation(Guid.NewGuid().ToString(), HistoryType.DefaultConversation, chatTitle,
+			var historyInstance = new GecoConversation(Guid.NewGuid().ToString(), HistoryType.DefaultConversation,
+				chatTitle,
 				DateTimeOffset.UtcNow.ToUnixTimeSeconds(), ChatMessages);
 
 			// append to UI

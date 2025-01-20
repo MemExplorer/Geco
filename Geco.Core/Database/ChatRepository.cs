@@ -115,8 +115,10 @@ public class ChatRepository : DbRepositoryBase
 	{
 		await Initialize();
 
-		using var db = await SqliteDb.GetTransient(DatabaseDir); 
-		await db.ExecuteNonQuery("DELETE FROM TblChatMessage WHERE HistoryId IN (SELECT Id FROM TblChatHistory WHERE Type = ?)" , (long)historyType);
+		using var db = await SqliteDb.GetTransient(DatabaseDir);
+		await db.ExecuteNonQuery(
+			"DELETE FROM TblChatMessage WHERE HistoryId IN (SELECT Id FROM TblChatHistory WHERE Type = ?)",
+			(long)historyType);
 		await db.ExecuteNonQuery("DELETE FROM TblChatHistory WHERE Type = ?", (long)historyType);
 	}
 }

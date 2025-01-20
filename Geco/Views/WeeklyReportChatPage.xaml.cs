@@ -1,23 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Geco.Views;
+﻿namespace Geco.Views;
 
 public partial class WeeklyReportChatPage : ContentPage
 {
-	public WeeklyReportChatPage()
-	{
-		InitializeComponent();
-	}
+	public WeeklyReportChatPage() => InitializeComponent();
 
 	private void WebView_Navigated(object sender, WebNavigatedEventArgs e)
 	{
-		if (sender is not WebView w) 
+		if (sender is not WebView w)
 			return;
-		
+
 		string backgroundColor = GecoSettings.DarkMode ? "#191919" : "#e3e3e3";
 		string textColor = GecoSettings.DarkMode ? "#ffffff" : "#000000";
 
@@ -34,4 +25,3 @@ public partial class WeeklyReportChatPage : ContentPage
 			");
 	}
 }
-

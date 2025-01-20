@@ -19,9 +19,9 @@ public partial class ReportsPage : ContentPage
 
 	void WebView_OnNavigated(object? sender, WebNavigatedEventArgs e)
 	{
-		if (sender is not WebView w) 
+		if (sender is not WebView w)
 			return;
-		
+
 		string backgroundColor = GecoSettings.DarkMode ? "#191919" : "#e3e3e3";
 		string textColor = "#808080";
 
@@ -42,7 +42,7 @@ public partial class ReportsPage : ContentPage
 	{
 		try
 		{
-			if (e.Parameter is not GecoConversation gc) 
+			if (e.Parameter is not GecoConversation gc)
 				return;
 
 			if (sender is Label)
