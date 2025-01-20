@@ -15,6 +15,7 @@ public class ChatRepository : DbRepositoryBase
 	[
 		new("TblChatHistory", [
 			new TblField("Id", TblFieldType.Text, true),
+			new TblField("Type", TblFieldType.Integer),
 			new TblField("Title", TblFieldType.Integer),
 			new TblField("DateCreated", TblFieldType.Integer)
 		]),
@@ -31,7 +32,7 @@ public class ChatRepository : DbRepositoryBase
 		await Initialize();
 
 		using var db = await SqliteDb.GetTransient(DatabaseDir);
-		await db.ExecuteNonQuery("INSERT INTO TblChatHistory VALUES(?, ?, ?)", history.Id, history.Title,
+		await db.ExecuteNonQuery("INSERT INTO TblChatHistory VALUES(?, ?, ?, ?)", history.Id, (long)history.Type, history.Title,
 			history.DateCreated);
 		foreach (var message in history.Messages)
 			await AppendChat(history.Id, message);
@@ -53,15 +54,15 @@ public class ChatRepository : DbRepositoryBase
 			message.Text, message.Role.Value);
 	}
 
-	public async Task LoadHistory(ICollection<GecoConversation> historyData)
+	public async Task LoadHistory(ICollection<GecoConversation> historyData, HistoryType historyType)
 	{
 		await Initialize();
 
 		using var db = await SqliteDb.GetTransient(DatabaseDir);
-		await using var historyReader = await db.ExecuteReader("SELECT * FROM TblChatHistory ORDER BY DateCreated ASC");
+		await using var historyReader = await db.ExecuteReader("SELECT * FROM TblChatHistory WHERE Type = ? ORDER BY DateCreated ASC", (long)historyType);
 		while (historyReader.Read())
 		{
-			var historyEntry = new GecoConversation((string)historyReader["Id"], (string)historyReader["Title"],
+			var historyEntry = new GecoConversation((string)historyReader["Id"], (HistoryType)(long)historyReader["Type"], (string)historyReader["Title"],
 				(long)historyReader["DateCreated"], []);
 			historyData.Add(historyEntry);
 		}

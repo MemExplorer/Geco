@@ -12,6 +12,7 @@ namespace Geco.Core.Models.Chat;
 /// <param name="Messages">All the message in the conversation</param>
 public record GecoConversation(
 	string Id,
+	HistoryType Type,
 	string Title,
 	long DateCreated,
 	ObservableCollection<ChatMessage> Messages)
