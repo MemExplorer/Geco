@@ -50,25 +50,6 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 			CreateDeviceUsageScheduledLogger();
 			CreateScheduledWeeklySummary();
 		}
-		else if (intent?.Action == "STOP_SERVICE" && !_hasStarted)
-		{
-			if (OperatingSystem.IsAndroidVersionAtLeast(33))
-				StopForeground(StopForegroundFlags.Remove);
-			else
-				StopForeground(true);
-
-			CancelDeviceUsageScheduledLogger();
-			CancelScheduledWeeklySummary();
-
-			// stop listening to device change events
-			foreach (var observer in Observers)
-			{
-				observer.OnStateChanged -= OnDeviceStateChanged;
-				observer.StopEventListener();
-			}
-
-			StopSelfResult(startId);
-		}
 
 		return StartCommandResult.Sticky;
 	}
@@ -85,8 +66,17 @@ public class DeviceUsageMonitorService : Service, IPlatformActionObserver
 	{
 		_hasStarted = false;
 		var stopIntent = new Intent(Platform.AppContext, Class);
-		stopIntent.SetAction("STOP_SERVICE");
 		Platform.AppContext.StopService(stopIntent);
+
+		CancelDeviceUsageScheduledLogger();
+		CancelScheduledWeeklySummary();
+
+		// stop listening to device change events
+		foreach (var observer in Observers)
+		{
+			observer.OnStateChanged -= OnDeviceStateChanged;
+			observer.StopEventListener();
+		}
 	}
 
 	public static void CreateScheduledWeeklySummary()
