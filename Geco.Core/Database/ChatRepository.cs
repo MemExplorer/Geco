@@ -66,11 +66,11 @@ public class ChatRepository : DbRepositoryBase
 				(long)historyType);
 		while (historyReader.Read())
 		{
-			object a = historyReader["Description"];
-			object b = historyReader["FullContent"];
+			object? descriptionValue = historyReader["Description"] == DBNull.Value ? null : historyReader["Description"];
+			object? fullContentValue = historyReader["FullContent"] == DBNull.Value ? null : historyReader["FullContent"];
 			var historyEntry = new GecoConversation((string)historyReader["Id"],
 				(HistoryType)(long)historyReader["Type"], (string)historyReader["Title"],
-				(long)historyReader["DateCreated"], [], (string?)a, (string?)b);
+				(long)historyReader["DateCreated"], [], (string?)descriptionValue, (string?)fullContentValue);
 			historyData.Add(historyEntry);
 		}
 	}
