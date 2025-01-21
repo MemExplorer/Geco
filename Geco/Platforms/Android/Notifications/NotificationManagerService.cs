@@ -35,9 +35,8 @@ public class NotificationManagerService : INotificationManagerService
 		bool isWeeklyReport = e.Intent?.Action == WeeklyReportNotificationId;
 		if (!(e.Intent?.Action == DefaultNotificationId || isWeeklyReport))
 			return;
-
+		
 		Platform.CurrentActivity!.Intent = e.Intent;
-
 		if (isWeeklyReport && e.Intent != null && e.Intent.HasExtra("historyid"))
 		{
 			// ensure `e.Intent.GetStringExtra` is not null

@@ -75,7 +75,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 					DateTimeOffset.UtcNow.ToUnixTimeSeconds(), [chatMsg], firstItem.NotificationDescription,
 					firstItem.FullContent);
 				await chatRepo.AppendHistory(historyInstance);
-				NotificationSvc.SendInteractiveNotification(firstItem.NotificationTitle,
+				NotificationSvc.SendInteractiveWeeklyReportNotification(historyInstance.Id, firstItem.NotificationTitle,
 					firstItem.NotificationDescription,
 					firstItem.FullContent);
 			});

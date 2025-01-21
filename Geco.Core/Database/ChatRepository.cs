@@ -61,11 +61,18 @@ public class ChatRepository : DbRepositoryBase
 		await Initialize();
 
 		using var db = await SqliteDb.GetTransient(DatabaseDir);
-		var history = await db.ExecuteScalar<GecoConversation>("SELECT * FROM TblChatHistory WHERE Id = ?", historyId);
-		if (history == null)
-			throw new Exception($"History Id {history} does not exist!");
-
-		return history;
+		await using var historyReader = await db.ExecuteReader("SELECT * FROM TblChatHistory WHERE Id = ?", historyId);
+		if (!historyReader.Read())
+			throw new Exception($"History Id {historyId} does not exist!");
+		
+		object? descriptionValue =
+			historyReader["Description"] == DBNull.Value ? null : historyReader["Description"];
+		object? fullContentValue =
+			historyReader["FullContent"] == DBNull.Value ? null : historyReader["FullContent"];
+		var historyEntry = new GecoConversation((string)historyReader["Id"],
+			(HistoryType)(long)historyReader["Type"], (string)historyReader["Title"],
+			(long)historyReader["DateCreated"], [], (string?)descriptionValue, (string?)fullContentValue);
+		return historyEntry;
 	}
 
 	public async Task LoadHistory(ICollection<GecoConversation> historyData, HistoryType historyType)

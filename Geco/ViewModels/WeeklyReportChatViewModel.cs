@@ -67,20 +67,34 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 		IsChatEnabled = true;
 	}
 
-	public void ApplyQueryAttributes(IDictionary<string, object> query)
+	public async void ApplyQueryAttributes(IDictionary<string, object> query)
 	{
-		if (!(query.TryGetValue("cdata", out object? obj) && obj is string historyId))
-			return;
+		try
+		{
+			
+#if ANDROID
+			// validate intent action
+			var intent = Platform.CurrentActivity?.Intent;
+			if (intent?.Action != "GecoWeeklyReportNotif")
+				return;
 
-		var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
-		var currentGecoConversationTask = chatRepo.GetHistoryById(historyId);
-		var currentGecoConversation = currentGecoConversationTask
-			.ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext).GetAwaiter()
-			.GetResult();
-		var loadChatTask = chatRepo.LoadChats(currentGecoConversation);
-		loadChatTask.ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
-		HistoryId = currentGecoConversation.Id;
-		ChatMessages = currentGecoConversation.Messages;
-		GeminiClient.LoadHistory(currentGecoConversation.Messages);
+			// after execution, set action to null to avoid repeating chat initialization
+			intent.SetAction(null);
+			
+#endif
+			if (!(query.TryGetValue("historyid", out object? obj) && obj is string historyId))
+				return;
+
+			var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
+			var currentGecoConversation = await chatRepo.GetHistoryById(historyId);
+			await chatRepo.LoadChats(currentGecoConversation);
+			HistoryId = currentGecoConversation.Id;
+			ChatMessages = currentGecoConversation.Messages;
+			GeminiClient.LoadHistory(currentGecoConversation.Messages);
+		}
+		catch (Exception e)
+		{
+			GlobalContext.Logger.Error<WeeklyReportChatViewModel>(e);
+		}
 	}
 }
