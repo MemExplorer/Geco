@@ -24,6 +24,6 @@ public partial class ReportsViewModel : ObservableObject
 	{
 		WeeklyReportHistory.Clear();
 		var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
-		await chatRepo.LoadHistory(WeeklyReportHistory, HistoryType.WeeklyReportConversation);
+		await chatRepo.LoadHistory(WeeklyReportHistory, HistoryType.WeeklyReportConversation, false);
 	}
 }

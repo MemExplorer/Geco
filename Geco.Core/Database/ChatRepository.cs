@@ -75,13 +75,14 @@ public class ChatRepository : DbRepositoryBase
 		return historyEntry;
 	}
 
-	public async Task LoadHistory(ICollection<GecoConversation> historyData, HistoryType historyType)
+	public async Task LoadHistory(ICollection<GecoConversation> historyData, HistoryType historyType, bool ascending)
 	{
 		await Initialize();
 
+		string orderKeyword = ascending ? "ASC" : "DESC";
 		using var db = await SqliteDb.GetTransient(DatabaseDir);
 		await using var historyReader =
-			await db.ExecuteReader("SELECT * FROM TblChatHistory WHERE Type = ? ORDER BY DateCreated ASC",
+			await db.ExecuteReader($"SELECT * FROM TblChatHistory WHERE Type = ? ORDER BY DateCreated {orderKeyword}",
 				(long)historyType);
 		while (historyReader.Read())
 		{

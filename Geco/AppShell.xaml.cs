@@ -36,7 +36,7 @@ public partial class AppShell : Shell
 		// Adding an item to the Context.ChatHistoryList triggers an event that executes code to create 
 		// a new flyout item using the details from the chat history entry.
 		var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
-		await chatRepo.LoadHistory(Context.ChatHistoryList, HistoryType.DefaultConversation);
+		await chatRepo.LoadHistory(Context.ChatHistoryList, HistoryType.DefaultConversation, true);
 		Application.Current!.UserAppTheme = GecoSettings.DarkMode ? AppTheme.Dark : AppTheme.Light;
 	}
 
