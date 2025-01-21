@@ -92,11 +92,320 @@ public class PromptRepository : DbRepositoryBase
 			((int)PromptCategory.SearchCtgBasedTemp,
 				"Using the tone of a search engine and based on the topic of {PredefinedTopic}, generate three responses focusing on the {StoredPromptRefinement}."),
 			((int)PromptCategory.TriggerNotifTemp,
-				"Given the unsustainable action based on {ActionTrigger}, the user overstepped the sustainable baseline data of {SustainableBaselineData}. Give a notification-like message for NotificationDescription, focusing on {StoredPromptRefinement}, explicitly include the exact and complete given sustainable baseline data in the notification description. The title of the notification, the NotificationTitle, should point out the unsustainable action while the description should always be in passive voice and shall be one sentence only. Also, provide an analytical overview in HTML format, for the 'FullContent' regarding this unsustainable action. Highlight on why the user should be aware of this and how the correction of this action will be of benefit in terms of achieving sustainability."),
+				"""
+				**Purpose:** Create a notification and an analytical overview based on detected unsustainable actions, using provided placeholders for contextual adaptability.  
+
+				## **Notification Requirements**  
+
+				1. **Notification Title (NotificationTitle):**  
+				   - Clearly indicate the unsustainable action.  
+				   - Use language that mildly highlights the action as non-ideal without implying habitual behavior.  
+
+				2. **Notification Description (NotificationDescription):**  
+				   - Must be in **passive voice**.  
+				   - Limited to **one sentence only**.  
+				   - Include the **exact and complete sustainable baseline data** provided in `{SustainableBaselineData}`.  
+
+				## **Full Analytical Overview Requirements**  
+
+				**Format:** Create the content in **HTML**.  
+
+				**Tone:** Mild and suggestive, avoiding accusatory language.  
+
+				**Content Structure (But not limited to):**  
+				1. **Introduction:** Briefly introduce the context of the detected unsustainable action.  
+				2. **Importance of Awareness:** Explain why the user should be aware of this action.  
+				3. **Benefits of Correction:**  
+				   - Highlight how correcting the action aligns with sustainability goals.  
+				   - Provide specific benefits, if applicable, of maintaining the sustainable baseline data.  
+
+				## Placeholders to Use: 
+				- **{ActionTrigger}:** Represents the specific action detected.  
+				- **{SustainableBaselineData}:** The exact sustainability data that was exceeded or not maintained.  
+				- **{StoredPromptRefinement}:** Focus area or criteria relevant to the notification description.  
+				- **NotificationTitle:** Title of the notification.  
+				- **NotificationDescription:** One-sentence description in passive voice.  
+				- **FullContent:** Analytical overview in HTML format.  
+
+				## Instructions for Generative AI:
+				- Use placeholders exactly as provided, ensuring consistency.  
+				- Maintain a mild and suggestive tone throughout the output.  
+				- Follow the structure and content guidelines strictly.  
+				"""),
 			((int)PromptCategory.LikelihoodWithPrevDataTemp,
-				"The current computed likelihood of sustainable use of mobile is {CurrentSustainabilityLikelihood}, the computation is as follows {CurrentLikelihoodComputation}. The values used are based on frequency, specifically: {CurrentFrequencyData}. The previous week computed likelihood of sustainable use of mobile is {PreviousSustainabilityLikelihood}, its computation is as follows {PreviousLikelihoodComputation}. The previous week computation made use of these frequencies: {PreviousFrequencyData}. For the property 'FullContent', provide a html of an analytical overview to the property regarding the given sustainability data while including recommendation to improve involved sustainable practice. For the other properties, keep it simple and as much as possible do not use symbols. Also, perform a comparison of the current and previous sustainability likelihood computation and value."),
+				"""
+				# Sustainability Analysis for Mobile Use
+
+				## 1. Overview of Current Sustainability Likelihood:
+				- **Current Sustainability Likelihood:**  
+				  Provide the current computed likelihood of sustainable mobile use: `{CurrentSustainabilityLikelihood}`.
+
+				- **Current Likelihood Computation:**  
+				  Detail the computation for the current likelihood: `{CurrentLikelihoodComputation}`.
+
+				- **Frequency Data (Current):**  
+				  Include the frequency data used for the computation: `{CurrentFrequencyData}`.
+
+				## 2. Overview of Previous Sustainability Likelihood:
+				- **Previous Sustainability Likelihood:**  
+				  Provide the previous week's computed likelihood of sustainable mobile use: `{PreviousSustainabilityLikelihood}`.
+
+				- **Previous Likelihood Computation:**  
+				  Detail the computation for the previous likelihood: `{PreviousLikelihoodComputation}`.
+
+				- **Frequency Data (Previous):**  
+				  Include the frequency data used for the previous week's computation: `{PreviousFrequencyData}`.
+
+				## 3. FullContent Property:
+				- **Detailed HTML Analytical Overview:**  
+				  Use the following HTML as the template for the `FullContent` property. Insert a summary of the report in the div with the class `overview`, and insert the full discussion, in-depth analysis, and comparison of previous and current sustainability likelihood with headings in each paragraph (do not use the tag <code> and <br> after a heading), and organized structure in the div with the class `content`. Again, strictly use the HTML template as well as the styling, change only the constant percentage value in JavaScript, and only populate the divs `overview` and `content` as instructed earlier. Use simple to understand words on the overview that any user can understand:
+
+				```
+				<html>
+				<head>
+				  <style>
+				    body {
+				      font-family: Arial, sans-serif;
+				      display: flex;
+				      flex-direction: column;
+				      align-items: center;
+				      padding: 20px;
+				      margin: 0;
+				    }
+				    div {
+				      text-align: justify;
+				      text-justify: inter-word;
+				    }
+				    .circle {
+				      position: relative;
+				      width: 100px;
+				      height: 100px;
+				      border-radius: 50%;
+				      background: conic-gradient(var(--color, red) 0%, var(--color, red) var(--percentage, 0%), #ccc var(--percentage, 0%));
+				      display: flex;
+				      justify-content: center;
+				      align-items: center;
+				      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+				      margin-right: 20px;
+				    }
+				    .circle::before {
+				      content: '';
+				      position: absolute;
+				      width: 70px;
+				      height: 70px;
+				      background-color: #f4f4f9;
+				      border-radius: 50%;
+				    }
+				    .circle span {
+				      position: absolute;
+				      font-size: 1.1rem;
+				      font-weight: bold;
+				      color: #333;
+				    }
+				    .overview {
+				      margin-bottom: 20px;
+				    }
+				    .collapsible {
+				      max-width: 150px;
+				      background-color: #039967;
+				      color: white;
+				      border: none;
+				      outline: none;
+				      align-self: start;
+				      padding: 10px 20px;
+				      cursor: pointer;
+				      border-radius: 5px;
+				      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+				    }
+				    .collapsible:hover {
+				      background-color: #026343;
+				    }
+				    .content {
+				      margin-top: 10px;
+				      display: none;
+				      overflow: hidden;
+				    }
+				  </style>
+				</head>
+				<body>
+				  <div class='circle' id='percentageCircle'>
+				      <span id='percentageValue'></span>
+				    </div>
+				  <h2>Weekly Sustainability Likelihood Report</h2>
+				  <div class='overview'>
+				    <p><!-- Insert the 1 paragraph overview here --></p>
+				  </div>
+				  <button class='collapsible'>Find out more</button>
+				  <div class='content' id='collapsibleContent'>
+				    <p><!-- Insert the full breakdown here --></p>
+				  </div>
+				  <script>
+				    const collapsible = document.querySelector('.collapsible');
+				    const collapsibleContent = document.querySelector('.content');
+				    collapsible.addEventListener('click', () => {
+				      const isExpanded = collapsibleContent.style.display === 'block';
+				      collapsibleContent.style.display = isExpanded ? 'none' : 'block';
+				      collapsibleContent.style.color = document.body.style.color;
+				      if (window.external && window.external.notify) {
+							window.external.notify('Resize');
+						}
+				    });
+
+				    function calculateColor(percentage) {
+				      let red, green;
+				      if (percentage <= 50) {
+				        red = 255;
+				        green = Math.round(percentage * 5.1);
+				      } else {
+				        red = Math.round((100 - percentage) * 5.1);
+				        green = 255;
+				      }
+				      return `rgb(${red}, ${green}, 0)`;
+				    }
+
+				    const percentage = 0;
+				    const circle = document.getElementById('percentageCircle');
+				    const percentageValue = document.getElementById('percentageValue');
+				    circle.style.setProperty('--color', calculateColor(percentage));
+				    circle.style.setProperty('--percentage', `${percentage}%`);
+				    percentageValue.textContent = `${percentage}%`;
+				  </script>
+				</body>
+				</html>
+				```
+				"""),
 			((int)PromptCategory.LikelihoodNoPrevDataTemp,
-				"The current computed likelihood of sustainable use of mobile is {CurrentSustainabilityLikelihood}, the computation is as follows {CurrentLikelihoodComputation}. The values used are based on frequency, specifically: {CurrentFrequencyData}. For the property 'FullContent', provide a html of an analytical overview to the property regarding the given sustainability data while including recommendation to improve involved sustainable practice. For the other properties, keep it simple and as much as possible do not use symbols."),
+				"""
+				# Sustainability Analysis for Mobile Use
+
+				## 1. Overview of Current Sustainability Likelihood:
+				- **Current Sustainability Likelihood:**  
+				  Provide the current computed likelihood of sustainable mobile use: `{CurrentSustainabilityLikelihood}`.
+
+				- **Current Likelihood Computation:**  
+				  Detail the computation for the current likelihood: `{CurrentLikelihoodComputation}`.
+
+				- **Frequency Data (Current):**  
+				  Include the frequency data used for the computation: `{CurrentFrequencyData}`.
+
+				## 2. FullContent Property:
+				- **Detailed HTML Analytical Overview:**  
+				  Use the following HTML as the template for the `FullContent` property. Insert a summary of the report in the div with the class `overview`, and insert the full discussion and in-depth analysis of the sustainability likelihood with headings in each paragraph (do not use the tag <code> and <br> after a heading), and organized structure in the div with the class `content`. Again, strictly use the HTML template as well as the styling, change only the constant percentage value in JavaScript, and only populate the divs `overview` and `content` as instructed earlier. Use simple to understand words on the overview that any user can understand:
+
+				```
+				<html>
+				<head>
+				  <style>
+				    body {
+				      font-family: Arial, sans-serif;
+				      display: flex;
+				      flex-direction: column;
+				      align-items: center;
+				      padding: 20px;
+				      margin: 0;
+				    }
+				    div {
+				      text-align: justify;
+				      text-justify: inter-word;
+				    }
+				    .circle {
+				      position: relative;
+				      width: 100px;
+				      height: 100px;
+				      border-radius: 50%;
+				      background: conic-gradient(var(--color, red) 0%, var(--color, red) var(--percentage, 0%), #ccc var(--percentage, 0%));
+				      display: flex;
+				      justify-content: center;
+				      align-items: center;
+				      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+				      margin-right: 20px;
+				    }
+				    .circle::before {
+				      content: '';
+				      position: absolute;
+				      width: 70px;
+				      height: 70px;
+				      background-color: #f4f4f9;
+				      border-radius: 50%;
+				    }
+				    .circle span {
+				      position: absolute;
+				      font-size: 1.1rem;
+				      font-weight: bold;
+				      color: #333;
+				    }
+				    .overview {
+				      margin-bottom: 20px;
+				    }
+				    .collapsible {
+				      max-width: 150px;
+				      background-color: #039967;
+				      color: white;
+				      border: none;
+				      outline: none;
+				      align-self: start;
+				      padding: 10px 20px;
+				      cursor: pointer;
+				      border-radius: 5px;
+				      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+				    }
+				    .collapsible:hover {
+				      background-color: #026343;
+				    }
+				    .content {
+				      margin-top: 10px;
+				      display: none;
+				      overflow: hidden;
+				    }
+				  </style>
+				</head>
+				<body>
+				  <div class='circle' id='percentageCircle'>
+				      <span id='percentageValue'></span>
+				    </div>
+				  <h2>Weekly Sustainability Likelihood Report</h2>
+				  <div class='overview'>
+				    <p><!-- Insert the 1 paragraph overview here --></p>
+				  </div>
+				  <button class='collapsible'>Find out more</button>
+				  <div class='content' id='collapsibleContent'>
+				    <p><!-- Insert the full breakdown here --></p>
+				  </div>
+				  <script>
+				    const collapsible = document.querySelector('.collapsible');
+				    const collapsibleContent = document.querySelector('.content');
+				    collapsible.addEventListener('click', () => {
+				      const isExpanded = collapsibleContent.style.display === 'block';
+				      collapsibleContent.style.display = isExpanded ? 'none' : 'block';
+				      collapsibleContent.style.color = document.body.style.color;
+				      if (window.external && window.external.notify) {
+							window.external.notify('Resize');
+						}
+				    });
+
+				    function calculateColor(percentage) {
+				      let red, green;
+				      if (percentage <= 50) {
+				        red = 255;
+				        green = Math.round(percentage * 5.1);
+				      } else {
+				        red = Math.round((100 - percentage) * 5.1);
+				        green = 255;
+				      }
+				      return `rgb(${red}, ${green}, 0)`;
+				    }
+
+				    const percentage = 0;
+				    const circle = document.getElementById('percentageCircle');
+				    const percentageValue = document.getElementById('percentageValue');
+				    circle.style.setProperty('--color', calculateColor(percentage));
+				    circle.style.setProperty('--percentage', `${percentage}%`);
+				    percentageValue.textContent = `${percentage}%`;
+				  </script>
+				</body>
+				</html>
+				```
+				"""),
 			((int)PromptCategory.EnergySearchRefinement, "Awareness and Advocacy"),
 			((int)PromptCategory.EnergySearchRefinement, "Comparative Analysis"),
 			((int)PromptCategory.EnergySearchRefinement, "Technological Innovations"),
@@ -241,4 +550,12 @@ public class PromptRepository : DbRepositoryBase
 		SearchPredefinedTopic.Transport => PromptCategory.TransportSearchRefinement,
 		_ => throw new Exception("Unknown Search Predefined Topic.")
 	};
+
+	public async Task PurgeData()
+	{
+		await Initialize();
+
+		using var db = await SqliteDb.GetTransient(DatabaseDir);
+		await db.ExecuteNonQuery("DROP TABLE TblPrompt");
+	}
 }
