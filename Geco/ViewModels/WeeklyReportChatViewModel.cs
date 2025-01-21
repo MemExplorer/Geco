@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
-using Geco.Core.Models.Chat;
 using GoogleGeminiSDK;
 using Microsoft.Extensions.AI;
 
@@ -70,14 +69,18 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 
 	public void ApplyQueryAttributes(IDictionary<string, object> query)
 	{
-		if (!(query.TryGetValue("cdata", out object? obj) && obj is GecoConversation cdata))
+		if (!(query.TryGetValue("cdata", out object? obj) && obj is string historyId))
 			return;
 
 		var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
-		var loadChatTask = chatRepo.LoadChats(cdata);
+		var currentGecoConversationTask = chatRepo.GetHistoryById(historyId);
+		var currentGecoConversation = currentGecoConversationTask
+			.ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext).GetAwaiter()
+			.GetResult();
+		var loadChatTask = chatRepo.LoadChats(currentGecoConversation);
 		loadChatTask.ConfigureAwait(ConfigureAwaitOptions.ContinueOnCapturedContext);
-		HistoryId = cdata.Id;
-		ChatMessages = cdata.Messages;
-		GeminiClient.LoadHistory(cdata.Messages);
+		HistoryId = currentGecoConversation.Id;
+		ChatMessages = currentGecoConversation.Messages;
+		GeminiClient.LoadHistory(currentGecoConversation.Messages);
 	}
 }

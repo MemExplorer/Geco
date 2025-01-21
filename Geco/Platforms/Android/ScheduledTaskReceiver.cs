@@ -238,18 +238,18 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 				if (currentEvent.PackageName == null || currentEvent.ClassName == null)
 					continue;
 
-				var key = currentEvent.PackageName + currentEvent.ClassName;
+				string? key = currentEvent.PackageName + currentEvent.ClassName;
 
 				// taking it into a collection to access by package name
 				if (!appMap.ContainsKey(key))
 					appMap.Add(key, new AppEventInfo(currentEvent.PackageName, currentEvent.ClassName));
 
 				bool appResumed = currentEvent.EventType == UsageEventType.MoveToForeground;
-				if (appResumed && (appStateMap.ContainsKey(key) && appStateMap[key] != null))
+				if (appResumed && appStateMap.ContainsKey(key) && appStateMap[key] != null)
 					throw new Exception("Unhandled case!");
 
 				// The app is either paused or stopped already
-				if (!appResumed && (appStateMap.ContainsKey(key) && appStateMap[key] == null))
+				if (!appResumed && appStateMap.ContainsKey(key) && appStateMap[key] == null)
 					continue;
 
 				if (appResumed)
@@ -271,7 +271,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		// log active app usage
 		var groupedData = appMap.GroupBy(x => x.Value.PackageName, y => y.Value.TimeInForeground)
 			.ToDictionary(x => x.Key, y => y.AsEnumerable().Sum());
-		var activeAppsLogMessage = string.Join('\n', groupedData.OrderByDescending(x => x.Value)
+		string? activeAppsLogMessage = string.Join('\n', groupedData.OrderByDescending(x => x.Value)
 			.Select(x => $"{x.Key} : {TimeSpan.FromMilliseconds(x.Value)}"));
 		GlobalContext.Logger.Info<ScheduledTaskReceiver>($"Device Usage Info:\n{activeAppsLogMessage}");
 		return appMap.Values.Sum(x => x.TimeInForeground);
@@ -279,9 +279,9 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 
 	class AppEventInfo(string PackageName, string ClassName)
 	{
-		public string PackageName = PackageName;
+		public readonly string PackageName = PackageName;
 		public string ClassName = ClassName;
-		public long TimeInForeground { get; set; } = 0;
+		public long TimeInForeground { get; set; }
 	}
 
 	private async Task CreateUnsustainableNotification(DeviceInteractionTrigger triggerType)

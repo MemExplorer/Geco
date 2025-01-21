@@ -56,6 +56,18 @@ public class ChatRepository : DbRepositoryBase
 			message.Text, message.Role.Value);
 	}
 
+	public async Task<GecoConversation> GetHistoryById(string historyId)
+	{
+		await Initialize();
+
+		using var db = await SqliteDb.GetTransient(DatabaseDir);
+		var history = await db.ExecuteScalar<GecoConversation>("SELECT * FROM TblChatHistory WHERE Id = ?", historyId);
+		if (history == null)
+			throw new Exception($"History Id {history} does not exist!");
+
+		return history;
+	}
+
 	public async Task LoadHistory(ICollection<GecoConversation> historyData, HistoryType historyType)
 	{
 		await Initialize();
@@ -66,8 +78,10 @@ public class ChatRepository : DbRepositoryBase
 				(long)historyType);
 		while (historyReader.Read())
 		{
-			object? descriptionValue = historyReader["Description"] == DBNull.Value ? null : historyReader["Description"];
-			object? fullContentValue = historyReader["FullContent"] == DBNull.Value ? null : historyReader["FullContent"];
+			object? descriptionValue =
+				historyReader["Description"] == DBNull.Value ? null : historyReader["Description"];
+			object? fullContentValue =
+				historyReader["FullContent"] == DBNull.Value ? null : historyReader["FullContent"];
 			var historyEntry = new GecoConversation((string)historyReader["Id"],
 				(HistoryType)(long)historyReader["Type"], (string)historyReader["Title"],
 				(long)historyReader["DateCreated"], [], (string?)descriptionValue, (string?)fullContentValue);

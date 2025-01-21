@@ -12,7 +12,7 @@ public partial class ReportsViewModel : ObservableObject
 
 	internal async Task SelectReport(GecoConversation conversation) =>
 		await Shell.Current.GoToAsync(nameof(WeeklyReportChatPage),
-			new Dictionary<string, object> { { "cdata", conversation } });
+			new Dictionary<string, object> { { "historyid", conversation.Id } });
 
 	public async Task LoadHistory()
 	{
