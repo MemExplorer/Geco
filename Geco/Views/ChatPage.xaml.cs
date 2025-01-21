@@ -19,7 +19,7 @@ public partial class ChatPage : ContentPage
 			await InitializeChat();
 	}
 
-	async Task InitializeChat()
+	internal async Task InitializeChat()
 	{
 		/*
 		 * - Code is executed here every time user visits Chat Page

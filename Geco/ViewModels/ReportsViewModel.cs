@@ -10,9 +10,15 @@ public partial class ReportsViewModel : ObservableObject
 {
 	[ObservableProperty] ObservableCollection<GecoConversation> _weeklyReportHistory = [];
 
-	internal async Task SelectReport(GecoConversation conversation) =>
+	internal async Task SelectReport(GecoConversation conversation)
+	{
+#if ANDROID
+		Platform.CurrentActivity?.Intent?.SetAction("GecoWeeklyReportNotif");
+#endif
+		
 		await Shell.Current.GoToAsync(nameof(WeeklyReportChatPage),
-			new Dictionary<string, object> { { "cdata", conversation } });
+			new Dictionary<string, object> { { "historyid", conversation.Id } });
+	}
 
 	public async Task LoadHistory()
 	{

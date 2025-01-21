@@ -4,16 +4,18 @@ using Android.Content;
 using Android.Graphics;
 using AndroidX.Core.App;
 using Geco.Core.Models.Notification;
+using Geco.Views;
 using String = Java.Lang.String;
 
 namespace Geco.Notifications;
 
 public class NotificationManagerService : INotificationManagerService
 {
+	public const string WeeklyReportNotificationId = "GecoWeeklyReportNotif";
 	const string ChannelId = "gecoChannelId";
 	const string ChannelName = "Geco Channel Name";
 	const string ChannelDescription = "The default channel for notifications.";
-	const string IntentActionName = "GecoNotif";
+	const string DefaultNotificationId = "GecoNotif";
 
 	bool _channelInitialized;
 	int _messageId;
@@ -30,12 +32,26 @@ public class NotificationManagerService : INotificationManagerService
 
 	private async Task OnNewIntentEvent(object? sender, NewIntentEvent e)
 	{
-		if (e.Intent is not { Action: IntentActionName })
+		bool isWeeklyReport = e.Intent?.Action == WeeklyReportNotificationId;
+		if (!(e.Intent?.Action == DefaultNotificationId || isWeeklyReport))
 			return;
-
+		
 		Platform.CurrentActivity!.Intent = e.Intent;
-		await Shell.Current.Navigation.PopToRootAsync();
-		await Shell.Current.GoToAsync("///IMPL_ChatPage");
+		if (isWeeklyReport && e.Intent != null && e.Intent.HasExtra("historyid"))
+		{
+			// ensure `e.Intent.GetStringExtra` is not null
+			string historyId = e.Intent.GetStringExtra("historyid")!;
+			await Shell.Current.GoToAsync(nameof(WeeklyReportChatPage),
+				new Dictionary<string, object> { { "historyid", historyId } });
+		}
+		else if (Shell.Current.CurrentItem.CurrentItem.Route == "IMPL_ChatPage" &&
+		         Shell.Current.CurrentPage is ChatPage chatPage)
+			await chatPage.InitializeChat(); // If we are already in chat page, reload viewmodel
+		else
+		{
+			await Shell.Current.Navigation.PopToRootAsync();
+			await Shell.Current.GoToAsync("///IMPL_ChatPage");
+		}
 	}
 
 	public void RunNotification(Notification notification)
@@ -48,26 +64,29 @@ public class NotificationManagerService : INotificationManagerService
 
 	public Notification SendPersistentNotification(string title, string description)
 	{
-		var notificationInst = InternalSendNotification(title, description, description, false, false);
+		var notificationInst =
+			InternalSendNotification(title, description, description, false, DefaultNotificationId, false);
 		notificationInst.Flags = NotificationFlags.OngoingEvent;
 		return notificationInst;
 	}
 
-	public void SendInteractiveNotification(string title, string description) =>
-		InternalSendNotification(title, description, description, true);
-
 	public void SendInteractiveNotification(string title, string description, string message) =>
-		InternalSendNotification(title, description, message, true);
+		InternalSendNotification(title, description, message, true, DefaultNotificationId);
+
+	public void SendInteractiveWeeklyReportNotification(string id, string title, string description, string message) =>
+		InternalSendNotification(title, description, message, true, WeeklyReportNotificationId,
+			args: new Dictionary<string, string> { { "historyid", id } });
 
 	private Notification InternalSendNotification(string title, string description, string message, bool interactive,
-		bool notify = true)
+		string notificationId,
+		bool notify = true, Dictionary<string, string>? args = null)
 	{
 		if (!_channelInitialized)
 		{
 			CreateNotificationChannel();
 		}
 
-		var notificationInstance = Show(title, description, message, interactive);
+		var notificationInstance = Show(title, description, message, notificationId, interactive, args);
 
 		if (notify)
 			_compatManager.Notify(_messageId++, notificationInstance);
@@ -75,7 +94,8 @@ public class NotificationManagerService : INotificationManagerService
 		return notificationInstance;
 	}
 
-	public Notification Show(string title, string description, string message, bool interactive)
+	public Notification Show(string title, string description, string message, string notificationId, bool interactive,
+		Dictionary<string, string>? args)
 	{
 		var builder = new NotificationCompat.Builder(Platform.AppContext, ChannelId)
 			.SetContentTitle(title)
@@ -89,9 +109,15 @@ public class NotificationManagerService : INotificationManagerService
 		if (interactive)
 		{
 			var intent = new Intent(Platform.AppContext, typeof(MainActivity));
-			intent.SetAction(IntentActionName);
+			intent.SetAction(notificationId);
 			intent.PutExtra("message", message);
 			intent.PutExtra("title", title);
+
+			if (args != null)
+			{
+				foreach (var a in args)
+					intent.PutExtra(a.Key, a.Value);
+			}
 
 			var pendingIntentFlags = OperatingSystem.IsAndroidVersionAtLeast(31)
 				? PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable

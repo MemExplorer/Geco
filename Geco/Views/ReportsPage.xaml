@@ -15,7 +15,7 @@
     <ContentPage.BindingContext>
         <vm:ReportsViewModel />
     </ContentPage.BindingContext>
-    <StackLayout Orientation="Vertical" Padding="0,10,0,0">
+    <ScrollView Orientation="Vertical" Padding="0,10,0,0">
         <CollectionView ItemsSource="{Binding WeeklyReportHistory}">
             <CollectionView.EmptyView>
                 <Label Padding="0,300,0,0" Text="Currently, you have no weekly reports."
@@ -90,5 +90,5 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-    </StackLayout>
+    </ScrollView>
 </ContentPage>
