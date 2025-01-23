@@ -150,7 +150,7 @@ public class PromptRepository : DbRepositoryBase
 
 				---
 				## Contents of the `Overview` property
-				A summary and encouraging message to a user about their mobile phone sustainability. 
+				A summary and encouraging message to a user about their mobile phone sustainability in a paragraph form. 
 				* **Purpose:** Clearly state the purpose of the report (analyzing the sustainability of their mobile phone usage).
 				* **Score:** Present a sustainability score with enthusiastic language.
 				* **Explanation:** Briefly explain what the score signifies in terms of the user's environmentally conscious habits.
@@ -159,7 +159,7 @@ public class PromptRepository : DbRepositoryBase
 				## Contents of the `ReportBreakdown` property
 
 				1. **Current Sustainability Likelihood:**  
-				   Emphasize the computed likelihood of sustainable mobile usage: `{CurrentSustainabilityLikelihood}`.
+				   Emphasize the computed likelihood of sustainable mobile usage in a paragraph: `{CurrentSustainabilityLikelihood}`.
 
 				2. **Current Likelihood Posterior Computation:**  
 				   Explain the computation for the current likelihood: `{CurrentLikelihoodComputation}`.  
@@ -169,7 +169,7 @@ public class PromptRepository : DbRepositoryBase
 				   Include the frequency data used in the computation and display the data in a table format: `{CurrentFrequencyData}`.
 
 				4. **Previous Week's Sustainability Likelihood:**  
-				   Emphasize the previous week's computed likelihood of sustainable mobile usage: `{PreviousSustainabilityLikelihood}`.
+				   Emphasize the previous week's computed likelihood of sustainable mobile usage in a paragraph: `{PreviousSustainabilityLikelihood}`.
 
 				5. **Previous Week's Likelihood Posterior Computation:**  
 				   Explain the computation for the previous week's likelihood: `{PreviousLikelihoodComputation}`.  
@@ -196,7 +196,7 @@ public class PromptRepository : DbRepositoryBase
 
 				---
 				## Contents of the `Overview` property
-				A summary and encouraging message to a user about their mobile phone sustainability. 
+				A summary and encouraging message to a user about their mobile phone sustainability in a paragraph form. 
 				* **Purpose:** Clearly state the purpose of the report (analyzing the sustainability of their mobile phone usage).
 				* **Score:** Present a sustainability score with enthusiastic language.
 				* **Explanation:** Briefly explain what the score signifies in terms of the user's environmentally conscious habits.
@@ -205,7 +205,7 @@ public class PromptRepository : DbRepositoryBase
 				## Contents of the `ReportBreakdown` property
 
 				1. **Current Sustainability Likelihood:**  
-				   Emphasize the computed likelihood of sustainable mobile usage: `{CurrentSustainabilityLikelihood}`.
+				   Emphasize the computed likelihood of sustainable mobile usage in a paragraph: `{CurrentSustainabilityLikelihood}`.
 
 				2. **Current Likelihood Posterior Computation:**  
 				   Explain the computation for the current likelihood: `{CurrentLikelihoodComputation}`.  
