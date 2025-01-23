@@ -30,7 +30,8 @@ public class PromptRepository : DbRepositoryBase
 		return await BuildPrompt(PromptCategory.SearchCtgBasedTemp,
 			new
 			{
-				PredefinedTopic = $"Sustainable {predefinedTopic}", StoredPromptRefinement = randomPromptRefinement
+				PredefinedTopic = $"Sustainable {predefinedTopic}",
+				StoredPromptRefinement = randomPromptRefinement
 			});
 	}
 
@@ -64,16 +65,57 @@ public class PromptRepository : DbRepositoryBase
 		string currentLikelihoodComputation,
 		string currentFrequencyData, string previousSustainabilityLikelihood, string previousLikelihoodComputation,
 		string previousFrequencyData)
-		=> await BuildPrompt(PromptCategory.LikelihoodWithPrevDataTemp,
-			new
-			{
-				CurrentSustainabilityLikelihood = currentSustainabilityLikelihood,
-				CurrentLikelihoodComputation = currentLikelihoodComputation,
-				CurrentFrequencyData = currentFrequencyData,
-				PreviousSustainabilityLikelihood = previousSustainabilityLikelihood,
-				PreviousLikelihoodComputation = previousLikelihoodComputation,
-				PreviousFrequencyData = previousFrequencyData
-			});
+	{
+		string upArrowSvg = @"
+			<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' width='20' height='20' viewBox='1 1 256 256' xml:space='preserve'>
+			<defs>
+			</defs>
+			<g style='stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;' transform='translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)' >
+			<path d='M 43.779 0.434 L 12.722 25.685 c -0.452 0.368 -0.714 0.92 -0.714 1.502 v 19.521 c 0 0.747 0.43 1.427 1.104 1.748 c 0.674 0.321 1.473 0.225 2.053 -0.246 L 45 23.951 l 29.836 24.258 c 0.579 0.471 1.378 0.567 2.053 0.246 c 0.674 -0.321 1.104 -1.001 1.104 -1.748 V 27.187 c 0 -0.582 -0.263 -1.134 -0.714 -1.502 L 46.221 0.434 C 45.51 -0.145 44.49 -0.145 43.779 0.434 z' style='stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(39,193,39); fill-rule: nonzero; opacity: 1;' transform=' matrix(1 0 0 1 0 0) ' stroke-linecap='round' />
+			<path d='M 43.779 41.792 l -31.057 25.25 c -0.452 0.368 -0.714 0.919 -0.714 1.502 v 19.52 c 0 0.747 0.43 1.427 1.104 1.748 c 0.674 0.321 1.473 0.225 2.053 -0.246 L 45 65.308 l 29.836 24.258 c 0.579 0.471 1.378 0.567 2.053 0.246 c 0.674 -0.321 1.104 -1.001 1.104 -1.748 V 68.544 c 0 -0.583 -0.263 -1.134 -0.714 -1.502 l -31.057 -25.25 C 45.51 41.214 44.49 41.214 43.779 41.792 z' style='stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(39,193,39); fill-rule: nonzero; opacity: 1;' transform=' matrix(1 0 0 1 0 0) ' stroke-linecap='round' />
+			</g>
+			</svg>";
+
+		string downArrowSvg = @"
+			<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' width='20' height='20' viewBox='0 0 256 256' xml:space='preserve'>
+			<defs>
+			</defs>
+			<g style='stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;' transform='translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)' >
+			<path d='M 43.779 89.566 L 12.722 64.315 c -0.452 -0.368 -0.714 -0.92 -0.714 -1.502 V 43.293 c 0 -0.747 0.43 -1.427 1.104 -1.748 c 0.674 -0.321 1.473 -0.225 2.053 0.246 L 45 66.049 l 29.836 -24.258 c 0.579 -0.471 1.378 -0.567 2.053 -0.246 c 0.674 0.321 1.104 1.001 1.104 1.748 v 19.521 c 0 0.582 -0.263 1.134 -0.714 1.502 L 46.221 89.566 C 45.51 90.145 44.49 90.145 43.779 89.566 z' style='stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(206,62,62); fill-rule: nonzero; opacity: 1;' transform=' matrix(1 0 0 1 0 0) ' stroke-linecap='round' />
+			<path d='M 43.779 48.208 l -31.057 -25.25 c -0.452 -0.368 -0.714 -0.919 -0.714 -1.502 V 1.936 c 0 -0.747 0.43 -1.427 1.104 -1.748 c 0.674 -0.321 1.473 -0.225 2.053 0.246 L 45 24.692 L 74.836 0.434 c 0.579 -0.471 1.378 -0.567 2.053 -0.246 c 0.674 0.321 1.104 1.001 1.104 1.748 v 19.521 c 0 0.583 -0.263 1.134 -0.714 1.502 l -31.057 25.25 C 45.51 48.786 44.49 48.786 43.779 48.208 z' style='stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(206,62,62); fill-rule: nonzero; opacity: 1;' transform=' matrix(1 0 0 1 0 0) ' stroke-linecap='round' />
+			</g>
+			</svg>";
+
+		string tildeSvg = @"
+			<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 50' width='20' height='50'>
+				<path d='M1 25 Q 25 5, 50 25 T 90 25' 
+						fill='none' 
+						stroke='gray' 
+						stroke-width='15' />
+			</svg>";
+
+		double currentLikelihoodValue = double.Parse(currentSustainabilityLikelihood.Remove(currentSustainabilityLikelihood.Length - 1));
+		double previousLikelihoodValue = double.Parse(previousSustainabilityLikelihood.Remove(previousSustainabilityLikelihood.Length - 1));
+
+
+		string statusIcon = currentLikelihoodValue > previousLikelihoodValue
+			? upArrowSvg
+			: currentLikelihoodValue < previousLikelihoodValue
+				? downArrowSvg
+				: tildeSvg;
+
+		return await BuildPrompt(PromptCategory.LikelihoodWithPrevDataTemp,
+		new
+		{
+			CurrentSustainabilityLikelihood = currentSustainabilityLikelihood,
+			CurrentLikelihoodComputation = currentLikelihoodComputation,
+			CurrentFrequencyData = currentFrequencyData,
+			PreviousSustainabilityLikelihood = previousSustainabilityLikelihood,
+			PreviousLikelihoodComputation = previousLikelihoodComputation,
+			PreviousFrequencyData = previousFrequencyData,
+			StatusIcon = statusIcon
+		});
+	}
 
 	protected override async Task InitializeTables()
 	{
@@ -140,8 +182,8 @@ public class PromptRepository : DbRepositoryBase
 				- **Current Sustainability Likelihood:**  
 				  Provide the current computed likelihood of sustainable mobile use: `{CurrentSustainabilityLikelihood}`.
 
-				- **Current Likelihood Computation:**  
-				  Detail the computation for the current likelihood: `{CurrentLikelihoodComputation}`.
+				- **Current Likelihood Posterior Computation:**  
+				  Detail the computation for the current likelihood: `{CurrentLikelihoodComputation}`. Emphasize that this is the posterior computation, the current sustainability likelihood percetange result shown is the converted propotional probability.
 
 				- **Frequency Data (Current):**  
 				  Include the frequency data used for the computation: `{CurrentFrequencyData}`.
@@ -150,127 +192,151 @@ public class PromptRepository : DbRepositoryBase
 				- **Previous Sustainability Likelihood:**  
 				  Provide the previous week's computed likelihood of sustainable mobile use: `{PreviousSustainabilityLikelihood}`.
 
-				- **Previous Likelihood Computation:**  
-				  Detail the computation for the previous likelihood: `{PreviousLikelihoodComputation}`.
+				- **Previous Likelihood Posterior Computation:**  
+				  Detail the computation for the previous likelihood: `{PreviousLikelihoodComputation}`. Emphasize that this is the posterior computation, the previous sustainability likelihood percetange result shown is the converted propotional probability.
 
 				- **Frequency Data (Previous):**  
 				  Include the frequency data used for the previous week's computation: `{PreviousFrequencyData}`.
 
 				## 3. FullContent Property:
 				- **Detailed HTML Analytical Overview:**  
-				  Use the following HTML as the template for the `FullContent` property. Insert a summary of the report in the div with the class `overview`, and insert the full discussion, in-depth analysis, and comparison of previous and current sustainability likelihood with headings in each paragraph (do not use the tag <code> and <br> after a heading), and organized structure in the div with the class `content`. Again, strictly use the HTML template as well as the styling, change only the constant percentage value in JavaScript, and only populate the divs `overview` and `content` as instructed earlier. Use simple to understand words on the overview that any user can understand:
+				  Striclty use the following HTML below for the `FullContent` property. Insert a summary of the report in the div with the class `overview`, and insert the full discussion, in-depth analysis, and comparison of previous and current sustainability likelihood with headings in each paragraph (do not use the tag <code> and <br> after a heading), and organized structure in the div with the class `content`. Again, strictly use the HTML template and the styling, change only the constant percentage value in the JavaScript, and only populate the divs `overview` and `content` as instructed earlier. Use simple to understand words on the overview that any user can understand:
 
 				```
 				<html>
-				<head>
-				  <style>
-				    body {
-				      font-family: Arial, sans-serif;
-				      display: flex;
-				      flex-direction: column;
-				      align-items: center;
-				      padding: 20px;
-				      margin: 0;
-				    }
-				    div {
-				      text-align: justify;
-				      text-justify: inter-word;
-				    }
-				    .circle {
-				      position: relative;
-				      width: 100px;
-				      height: 100px;
-				      border-radius: 50%;
-				      background: conic-gradient(var(--color, red) 0%, var(--color, red) var(--percentage, 0%), #ccc var(--percentage, 0%));
-				      display: flex;
-				      justify-content: center;
-				      align-items: center;
-				      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-				      margin-right: 20px;
-				    }
-				    .circle::before {
-				      content: '';
-				      position: absolute;
-				      width: 70px;
-				      height: 70px;
-				      background-color: #f4f4f9;
-				      border-radius: 50%;
-				    }
-				    .circle span {
-				      position: absolute;
-				      font-size: 1.1rem;
-				      font-weight: bold;
-				      color: #333;
-				    }
-				    .overview {
-				      margin-bottom: 20px;
-				    }
-				    .collapsible {
-				      max-width: 150px;
-				      background-color: #039967;
-				      color: white;
-				      border: none;
-				      outline: none;
-				      align-self: start;
-				      padding: 10px 20px;
-				      cursor: pointer;
-				      border-radius: 5px;
-				      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-				    }
-				    .collapsible:hover {
-				      background-color: #026343;
-				    }
-				    .content {
-				      margin-top: 10px;
-				      display: none;
-				      overflow: hidden;
-				    }
-				  </style>
-				</head>
-				<body>
-				  <div class='circle' id='percentageCircle'>
-				      <span id='percentageValue'></span>
-				    </div>
-				  <h2>Weekly Sustainability Likelihood Report</h2>
-				  <div class='overview'>
-				    <p><!-- Insert the 1 paragraph overview here --></p>
-				  </div>
-				  <button class='collapsible'>Find out more</button>
-				  <div class='content' id='collapsibleContent'>
-				    <p><!-- Insert the full breakdown here --></p>
-				  </div>
-				  <script>
-				    const collapsible = document.querySelector('.collapsible');
-				    const collapsibleContent = document.querySelector('.content');
-				    collapsible.addEventListener('click', () => {
-				      const isExpanded = collapsibleContent.style.display === 'block';
-				      collapsibleContent.style.display = isExpanded ? 'none' : 'block';
-				      collapsibleContent.style.color = document.body.style.color;
-				      if (window.external && window.external.notify) {
-							window.external.notify('Resize');
+					<head>
+						<style>
+						body {
+							font-family: Arial, sans-serif;
+							display: flex;
+							flex-direction: column;
+							align-items: center;
+							padding: 20px;
+							margin: 0;
 						}
-				    });
 
-				    function calculateColor(percentage) {
-				      let red, green;
-				      if (percentage <= 50) {
-				        red = 255;
-				        green = Math.round(percentage * 5.1);
-				      } else {
-				        red = Math.round((100 - percentage) * 5.1);
-				        green = 255;
-				      }
-				      return `rgb(${red}, ${green}, 0)`;
-				    }
+						.circle {
+							position: relative;
+							width: 100px;
+							height: 100px;
+							border-radius: 50%;
+							background: conic-gradient(var(--color, red) 0%, var(--color, red) var(--percentage, 0%), #ccc var(--percentage, 0%));
+							display: flex;
+							justify-content: center;
+							align-items: center;
+							box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+							margin-right: 20px;
+						}
 
-				    const percentage = 0;
-				    const circle = document.getElementById('percentageCircle');
-				    const percentageValue = document.getElementById('percentageValue');
-				    circle.style.setProperty('--color', calculateColor(percentage));
-				    circle.style.setProperty('--percentage', `${percentage}%`);
-				    percentageValue.textContent = `${percentage}%`;
-				  </script>
-				</body>
+						.circle::before {
+							content: '';
+							position: absolute;
+							width: 80px;
+							height: 80px;
+							background-color: #f4f4f9;
+							border-radius: 50%;
+						}
+
+						.circle .grid-inner {
+							position: absolute;
+							color: #333;
+							align-items:center;
+							justify-content:center;
+							display:flex;
+						}
+						
+						.circle .grid-inner svg {
+							padding-bottom: 2px;
+						}
+
+						.overview {
+							margin-bottom: 20px;
+						}
+
+						.collapsible {
+							max-width: 150px;
+							background-color: #039967;
+							color: white;
+							border: none;
+							outline: none;
+							align-self: start;
+							padding: 7px 10px;
+							cursor: pointer;
+							border-radius: 5px;
+							box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+						}
+
+						.collapsible:hover {
+							background-color: #026343;
+						}
+
+						.content {
+							margin-top: 5px;
+							display: none;
+							overflow: hidden;
+						}
+						
+						.flex-container {
+							display: flex;
+							flex-wrap:wrap;
+						}
+						.title {
+							height: auto;
+							align-self:center;
+						}
+						</style>
+					</head>
+					<body>
+						<div class='flex-container'>
+							<div class='circle' id='percentageCircle'>
+							<div class='grid-inner'>
+								<h4 id='percentageValue'></h4>
+							
+								{StatusIcon}
+							</div>
+							</div>
+							
+							<div class='title'>
+								<h3>Weekly<br>Sustainability<br>Likelihood Report</h3>
+							</div>
+						</div>
+						
+						<div class='overview'>
+							<p><!-- Insert the 1 paragraph overview here --></p>
+						</div>
+						<button class='collapsible'>Find out more</button>
+						<div class='content' id='collapsibleContent'>
+							<p><!-- Insert the full breakdown here --></p>
+						</div>
+						<script>
+						const collapsible = document.querySelector('.collapsible');
+						const collapsibleContent = document.querySelector('.content');
+						collapsible.addEventListener('click', () => {
+							const isExpanded = collapsibleContent.style.display === 'block';
+							collapsibleContent.style.display = isExpanded ? 'none' : 'block';
+							collapsibleContent.style.color = document.body.style.color;
+							collapsible.remove();
+						});
+
+						function calculateColor(percentage) {
+							let red, green;
+							if (percentage <= 50) {
+							red = 255;
+							green = Math.round(percentage * 5.1);
+							} else {
+							red = Math.round((100 - percentage) * 5.1);
+							green = 255;
+							}
+							return `rgb(${red}, ${green}, 0)`;
+						}
+						const percentage = 0;
+						const circle = document.getElementById('percentageCircle');
+						const percentageValue = document.getElementById('percentageValue');
+						circle.style.setProperty('--color', calculateColor(percentage));
+						circle.style.setProperty('--percentage', `${percentage}%`);
+						percentageValue.textContent = `${percentage}%`;
+						</script>
+					</body>
 				</html>
 				```
 				"""),
@@ -282,127 +348,149 @@ public class PromptRepository : DbRepositoryBase
 				- **Current Sustainability Likelihood:**  
 				  Provide the current computed likelihood of sustainable mobile use: `{CurrentSustainabilityLikelihood}`.
 
-				- **Current Likelihood Computation:**  
-				  Detail the computation for the current likelihood: `{CurrentLikelihoodComputation}`.
+				- **Current Likelihood Posterior Computation:**  
+				  Detail the computation for the current likelihood: `{CurrentLikelihoodComputation}`. Emphasize that this is the posterior computation, the current sustainability likelihood percetange result shown is the converted propotional probability.
 
 				- **Frequency Data (Current):**  
 				  Include the frequency data used for the computation: `{CurrentFrequencyData}`.
 
 				## 2. FullContent Property:
 				- **Detailed HTML Analytical Overview:**  
-				  Use the following HTML as the template for the `FullContent` property. Insert a summary of the report in the div with the class `overview`, and insert the full discussion and in-depth analysis of the sustainability likelihood with headings in each paragraph (do not use the tag <code> and <br> after a heading), and organized structure in the div with the class `content`. Again, strictly use the HTML template as well as the styling, change only the constant percentage value in JavaScript, and only populate the divs `overview` and `content` as instructed earlier. Use simple to understand words on the overview that any user can understand:
+				  Striclty use the following HTML below as the template for the `FullContent` property. Insert a summary of the report in the div with the class `overview`, and insert the full discussion and in-depth analysis of the sustainability likelihood with headings in each paragraph (do not use the tag <code> and <br> after a heading), and organized structure in the div with the class `content`. Again, strictly use the HTML template and the styling, change only the constant percentage value in JavaScript, and only populate the divs `overview` and `content` as instructed earlier. Use simple to understand words on the overview that any user can understand:
 
 				```
 				<html>
-				<head>
-				  <style>
-				    body {
-				      font-family: Arial, sans-serif;
-				      display: flex;
-				      flex-direction: column;
-				      align-items: center;
-				      padding: 20px;
-				      margin: 0;
-				    }
-				    div {
-				      text-align: justify;
-				      text-justify: inter-word;
-				    }
-				    .circle {
-				      position: relative;
-				      width: 100px;
-				      height: 100px;
-				      border-radius: 50%;
-				      background: conic-gradient(var(--color, red) 0%, var(--color, red) var(--percentage, 0%), #ccc var(--percentage, 0%));
-				      display: flex;
-				      justify-content: center;
-				      align-items: center;
-				      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-				      margin-right: 20px;
-				    }
-				    .circle::before {
-				      content: '';
-				      position: absolute;
-				      width: 70px;
-				      height: 70px;
-				      background-color: #f4f4f9;
-				      border-radius: 50%;
-				    }
-				    .circle span {
-				      position: absolute;
-				      font-size: 1.1rem;
-				      font-weight: bold;
-				      color: #333;
-				    }
-				    .overview {
-				      margin-bottom: 20px;
-				    }
-				    .collapsible {
-				      max-width: 150px;
-				      background-color: #039967;
-				      color: white;
-				      border: none;
-				      outline: none;
-				      align-self: start;
-				      padding: 10px 20px;
-				      cursor: pointer;
-				      border-radius: 5px;
-				      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-				    }
-				    .collapsible:hover {
-				      background-color: #026343;
-				    }
-				    .content {
-				      margin-top: 10px;
-				      display: none;
-				      overflow: hidden;
-				    }
-				  </style>
-				</head>
-				<body>
-				  <div class='circle' id='percentageCircle'>
-				      <span id='percentageValue'></span>
-				    </div>
-				  <h2>Weekly Sustainability Likelihood Report</h2>
-				  <div class='overview'>
-				    <p><!-- Insert the 1 paragraph overview here --></p>
-				  </div>
-				  <button class='collapsible'>Find out more</button>
-				  <div class='content' id='collapsibleContent'>
-				    <p><!-- Insert the full breakdown here --></p>
-				  </div>
-				  <script>
-				    const collapsible = document.querySelector('.collapsible');
-				    const collapsibleContent = document.querySelector('.content');
-				    collapsible.addEventListener('click', () => {
-				      const isExpanded = collapsibleContent.style.display === 'block';
-				      collapsibleContent.style.display = isExpanded ? 'none' : 'block';
-				      collapsibleContent.style.color = document.body.style.color;
-				      if (window.external && window.external.notify) {
-							window.external.notify('Resize');
+					<head>
+						<style>
+						body {
+							font-family: Arial, sans-serif;
+							display: flex;
+							flex-direction: column;
+							align-items: center;
+							padding: 20px;
+							margin: 0;
 						}
-				    });
 
-				    function calculateColor(percentage) {
-				      let red, green;
-				      if (percentage <= 50) {
-				        red = 255;
-				        green = Math.round(percentage * 5.1);
-				      } else {
-				        red = Math.round((100 - percentage) * 5.1);
-				        green = 255;
-				      }
-				      return `rgb(${red}, ${green}, 0)`;
-				    }
+						.circle {
+							position: relative;
+							width: 100px;
+							height: 100px;
+							border-radius: 50%;
+							background: conic-gradient(var(--color, red) 0%, var(--color, red) var(--percentage, 0%), #ccc var(--percentage, 0%));
+							display: flex;
+							justify-content: center;
+							align-items: center;
+							box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+							margin-right: 20px;
+						}
 
-				    const percentage = 0;
-				    const circle = document.getElementById('percentageCircle');
-				    const percentageValue = document.getElementById('percentageValue');
-				    circle.style.setProperty('--color', calculateColor(percentage));
-				    circle.style.setProperty('--percentage', `${percentage}%`);
-				    percentageValue.textContent = `${percentage}%`;
-				  </script>
-				</body>
+						.circle::before {
+							content: '';
+							position: absolute;
+							width: 80px;
+							height: 80px;
+							background-color: #f4f4f9;
+							border-radius: 50%;
+						}
+
+						.circle .grid-inner {
+							position: absolute;
+							color: #333;
+							align-items:center;
+							justify-content:center;
+							display:flex;
+						}
+						
+						.circle .grid-inner svg {
+							padding-bottom: 2px;
+						}
+
+						.overview {
+							margin-bottom: 20px;
+						}
+
+						.collapsible {
+							max-width: 150px;
+							background-color: #039967;
+							color: white;
+							border: none;
+							outline: none;
+							align-self: start;
+							padding: 7px 10px;
+							cursor: pointer;
+							border-radius: 5px;
+							box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+						}
+
+						.collapsible:hover {
+							background-color: #026343;
+						}
+
+						.content {
+							margin-top: 5px;
+							display: none;
+							overflow: hidden;
+						}
+						
+						.flex-container {
+							display: flex;
+							flex-wrap:wrap;
+						}
+						.title {
+							height: auto;
+							align-self:center;
+						}
+						</style>
+					</head>
+					<body>
+						<div class='flex-container'>
+							<div class='circle' id='percentageCircle'>
+							<div class='grid-inner'>
+								<h4 id='percentageValue'></h4>
+							</div>
+							</div>
+							
+							<div class='title'>
+								<h3>Weekly<br>Sustainability<br>Likelihood Report</h3>
+							</div>
+						</div>
+						
+						<div class='overview'>
+							<p><!-- Insert the 1 paragraph overview here --></p>
+						</div>
+						<button class='collapsible'>Find out more</button>
+						<div class='content' id='collapsibleContent'>
+							<p><!-- Insert the full breakdown here --></p>
+						</div>
+						<script>
+						const collapsible = document.querySelector('.collapsible');
+						const collapsibleContent = document.querySelector('.content');
+						collapsible.addEventListener('click', () => {
+							const isExpanded = collapsibleContent.style.display === 'block';
+							collapsibleContent.style.display = isExpanded ? 'none' : 'block';
+							collapsibleContent.style.color = document.body.style.color;
+							collapsible.remove();
+						});
+
+						function calculateColor(percentage) {
+							let red, green;
+							if (percentage <= 50) {
+							red = 255;
+							green = Math.round(percentage * 5.1);
+							} else {
+							red = Math.round((100 - percentage) * 5.1);
+							green = 255;
+							}
+							return `rgb(${red}, ${green}, 0)`;
+						}
+						const percentage = 0;
+						const circle = document.getElementById('percentageCircle');
+						const percentageValue = document.getElementById('percentageValue');
+						circle.style.setProperty('--color', calculateColor(percentage));
+						circle.style.setProperty('--percentage', `${percentage}%`);
+						percentageValue.textContent = `${percentage}%`;
+						</script>
+					</body>
 				</html>
 				```
 				"""),

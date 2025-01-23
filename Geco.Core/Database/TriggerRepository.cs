@@ -58,8 +58,8 @@ public class TriggerRepository : DbRepositoryBase
 		// ensure that the fetched data corresponds to records from the last 2 weeks.
 		var triggers = new Dictionary<DeviceInteractionTrigger, int>();
 		await using var fetchQuery = await db.ExecuteReader(
-			"SELECT Type, SUM(RawValue) FROM TblTriggerLog WHERE (unixepoch() - Timestamp) > ? AND (unixepoch() - Timestamp) <= ?) GROUP BY Type",
-			OneWeekInSeconds, TwoWeeksInSeconds);
+		"SELECT Type, SUM(RawValue) FROM TblTriggerLog WHERE (unixepoch() - Timestamp) > ? AND (unixepoch() - Timestamp) <= ? GROUP BY Type",
+		OneWeekInSeconds, TwoWeeksInSeconds);
 		while (fetchQuery.Read())
 			triggers.Add((DeviceInteractionTrigger)(long)fetchQuery["Type"],
 				(int)(long)fetchQuery["SUM(RawValue)"]);

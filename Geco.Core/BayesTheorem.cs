@@ -163,8 +163,8 @@ public class BayesTheorem
 
 		// proportional probability
 		double posteriorSum = positivePosterior + negativePosterior;
-		double proportionalPositiveProb = positivePosterior / posteriorSum;
-		double proportionalNegativeProb = negativePosterior / posteriorSum;
+		double proportionalPositiveProb = (positivePosterior / posteriorSum) * 100;
+		double proportionalNegativeProb = (negativePosterior / posteriorSum) * 100;
 
 		return (positivePosterior > negativePosterior, proportionalPositiveProb, proportionalNegativeProb);
 	}
