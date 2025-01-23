@@ -1,3 +1,4 @@
+using System.Globalization;
 using Geco.Core.Database.SqliteModel;
 using Geco.Core.Models.ActionObserver;
 using Geco.Core.Models.Prompt;
@@ -30,8 +31,7 @@ public class PromptRepository : DbRepositoryBase
 		return await BuildPrompt(PromptCategory.SearchCtgBasedTemp,
 			new
 			{
-				PredefinedTopic = $"Sustainable {predefinedTopic}",
-				StoredPromptRefinement = randomPromptRefinement
+				PredefinedTopic = $"Sustainable {predefinedTopic}", StoredPromptRefinement = randomPromptRefinement
 			});
 	}
 
@@ -51,70 +51,73 @@ public class PromptRepository : DbRepositoryBase
 			});
 	}
 
-	public async Task<string> GetLikelihoodPrompt(string currentSustainabilityLikelihood,
+	public async Task<string> GetLikelihoodPrompt(double currentSustainabilityLikelihood,
 		string currentLikelihoodComputation,
 		string currentFrequencyData) => await BuildPrompt(PromptCategory.LikelihoodNoPrevDataTemp,
 		new
 		{
-			CurrentSustainabilityLikelihood = currentSustainabilityLikelihood,
+			CurrentSustainabilityLikelihood =
+				currentSustainabilityLikelihood.ToString(CultureInfo.InvariantCulture) + "%",
 			CurrentLikelihoodComputation = currentLikelihoodComputation,
 			CurrentFrequencyData = currentFrequencyData
 		});
 
-	public async Task<string> GetLikelihoodWithHistoryPrompt(string currentSustainabilityLikelihood,
+	public async Task<string> GetLikelihoodWithHistoryPrompt(double currentSustainabilityLikelihood,
 		string currentLikelihoodComputation,
-		string currentFrequencyData, string previousSustainabilityLikelihood, string previousLikelihoodComputation,
+		string currentFrequencyData, double previousSustainabilityLikelihood, string previousLikelihoodComputation,
 		string previousFrequencyData)
 	{
-		string upArrowSvg = @"
-			<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' width='20' height='20' viewBox='1 1 256 256' xml:space='preserve'>
-			<defs>
-			</defs>
-			<g style='stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;' transform='translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)' >
-			<path d='M 43.779 0.434 L 12.722 25.685 c -0.452 0.368 -0.714 0.92 -0.714 1.502 v 19.521 c 0 0.747 0.43 1.427 1.104 1.748 c 0.674 0.321 1.473 0.225 2.053 -0.246 L 45 23.951 l 29.836 24.258 c 0.579 0.471 1.378 0.567 2.053 0.246 c 0.674 -0.321 1.104 -1.001 1.104 -1.748 V 27.187 c 0 -0.582 -0.263 -1.134 -0.714 -1.502 L 46.221 0.434 C 45.51 -0.145 44.49 -0.145 43.779 0.434 z' style='stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(39,193,39); fill-rule: nonzero; opacity: 1;' transform=' matrix(1 0 0 1 0 0) ' stroke-linecap='round' />
-			<path d='M 43.779 41.792 l -31.057 25.25 c -0.452 0.368 -0.714 0.919 -0.714 1.502 v 19.52 c 0 0.747 0.43 1.427 1.104 1.748 c 0.674 0.321 1.473 0.225 2.053 -0.246 L 45 65.308 l 29.836 24.258 c 0.579 0.471 1.378 0.567 2.053 0.246 c 0.674 -0.321 1.104 -1.001 1.104 -1.748 V 68.544 c 0 -0.583 -0.263 -1.134 -0.714 -1.502 l -31.057 -25.25 C 45.51 41.214 44.49 41.214 43.779 41.792 z' style='stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(39,193,39); fill-rule: nonzero; opacity: 1;' transform=' matrix(1 0 0 1 0 0) ' stroke-linecap='round' />
-			</g>
-			</svg>";
+		const string upArrowSvg = """
+		                          <svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' width='20' height='20' viewBox='1 1 256 256' xml:space='preserve'>
+		                          <defs>
+		                          </defs>
+		                          <g style='stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;' transform='translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)' >
+		                          <path d='M 43.779 0.434 L 12.722 25.685 c -0.452 0.368 -0.714 0.92 -0.714 1.502 v 19.521 c 0 0.747 0.43 1.427 1.104 1.748 c 0.674 0.321 1.473 0.225 2.053 -0.246 L 45 23.951 l 29.836 24.258 c 0.579 0.471 1.378 0.567 2.053 0.246 c 0.674 -0.321 1.104 -1.001 1.104 -1.748 V 27.187 c 0 -0.582 -0.263 -1.134 -0.714 -1.502 L 46.221 0.434 C 45.51 -0.145 44.49 -0.145 43.779 0.434 z' style='stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(39,193,39); fill-rule: nonzero; opacity: 1;' transform=' matrix(1 0 0 1 0 0) ' stroke-linecap='round' />
+		                          <path d='M 43.779 41.792 l -31.057 25.25 c -0.452 0.368 -0.714 0.919 -0.714 1.502 v 19.52 c 0 0.747 0.43 1.427 1.104 1.748 c 0.674 0.321 1.473 0.225 2.053 -0.246 L 45 65.308 l 29.836 24.258 c 0.579 0.471 1.378 0.567 2.053 0.246 c 0.674 -0.321 1.104 -1.001 1.104 -1.748 V 68.544 c 0 -0.583 -0.263 -1.134 -0.714 -1.502 l -31.057 -25.25 C 45.51 41.214 44.49 41.214 43.779 41.792 z' style='stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(39,193,39); fill-rule: nonzero; opacity: 1;' transform=' matrix(1 0 0 1 0 0) ' stroke-linecap='round' />
+		                          </g>
+		                          </svg>
+		                          """;
 
-		string downArrowSvg = @"
-			<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' width='20' height='20' viewBox='0 0 256 256' xml:space='preserve'>
-			<defs>
-			</defs>
-			<g style='stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;' transform='translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)' >
-			<path d='M 43.779 89.566 L 12.722 64.315 c -0.452 -0.368 -0.714 -0.92 -0.714 -1.502 V 43.293 c 0 -0.747 0.43 -1.427 1.104 -1.748 c 0.674 -0.321 1.473 -0.225 2.053 0.246 L 45 66.049 l 29.836 -24.258 c 0.579 -0.471 1.378 -0.567 2.053 -0.246 c 0.674 0.321 1.104 1.001 1.104 1.748 v 19.521 c 0 0.582 -0.263 1.134 -0.714 1.502 L 46.221 89.566 C 45.51 90.145 44.49 90.145 43.779 89.566 z' style='stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(206,62,62); fill-rule: nonzero; opacity: 1;' transform=' matrix(1 0 0 1 0 0) ' stroke-linecap='round' />
-			<path d='M 43.779 48.208 l -31.057 -25.25 c -0.452 -0.368 -0.714 -0.919 -0.714 -1.502 V 1.936 c 0 -0.747 0.43 -1.427 1.104 -1.748 c 0.674 -0.321 1.473 -0.225 2.053 0.246 L 45 24.692 L 74.836 0.434 c 0.579 -0.471 1.378 -0.567 2.053 -0.246 c 0.674 0.321 1.104 1.001 1.104 1.748 v 19.521 c 0 0.583 -0.263 1.134 -0.714 1.502 l -31.057 25.25 C 45.51 48.786 44.49 48.786 43.779 48.208 z' style='stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(206,62,62); fill-rule: nonzero; opacity: 1;' transform=' matrix(1 0 0 1 0 0) ' stroke-linecap='round' />
-			</g>
-			</svg>";
+		const string downArrowSvg = """
+		                            <svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' width='20' height='20' viewBox='0 0 256 256' xml:space='preserve'>
+		                            <defs>
+		                            </defs>
+		                            <g style='stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;' transform='translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)' >
+		                            <path d='M 43.779 89.566 L 12.722 64.315 c -0.452 -0.368 -0.714 -0.92 -0.714 -1.502 V 43.293 c 0 -0.747 0.43 -1.427 1.104 -1.748 c 0.674 -0.321 1.473 -0.225 2.053 0.246 L 45 66.049 l 29.836 -24.258 c 0.579 -0.471 1.378 -0.567 2.053 -0.246 c 0.674 0.321 1.104 1.001 1.104 1.748 v 19.521 c 0 0.582 -0.263 1.134 -0.714 1.502 L 46.221 89.566 C 45.51 90.145 44.49 90.145 43.779 89.566 z' style='stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(206,62,62); fill-rule: nonzero; opacity: 1;' transform=' matrix(1 0 0 1 0 0) ' stroke-linecap='round' />
+		                            <path d='M 43.779 48.208 l -31.057 -25.25 c -0.452 -0.368 -0.714 -0.919 -0.714 -1.502 V 1.936 c 0 -0.747 0.43 -1.427 1.104 -1.748 c 0.674 -0.321 1.473 -0.225 2.053 0.246 L 45 24.692 L 74.836 0.434 c 0.579 -0.471 1.378 -0.567 2.053 -0.246 c 0.674 0.321 1.104 1.001 1.104 1.748 v 19.521 c 0 0.583 -0.263 1.134 -0.714 1.502 l -31.057 25.25 C 45.51 48.786 44.49 48.786 43.779 48.208 z' style='stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(206,62,62); fill-rule: nonzero; opacity: 1;' transform=' matrix(1 0 0 1 0 0) ' stroke-linecap='round' />
+		                            </g>
+		                            </svg>
+		                            """;
 
-		string tildeSvg = @"
-			<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 50' width='20' height='50'>
-				<path d='M1 25 Q 25 5, 50 25 T 90 25' 
-						fill='none' 
-						stroke='gray' 
-						stroke-width='15' />
-			</svg>";
+		const string tildeSvg = """
+		                        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 50' width='20' height='50'>
+		                        	<path d='M1 25 Q 25 5, 50 25 T 90 25' 
+		                        			fill='none' 
+		                        			stroke='gray' 
+		                        			stroke-width='15' />
+		                        </svg>
+		                        """;
 
-		double currentLikelihoodValue = double.Parse(currentSustainabilityLikelihood.Remove(currentSustainabilityLikelihood.Length - 1));
-		double previousLikelihoodValue = double.Parse(previousSustainabilityLikelihood.Remove(previousSustainabilityLikelihood.Length - 1));
-
-
-		string statusIcon = currentLikelihoodValue > previousLikelihoodValue
-			? upArrowSvg
-			: currentLikelihoodValue < previousLikelihoodValue
-				? downArrowSvg
-				: tildeSvg;
+		string statusIcon = currentFrequencyData.CompareTo(previousSustainabilityLikelihood) switch
+		{
+			-1 => downArrowSvg,
+			1 => upArrowSvg,
+			_ => tildeSvg
+		};
 
 		return await BuildPrompt(PromptCategory.LikelihoodWithPrevDataTemp,
-		new
-		{
-			CurrentSustainabilityLikelihood = currentSustainabilityLikelihood,
-			CurrentLikelihoodComputation = currentLikelihoodComputation,
-			CurrentFrequencyData = currentFrequencyData,
-			PreviousSustainabilityLikelihood = previousSustainabilityLikelihood,
-			PreviousLikelihoodComputation = previousLikelihoodComputation,
-			PreviousFrequencyData = previousFrequencyData,
-			StatusIcon = statusIcon
-		});
+			new
+			{
+				CurrentSustainabilityLikelihood =
+					currentSustainabilityLikelihood.ToString(CultureInfo.InvariantCulture) + "%",
+				CurrentLikelihoodComputation = currentLikelihoodComputation,
+				CurrentFrequencyData = currentFrequencyData,
+				PreviousSustainabilityLikelihood =
+					previousSustainabilityLikelihood.ToString(CultureInfo.InvariantCulture) + "%",
+				PreviousLikelihoodComputation = previousLikelihoodComputation,
+				PreviousFrequencyData = previousFrequencyData,
+				StatusIcon = statusIcon
+			});
 	}
 
 	protected override async Task InitializeTables()
@@ -214,7 +217,7 @@ public class PromptRepository : DbRepositoryBase
 							padding: 20px;
 							margin: 0;
 						}
-
+				
 						.circle {
 							position: relative;
 							width: 100px;
@@ -227,7 +230,7 @@ public class PromptRepository : DbRepositoryBase
 							box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 							margin-right: 20px;
 						}
-
+				
 						.circle::before {
 							content: '';
 							position: absolute;
@@ -236,7 +239,7 @@ public class PromptRepository : DbRepositoryBase
 							background-color: #f4f4f9;
 							border-radius: 50%;
 						}
-
+				
 						.circle .grid-inner {
 							position: absolute;
 							color: #333;
@@ -248,11 +251,11 @@ public class PromptRepository : DbRepositoryBase
 						.circle .grid-inner svg {
 							padding-bottom: 2px;
 						}
-
+				
 						.overview {
 							margin-bottom: 20px;
 						}
-
+				
 						.collapsible {
 							max-width: 150px;
 							background-color: #039967;
@@ -265,11 +268,11 @@ public class PromptRepository : DbRepositoryBase
 							border-radius: 5px;
 							box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 						}
-
+				
 						.collapsible:hover {
 							background-color: #026343;
 						}
-
+				
 						.content {
 							margin-top: 5px;
 							display: none;
@@ -317,7 +320,7 @@ public class PromptRepository : DbRepositoryBase
 							collapsibleContent.style.color = document.body.style.color;
 							collapsible.remove();
 						});
-
+				
 						function calculateColor(percentage) {
 							let red, green;
 							if (percentage <= 50) {
@@ -370,7 +373,7 @@ public class PromptRepository : DbRepositoryBase
 							padding: 20px;
 							margin: 0;
 						}
-
+				
 						.circle {
 							position: relative;
 							width: 100px;
@@ -383,7 +386,7 @@ public class PromptRepository : DbRepositoryBase
 							box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 							margin-right: 20px;
 						}
-
+				
 						.circle::before {
 							content: '';
 							position: absolute;
@@ -392,7 +395,7 @@ public class PromptRepository : DbRepositoryBase
 							background-color: #f4f4f9;
 							border-radius: 50%;
 						}
-
+				
 						.circle .grid-inner {
 							position: absolute;
 							color: #333;
@@ -404,11 +407,11 @@ public class PromptRepository : DbRepositoryBase
 						.circle .grid-inner svg {
 							padding-bottom: 2px;
 						}
-
+				
 						.overview {
 							margin-bottom: 20px;
 						}
-
+				
 						.collapsible {
 							max-width: 150px;
 							background-color: #039967;
@@ -421,11 +424,11 @@ public class PromptRepository : DbRepositoryBase
 							border-radius: 5px;
 							box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 						}
-
+				
 						.collapsible:hover {
 							background-color: #026343;
 						}
-
+				
 						.content {
 							margin-top: 5px;
 							display: none;
@@ -471,7 +474,7 @@ public class PromptRepository : DbRepositoryBase
 							collapsibleContent.style.color = document.body.style.color;
 							collapsible.remove();
 						});
-
+				
 						function calculateColor(percentage) {
 							let red, green;
 							if (percentage <= 50) {

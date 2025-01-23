@@ -58,7 +58,7 @@ public class DatabaseTest
 		string triggerPrompt = await promptRepo.GetPrompt(DeviceInteractionTrigger.BrowserUsageUnsustainable);
 		_output.WriteLine($"Trigger Prompt: {triggerPrompt}");
 
-		string sustLikelihoodPrompt = await promptRepo.GetLikelihoodPrompt("16.55%",
+		string sustLikelihoodPrompt = await promptRepo.GetLikelihoodPrompt(16.55,
 			"current_sustainability_likelihood = (7/10) * (12/20) * (10/16) * (29/46)",
 			"Charging: Total frequency – 10, Frequency Sustainable Charging – 3, Frequency Unsustainable Charging – 7");
 		_output.WriteLine($"Likelihood Prompt: {sustLikelihoodPrompt}");

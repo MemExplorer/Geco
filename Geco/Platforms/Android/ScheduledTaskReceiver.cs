@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.Json;
 using Android.App;
 using Android.App.Usage;
@@ -119,7 +118,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 			currentWeekResult.Value.Frequency);
 	}
 
-	private (string PositiveComputation, string Frequency, string Probability)? GetLikelihoodPromptFromRecords(
+	private (string PositiveComputation, string Frequency, double Probability)? GetLikelihoodPromptFromRecords(
 		Dictionary<DeviceInteractionTrigger, int> currentWeekTriggerRecords)
 	{
 		int chargingPositive =
@@ -154,8 +153,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		var currWeekComputationResult = currWeekBayesInst.Compute();
 		var currWeekComputationStr = currWeekBayesInst.GetComputationInString();
 		string currWeekFrequencyStr = currWeekBayesInst.GetFrequencyInString();
-		string currSustainableProportionalProbability = Math.Round(currWeekComputationResult.PositiveProbs, 2)
-			.ToString(CultureInfo.InvariantCulture) + "%";
+		double currSustainableProportionalProbability = Math.Round(currWeekComputationResult.PositiveProbs, 2);
 
 		return (currWeekComputationStr.PositiveComputation, currWeekFrequencyStr,
 			currSustainableProportionalProbability);

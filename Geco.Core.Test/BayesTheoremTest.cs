@@ -41,8 +41,7 @@ public class BayesTheoremTest
 		var currWeekComputationResult = currWeekBayesInst.Compute();
 		var currWeekComputationStr = currWeekBayesInst.GetComputationInString();
 		string currWeekFrequencyStr = currWeekBayesInst.GetFrequencyInString();
-		string currSustainableProportionalProbability = Math.Round(currWeekComputationResult.PositiveProbs, 2)
-			.ToString(CultureInfo.InvariantCulture) + "%";
+		double currSustainableProportionalProbability = Math.Round(currWeekComputationResult.PositiveProbs, 2);
 		string? finalPrompt = await promptRepo.GetLikelihoodPrompt(currSustainableProportionalProbability,
 			currWeekComputationStr.PositiveComputation, currWeekFrequencyStr);
 		_output.WriteLine(finalPrompt);
