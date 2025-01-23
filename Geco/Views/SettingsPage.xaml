@@ -28,6 +28,22 @@
                 <TapGestureRecognizer Command="{Binding ClearHistoryCommand}" />
             </Border.GestureRecognizers>
         </Border>
+        
+        <!-- Clear Weekly Reports -->
+        <Border Stroke="Black">
+            <StackLayout Orientation="Horizontal"
+                         Padding="10">
+                <StackLayout Orientation="Vertical">
+                    <Label FontSize="18"
+                           Text="Clear Weekly Reports" />
+                    <Label FontSize="Caption"
+                           Text="Clears your weekly reports" />
+                </StackLayout>
+            </StackLayout>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ClearWeeklyReportsCommand}" />
+            </Border.GestureRecognizers>
+        </Border>
 
         <!-- Toggle Dark Mode -->
         <Border Stroke="Black">

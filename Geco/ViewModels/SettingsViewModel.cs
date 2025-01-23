@@ -36,6 +36,22 @@ public partial class SettingsViewModel : ObservableObject
 		currShellViewModel.ChatHistoryList.Clear();
 		await chatRepo.DeleteAllHistory(HistoryType.DefaultConversation);
 	}
+	
+	[RelayCommand]
+	async Task ClearWeeklyReports()
+	{
+		var currentShell = (AppShell)Shell.Current;
+
+		// delete confirmation dialog
+		bool deleteAns =
+			await currentShell.DisplayAlert("", "Are you sure you want to clear your weekly reports?", "Yes", "No");
+
+		if (!deleteAns)
+			return;
+		
+		var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
+		await chatRepo.DeleteAllHistory(HistoryType.WeeklyReportConversation);
+	}
 
 	[RelayCommand]
 	void ToggleDarkMode(ToggledEventArgs e)
