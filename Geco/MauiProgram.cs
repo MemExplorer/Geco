@@ -163,6 +163,25 @@ public static class MauiProgram
 			)
 		});
 
+		builder.Services.AddKeyedSingleton(GlobalContext.GeminiWeeklyReport, new GeminiSettings
+		{
+			Conversational = false,
+			ResponseMimeType = "application/json",
+			ResponseSchema = new Schema(
+				SchemaType.ARRAY,
+				Items: new Schema(SchemaType.OBJECT,
+					Properties: new Dictionary<string, Schema>
+					{
+						{ "NotificationTitle", new Schema(SchemaType.STRING) },
+						{ "NotificationDescription", new Schema(SchemaType.STRING) },
+						{ "Overview", new Schema(SchemaType.STRING) },
+						{ "ReportBreakdown", new Schema(SchemaType.STRING) }
+					},
+					Required: ["NotificationTitle", "NotificationDescription", "Overview", "ReportBreakdown"]
+				)
+			)
+		});
+
 		builder.Services.AddTransient<GeminiChat>(_ =>
 			new GeminiChat(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest"));
 		return builder;
