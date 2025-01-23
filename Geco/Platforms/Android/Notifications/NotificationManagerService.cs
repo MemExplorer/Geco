@@ -81,13 +81,16 @@ public class NotificationManagerService : INotificationManagerService
 		string notificationId,
 		bool notify = true, Dictionary<string, string>? args = null)
 	{
+		var notificationInstance = Show(title, description, message, notificationId, interactive, args);
+
+		if (!GecoSettings.Notifications)
+			return notificationInstance;
+		
 		if (!_channelInitialized)
 		{
 			CreateNotificationChannel();
 		}
-
-		var notificationInstance = Show(title, description, message, notificationId, interactive, args);
-
+		
 		if (notify)
 			_compatManager.Notify(_messageId++, notificationInstance);
 
