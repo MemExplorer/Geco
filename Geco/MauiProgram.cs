@@ -133,24 +133,6 @@ public static class MauiProgram
 				"""
 		});
 
-		builder.Services.AddKeyedSingleton(GlobalContext.GeminiSearch, new GeminiSettings
-		{
-			SystemInstructions =
-				"You are Geco, a large language model based on Google Gemini. You are developed by SS Bois. Your response should always be sustainability focused, your tone should be like a search engine, and you should always have 3 responses",
-			Conversational = false,
-			ResponseMimeType = "application/json",
-			ResponseSchema = new Schema(
-				SchemaType.ARRAY,
-				Items: new Schema(SchemaType.OBJECT,
-					Properties: new Dictionary<string, Schema>
-					{
-						{ "Title", new Schema(SchemaType.STRING) }, { "Description", new Schema(SchemaType.STRING) }
-					},
-					Required: ["Title", "Description"]
-				)
-			)
-		});
-
 		builder.Services.AddKeyedSingleton(GlobalContext.GeminiNotification, new GeminiSettings
 		{
 			SystemInstructions =

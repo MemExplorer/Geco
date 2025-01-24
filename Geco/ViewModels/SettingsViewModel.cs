@@ -36,7 +36,7 @@ public partial class SettingsViewModel : ObservableObject
 		currShellViewModel.ChatHistoryList.Clear();
 		await chatRepo.DeleteAllHistory(HistoryType.DefaultConversation);
 	}
-	
+
 	[RelayCommand]
 	async Task ClearWeeklyReports()
 	{
@@ -48,7 +48,7 @@ public partial class SettingsViewModel : ObservableObject
 
 		if (!deleteAns)
 			return;
-		
+
 		var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
 		await chatRepo.DeleteAllHistory(HistoryType.WeeklyReportConversation);
 	}

@@ -15,7 +15,7 @@ public partial class ReportsViewModel : ObservableObject
 #if ANDROID
 		Platform.CurrentActivity?.Intent?.SetAction("GecoWeeklyReportNotif");
 #endif
-		
+
 		await Shell.Current.GoToAsync(nameof(WeeklyReportChatPage),
 			new Dictionary<string, object> { { "historyid", conversation.Id } });
 	}

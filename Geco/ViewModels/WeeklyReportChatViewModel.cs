@@ -71,7 +71,6 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 	{
 		try
 		{
-			
 #if ANDROID
 			// validate intent action
 			var intent = Platform.CurrentActivity?.Intent;
@@ -80,7 +79,7 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 
 			// after execution, set action to null to avoid repeating chat initialization
 			intent.SetAction(null);
-			
+
 #endif
 			if (!(query.TryGetValue("historyid", out object? obj) && obj is string historyId))
 				return;

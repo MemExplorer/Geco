@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Globalization;
 using Geco.Core.Database;
 using Xunit.Abstractions;
 
@@ -46,7 +45,7 @@ public class BayesTheoremTest
 			currWeekComputationStr.PositiveComputation, currWeekFrequencyStr);
 		_output.WriteLine(finalPrompt);
 	}
-	
+
 	[Fact]
 	async Task BayesWithPreviousWeekPromptTest()
 	{
@@ -61,7 +60,7 @@ public class BayesTheoremTest
 		var currWeekComputationStr = currWeekBayesInst.GetComputationInString();
 		string currWeekFrequencyStr = currWeekBayesInst.GetFrequencyInString();
 		double currSustainableProportionalProbability = Math.Round(currWeekComputationResult.PositiveProbs, 2);
-		
+
 		var prevWeekBayesInst = new BayesTheorem();
 		prevWeekBayesInst.AppendData("Charging", 2, 0);
 		prevWeekBayesInst.AppendData("Usage", 8, 0);
@@ -72,7 +71,7 @@ public class BayesTheoremTest
 		string prevWeekFrequencyStr = prevWeekBayesInst.GetFrequencyInString();
 		double prevSustainableProportionalProbability = Math.Round(prevWeekComputationResult.PositiveProbs, 2);
 		string? finalPrompt = await promptRepo.GetLikelihoodWithHistoryPrompt(currSustainableProportionalProbability,
-			currWeekComputationStr.PositiveComputation, currWeekFrequencyStr,prevSustainableProportionalProbability,
+			currWeekComputationStr.PositiveComputation, currWeekFrequencyStr, prevSustainableProportionalProbability,
 			prevWeekComputationStr.PositiveComputation, prevWeekFrequencyStr);
 		_output.WriteLine(finalPrompt);
 	}

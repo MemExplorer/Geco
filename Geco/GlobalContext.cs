@@ -18,7 +18,6 @@ internal static class GlobalContext
 
 	// Gemini Constants
 	internal const int GeminiChat = 0;
-	internal const int GeminiSearch = 1;
-	internal const int GeminiNotification = 2;
-	internal const int GeminiWeeklyReport = 3;
+	internal const int GeminiNotification = 1;
+	internal const int GeminiWeeklyReport = 2;
 }

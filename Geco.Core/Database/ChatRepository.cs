@@ -64,7 +64,7 @@ public class ChatRepository : DbRepositoryBase
 		await using var historyReader = await db.ExecuteReader("SELECT * FROM TblChatHistory WHERE Id = ?", historyId);
 		if (!historyReader.Read())
 			throw new Exception($"History Id {historyId} does not exist!");
-		
+
 		object? descriptionValue =
 			historyReader["Description"] == DBNull.Value ? null : historyReader["Description"];
 		object? fullContentValue =

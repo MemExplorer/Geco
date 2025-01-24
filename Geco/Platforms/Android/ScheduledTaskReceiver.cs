@@ -433,15 +433,15 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 					if (!appResumed && currAppState == null)
 						continue;
 				}
-				
+
 				if (appResumed)
 					appStateMap[key] = currentEvent;
 				else
 				{
 					// skip when the first event is a paused or stopped event
 					if (!hasKeyAppState)
-						continue; 
-					
+						continue;
+
 					// handle stop or pause
 					long timeElapsed = currentEvent.TimeStamp - currAppState!.TimeStamp;
 					appMap[key].TimeInForeground += timeElapsed;

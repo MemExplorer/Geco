@@ -24,7 +24,7 @@ public class SearchAPI
 		string escapedQuery = Uri.EscapeDataString(query + " +sustainable");
 		var result =
 			await Client.GetAsync(
-				$"{APIEndpoint}/web/search?q={escapedQuery}&country=ph&safesearch=strict&result_filter=web&text_decorations=0&offset={offset}&count={resultCount}");
+				$"{APIEndpoint}/web/search?q={escapedQuery}&country=ph&safesearch=strict&result_filter=web&offset={offset}&count={resultCount}");
 		if (!result.IsSuccessStatusCode)
 			throw new WebException(await result.Content.ReadAsStringAsync());
 

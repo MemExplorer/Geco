@@ -7,5 +7,6 @@ namespace Geco.Core.Brave;
 [JsonSerializable(typeof(BraveSearchData))]
 [JsonSerializable(typeof(BraveSearchResult))]
 [JsonSerializable(typeof(WebResultEntry))]
+[JsonSerializable(typeof(WebPageProfile))]
 [JsonSerializable(typeof(WebPageUrlMeta))]
 internal sealed partial class JsonContext : JsonSerializerContext;

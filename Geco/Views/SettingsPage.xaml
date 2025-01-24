@@ -28,7 +28,7 @@
                 <TapGestureRecognizer Command="{Binding ClearHistoryCommand}" />
             </Border.GestureRecognizers>
         </Border>
-        
+
         <!-- Clear Weekly Reports -->
         <Border Stroke="Black">
             <StackLayout Orientation="Horizontal"

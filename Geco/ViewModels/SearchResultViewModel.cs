@@ -1,56 +1,27 @@
 using System.Collections.ObjectModel;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Web;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Geco.Core.Brave;
 using Geco.Core.Database;
-using Geco.Core.Models;
 using Geco.Core.Models.ActionObserver;
 using Geco.Core.Models.Prompt;
-using GoogleGeminiSDK;
-using ChatRole = Microsoft.Extensions.AI.ChatRole;
 
 namespace Geco.ViewModels;
 
 public partial class SearchResultViewModel : ObservableObject, IQueryAttributable
 {
-	[ObservableProperty] ObservableCollection<GecoSearchResult> _searchResults;
+	[ObservableProperty] ObservableCollection<WebResultEntry> _searchResults;
 	[ObservableProperty] string? _searchInput;
 	bool _isPredefined;
 	[ObservableProperty] bool _isSearching;
-	GeminiChat GeminiClient { get; }
+	SearchAPI BraveSearchAPI { get; }
 
 	public SearchResultViewModel()
 	{
 		_searchResults = [];
-		GeminiClient = GlobalContext.Services.GetRequiredService<GeminiChat>();
-		GeminiClient.OnChatReceive += async (_, e) =>
-			await GeminiClientOnChatReceive(e);
-	}
-
-	private async Task GeminiClientOnChatReceive(ChatReceiveEventArgs e)
-	{
-		// only accept messages from Gemini
-		if (e.Message.Role == ChatRole.User)
-			return;
-
-		// deserialize structured response
-		string message = e.Message.Text!;
-		var results = JsonSerializer.Deserialize<List<GecoSearchResult>>(message);
-
-		if (results == null)
-			return;
-
-		// populate search result
-		foreach (var item in results)
-			SearchResults.Add(new GecoSearchResult(item.Title, item.Description));
-
-		// log usage
-		var triggerRepo = GlobalContext.Services.GetRequiredService<TriggerRepository>();
-		await triggerRepo.LogTrigger(DeviceInteractionTrigger.BrowserUsageSustainable, 0);
-
-		IsSearching = false;
+		BraveSearchAPI = GlobalContext.Services.GetRequiredService<SearchAPI>();
 	}
 
 	[RelayCommand]
@@ -79,7 +50,7 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 
 			string unescapeDataString = Uri.UnescapeDataString(SearchInput);
 			var promptRepo = GlobalContext.Services.GetRequiredService<PromptRepository>();
-			var geminiConfig = GlobalContext.Services.GetKeyedService<GeminiSettings>(GlobalContext.GeminiSearch);
+			var triggerRepo = GlobalContext.Services.GetRequiredService<TriggerRepository>();
 
 			string prompt;
 			if (isPredefined &&
@@ -90,13 +61,19 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 
 			try
 			{
-				if (!string.IsNullOrEmpty(prompt))
-					await GeminiClient.SendMessage(prompt, settings: geminiConfig);
+				if (string.IsNullOrEmpty(prompt))
+					return;
+
+				await triggerRepo.LogTrigger(DeviceInteractionTrigger.BrowserUsageSustainable, 0);
+				foreach (var searchResult in await BraveSearchAPI.Search(prompt))
+					SearchResults.Add(searchResult);
 			}
 			catch (Exception geminiException)
 			{
 				GlobalContext.Logger.Error<SearchViewModel>(geminiException);
 			}
+
+			IsSearching = false;
 		}
 		catch (Exception ex)
 		{

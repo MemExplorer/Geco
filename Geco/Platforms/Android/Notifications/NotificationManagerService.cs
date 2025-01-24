@@ -35,7 +35,7 @@ public class NotificationManagerService : INotificationManagerService
 		bool isWeeklyReport = e.Intent?.Action == WeeklyReportNotificationId;
 		if (!(e.Intent?.Action == DefaultNotificationId || isWeeklyReport))
 			return;
-		
+
 		Platform.CurrentActivity!.Intent = e.Intent;
 		if (isWeeklyReport && e.Intent != null && e.Intent.HasExtra("historyid"))
 		{
@@ -85,12 +85,12 @@ public class NotificationManagerService : INotificationManagerService
 
 		if (!GecoSettings.Notifications)
 			return notificationInstance;
-		
+
 		if (!_channelInitialized)
 		{
 			CreateNotificationChannel();
 		}
-		
+
 		if (notify)
 			_compatManager.Notify(_messageId++, notificationInstance);
 
