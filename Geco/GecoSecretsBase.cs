@@ -6,4 +6,5 @@ namespace Geco;
 internal partial class GecoSecrets
 {
 	internal static partial string GEMINI_API_KEY { get; }
+	internal static partial string BRAVE_SEARCH_API_KEY { get; }
 }
