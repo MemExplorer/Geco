@@ -16,11 +16,17 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 	[ObservableProperty] string? _searchInput;
 	bool _isPredefined;
 	[ObservableProperty] bool _isSearching;
+	[ObservableProperty] bool _finalPageReached;
 	SearchAPI BraveSearchAPI { get; }
+	uint CurrentPageOffset { get; set; }
+	string? CurrentSearchQuery { get; set; }
 
 	public SearchResultViewModel()
 	{
 		_searchResults = [];
+		CurrentPageOffset = 1;
+		CurrentSearchQuery = null;
+		_finalPageReached = false;
 		BraveSearchAPI = GlobalContext.Services.GetRequiredService<SearchAPI>();
 	}
 
@@ -64,19 +70,47 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 				if (string.IsNullOrEmpty(prompt))
 					return;
 
+				CurrentPageOffset = 1;
+				CurrentSearchQuery = prompt;
+				FinalPageReached = false;
 				await triggerRepo.LogTrigger(DeviceInteractionTrigger.BrowserUsageSustainable, 0);
-				foreach (var searchResult in await BraveSearchAPI.Search(prompt))
+				foreach (var searchResult in await BraveSearchAPI.Search(prompt, CurrentPageOffset))
 					SearchResults.Add(searchResult);
 			}
-			catch (Exception geminiException)
+			catch (Exception searchEx)
 			{
-				GlobalContext.Logger.Error<SearchViewModel>(geminiException);
+				GlobalContext.Logger.Error<SearchViewModel>(searchEx);
 			}
 
 			IsSearching = false;
 		}
 		catch (Exception ex)
 		{
+			GlobalContext.Logger.Error<SearchViewModel>(ex);
+		}
+	}
+
+	[RelayCommand]
+	async Task LoadMore()
+	{
+		if (string.IsNullOrEmpty(CurrentSearchQuery))
+			return;
+
+		try
+		{
+			CurrentPageOffset++;
+			foreach (var searchResult in await BraveSearchAPI.Search(CurrentSearchQuery, CurrentPageOffset))
+				SearchResults.Add(searchResult);
+		}
+		catch (Exception ex)
+		{
+			// error when last page is reached
+			if (ex.Message.Contains("status\":422"))
+			{
+				// make button invisible
+				FinalPageReached = true;
+				return; 
+			}
 			GlobalContext.Logger.Error<SearchViewModel>(ex);
 		}
 	}

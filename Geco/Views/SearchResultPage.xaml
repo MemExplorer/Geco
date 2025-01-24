@@ -455,6 +455,11 @@
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
+            <CollectionView.Footer>
+                <Button Text="Load more..."
+                        IsVisible="{Binding FinalPageReached, Converter={StaticResource InvertedBoolConverter}}"
+                        Command="{Binding LoadMoreCommand}" />
+            </CollectionView.Footer>
         </CollectionView>
     </StackLayout>
 </ContentPage>
