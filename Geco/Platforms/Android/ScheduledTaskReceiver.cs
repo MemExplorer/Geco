@@ -388,7 +388,6 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 	// Inspired from https://stackoverflow.com/a/45380396
 	private long GetDeviceScreenTime(UsageStatsManager usageStatsManager)
 	{
-		var allEvents = new List<UsageEvents.Event>();
 		var appMap = new Dictionary<string, AppEventInfo>();
 		var appStateMap = new Dictionary<string, UsageEvents.Event?>();
 
@@ -402,43 +401,49 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 
 		// capturing all events in a array to compare with next element
 		// we assume that all subsequent events have a TimeStamp value that is equal to or greater than the previous one
-		UsageEvents.Event currentEvent;
 		while (usageEvents.HasNextEvent)
 		{
-			currentEvent = new UsageEvents.Event();
+			var currentEvent = new UsageEvents.Event();
 			usageEvents.GetNextEvent(currentEvent);
 			switch (currentEvent.EventType)
 			{
 			case UsageEventType.MoveToForeground:
 			case UsageEventType.MoveToBackground:
-			case UsageEventType evt
+			case var evt
 				when OperatingSystem.IsAndroidVersionAtLeast(29) && evt == UsageEventType.ActivityStopped:
 
 				if (currentEvent.PackageName == null || currentEvent.ClassName == null)
 					continue;
 
-				string? key = currentEvent.PackageName + currentEvent.ClassName;
+				string key = currentEvent.PackageName + currentEvent.ClassName;
 
 				// taking it into a collection to access by package name
 				if (!appMap.ContainsKey(key))
 					appMap.Add(key, new AppEventInfo(currentEvent.PackageName, currentEvent.ClassName));
 
 				bool appResumed = currentEvent.EventType == UsageEventType.MoveToForeground;
-				if (appResumed && appStateMap.ContainsKey(key) && appStateMap[key] != null)
-					throw new Exception("Unhandled case!");
+				bool hasKeyAppState = appStateMap.TryGetValue(key, out var currAppState);
+				if (hasKeyAppState)
+				{
+					// The app is already running
+					if (appResumed && currAppState != null)
+						continue;
 
-				// The app is either paused or stopped already
-				if (!appResumed && appStateMap.ContainsKey(key) && appStateMap[key] == null)
-					continue;
-
+					// The app is either paused or stopped already
+					if (!appResumed && currAppState == null)
+						continue;
+				}
+				
 				if (appResumed)
 					appStateMap[key] = currentEvent;
-				else if (!appStateMap.ContainsKey(key))
-					continue; // skip when the first event is a paused or stopped event
 				else
 				{
+					// skip when the first event is a paused or stopped event
+					if (!hasKeyAppState)
+						continue; 
+					
 					// handle stop or pause
-					long timeElapsed = currentEvent.TimeStamp - appStateMap[key]!.TimeStamp;
+					long timeElapsed = currentEvent.TimeStamp - currAppState!.TimeStamp;
 					appMap[key].TimeInForeground += timeElapsed;
 					appStateMap[key] = null;
 				}
@@ -450,7 +455,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		// log active app usage
 		var groupedData = appMap.GroupBy(x => x.Value.PackageName, y => y.Value.TimeInForeground)
 			.ToDictionary(x => x.Key, y => y.AsEnumerable().Sum());
-		string? activeAppsLogMessage = string.Join('\n', groupedData.OrderByDescending(x => x.Value)
+		string activeAppsLogMessage = string.Join('\n', groupedData.OrderByDescending(x => x.Value)
 			.Select(x => $"{x.Key} : {TimeSpan.FromMilliseconds(x.Value)}"));
 		GlobalContext.Logger.Info<ScheduledTaskReceiver>($"Device Usage Info:\n{activeAppsLogMessage}");
 		return appMap.Values.Sum(x => x.TimeInForeground);
