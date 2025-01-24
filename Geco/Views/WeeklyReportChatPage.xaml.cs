@@ -9,7 +9,7 @@ public partial class WeeklyReportChatPage : ContentPage
 		if (sender is not WebView w)
 			return;
 
-		string backgroundColor = GecoSettings.DarkMode ? "#191919" : "#e3e3e3";
+		string backgroundColor = GecoSettings.DarkMode ? "#1C1C1C" : "#FFFFFF";
 		string textColor = GecoSettings.DarkMode ? "#ffffff" : "#000000";
 
 		w.EvaluateJavaScriptAsync(@$"

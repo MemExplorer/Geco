@@ -35,29 +35,25 @@
                                    Source="geco_logo.png"
                                    MaximumWidthRequest="50"
                                    MaximumHeightRequest="50"
-                                   Margin="5"
-                                   VerticalOptions="End"
+                                   Margin="5,15,3,5"
+                                   VerticalOptions="Start"
                                    IsVisible="{Binding Role, Converter={StaticResource IsModelToBooleanConverter}}" />
                             <Border Margin="2"
                                     Grid.Column="1"
                                     StrokeShape="{Binding Role, Converter={StaticResource IsModelToShapeConverter}}"
                                     BackgroundColor="{AppThemeBinding Light=#e3e3e3,
                                                   Dark=#191919}"
-                                    HorizontalOptions="{Binding Role, Converter={StaticResource ChatAlignmentConverter}}">
+                                    HorizontalOptions="{Binding Role, Converter={StaticResource ChatAlignmentConverter}}"
+                                    IsVisible="{Binding Role, Converter={StaticResource IsUserToBooleanConverter}}">
 
-                                <!-- WebView or Label based on Role -->
-                                <StackLayout>
-                                    <WebView
-                                        IsVisible="{Binding Role, Converter={StaticResource IsModelToBooleanConverter}}"
-                                        Navigated="WebView_Navigated"
-                                        Source="{Binding Text, Converter={StaticResource HtmlConverter}}" />
-
-
-                                    <Label Padding="15"
-                                           Text="{Binding Text}"
-                                           IsVisible="{Binding Role, Converter={StaticResource IsUserToBooleanConverter}}" />
-                                </StackLayout>
+                                <Label Padding="15"
+                                       Text="{Binding Text}" />
                             </Border>
+                            <WebView
+                                Grid.Column="1"
+                                IsVisible="{Binding Role, Converter={StaticResource IsModelToBooleanConverter}}"
+                                Navigated="WebView_Navigated"
+                                Source="{Binding Text, Converter={StaticResource HtmlConverter}}" />
                         </Grid>
                     </Border>
                 </DataTemplate>
