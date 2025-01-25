@@ -55,26 +55,19 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 				return;
 
 			string unescapeDataString = Uri.UnescapeDataString(SearchInput);
+			if (string.IsNullOrEmpty(unescapeDataString))
+				return;
+
 			var promptRepo = GlobalContext.Services.GetRequiredService<PromptRepository>();
 			var triggerRepo = GlobalContext.Services.GetRequiredService<TriggerRepository>();
 
-			string prompt;
-			if (isPredefined &&
-			    Enum.TryParse<SearchPredefinedTopic>(unescapeDataString, out var convertedPredefinedTopic))
-				prompt = await promptRepo.GetPrompt(convertedPredefinedTopic);
-			else
-				prompt = await promptRepo.GetPrompt(unescapeDataString);
-
 			try
 			{
-				if (string.IsNullOrEmpty(prompt))
-					return;
-
 				CurrentPageOffset = 1;
-				CurrentSearchQuery = prompt;
+				CurrentSearchQuery = unescapeDataString;
 				FinalPageReached = false;
 				await triggerRepo.LogTrigger(DeviceInteractionTrigger.BrowserUsageSustainable, 0);
-				foreach (var searchResult in await BraveSearchAPI.Search(prompt, CurrentPageOffset))
+				foreach (var searchResult in await BraveSearchAPI.Search(unescapeDataString, CurrentPageOffset))
 					SearchResults.Add(searchResult);
 			}
 			catch (Exception searchEx)
