@@ -4,4 +4,5 @@ public record WeeklyReportContent(
 	string NotificationTitle,
 	string NotificationDescription,
 	string Overview,
-	string ReportBreakdown);
+	string ReportBreakdown,
+	string ComputeBreakdown);

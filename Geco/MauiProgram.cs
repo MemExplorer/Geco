@@ -165,9 +165,10 @@ public static class MauiProgram
 						{ "NotificationTitle", new Schema(SchemaType.STRING) },
 						{ "NotificationDescription", new Schema(SchemaType.STRING) },
 						{ "Overview", new Schema(SchemaType.STRING) },
-						{ "ReportBreakdown", new Schema(SchemaType.STRING) }
+						{ "ReportBreakdown", new Schema(SchemaType.STRING) },
+						{ "ComputeBreakdown", new Schema(SchemaType.STRING) }
 					},
-					Required: ["NotificationTitle", "NotificationDescription", "Overview", "ReportBreakdown"]
+					Required: ["NotificationTitle", "NotificationDescription", "Overview", "ReportBreakdown", "ComputeBreakdown"]
 				)
 			)
 		});
@@ -262,6 +263,14 @@ public static class MauiProgram
 			h.PlatformView.BackgroundTintList =
 				ColorStateList.ValueOf(Colors.Transparent.ToPlatform());
 		});
+
+		// Hide scrollbar in webview
+        WebViewHandler.Mapper.AppendToMapping("RemoveScrollbars", (handler, view) =>
+        {
+            var nativeWebView = handler.PlatformView;
+            nativeWebView.VerticalScrollBarEnabled = false;
+            nativeWebView.HorizontalScrollBarEnabled = false;
+        });
 #endif
 	}
 }

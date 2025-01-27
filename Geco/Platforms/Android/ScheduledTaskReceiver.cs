@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using Android.App;
 using Android.App.Usage;
@@ -53,6 +54,9 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		string likelihoodPrompt = constructedPrompt.GetValueOrDefault().Item1;
 		double likelihoodProbability = constructedPrompt.GetValueOrDefault().Item2;
 		string statusIcon = constructedPrompt.GetValueOrDefault().Item3;
+		string sustainabilityLevel = constructedPrompt.GetValueOrDefault().Item4;
+		string currChartLayout = constructedPrompt.GetValueOrDefault().Item5;
+		string prevChartLayout = constructedPrompt.GetValueOrDefault().Item6;
 		GlobalContext.Logger.Info<ScheduledTaskReceiver>("Created weekly report likelihood prompt.");
 		try
 		{
@@ -69,7 +73,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 
 				// create chat history
 				var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
-				string weeklyReportMessage = BuildWeeklyReport(firstItem, statusIcon, likelihoodProbability);
+				string weeklyReportMessage = BuildWeeklyReport(firstItem, statusIcon, likelihoodProbability, sustainabilityLevel, currChartLayout, prevChartLayout);
 				var chatMsg = new ChatMessage(new ChatRole("model"), weeklyReportMessage);
 				chatMsg.AdditionalProperties = new AdditionalPropertiesDictionary { ["id"] = (ulong)0 };
 				string chatTitle = firstItem.NotificationTitle;
@@ -90,145 +94,256 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		}
 	}
 
-	private string BuildWeeklyReport(WeeklyReportContent content, string status, double percentage) =>
+	private string BuildWeeklyReport(WeeklyReportContent content, string status, double percentage, string sustainabilityLevel, string currChartContent, string prevChartContent) =>
 		$$"""
 		  <html>
-		  	<head>
-		  		<style>
-		  		body {
-		  			font-family: Arial, sans-serif;
-		  			display: flex;
-		  			flex-direction: column;
-		  			align-items: center;
-		  			padding: 20px;
-		  			margin: 0;
-		  		}
-		  
-		  		.circle {
-		  			position: relative;
-		  			width: 100px;
-		  			height: 100px;
-		  			border-radius: 50%;
-		  			background: conic-gradient(var(--color, red) 0%, var(--color, red) var(--percentage, 0%), #ccc var(--percentage, 0%));
-		  			display: flex;
-		  			justify-content: center;
-		  			align-items: center;
-		  			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-		  			margin-right: 20px;
-		  		}
-		  
-		  		.circle::before {
-		  			content: '';
-		  			position: absolute;
-		  			width: 80px;
-		  			height: 80px;
-		  			background-color: #f4f4f9;
-		  			border-radius: 50%;
-		  		}
-		  
-		  		.circle .grid-inner {
-		  			position: absolute;
-		  			color: #333;
-		  			align-items:center;
-		  			justify-content:center;
-		  			display:flex;
-		  		}
-		  		
-		  		.circle .grid-inner svg {
-		  			padding-bottom: 2px;
-		  		}
-		  
-		  		.overview {
-		  			margin-bottom: 20px;
-		  		}
-		  
-		  		.collapsible {
-		  			max-width: 150px;
-		  			background-color: #039967;
-		  			color: white;
-		  			border: none;
-		  			outline: none;
-		  			align-self: start;
-		  			padding: 7px 10px;
-		  			cursor: pointer;
-		  			border-radius: 5px;
-		  			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-		  		}
-		  
-		  		.collapsible:hover {
-		  			background-color: #026343;
-		  		}
-		  
-		  		.content {
-		  			margin-top: 5px;
-		  			display: none;
-		  			overflow: hidden;
-		  		}
-		  		
-		  		.flex-container {
-		  			display: flex;
-		  			flex-wrap:wrap;
-		  		}
-		  		.title {
-		  			height: auto;
-		  			align-self:center;
-		  		}
-		  		</style>
-		  	</head>
-		  	<body>
-		  		<div class='flex-container'>
-		  			<div class='circle' id='percentageCircle'>
-		  			<div class='grid-inner'>
-		  				<h4 id='percentageValue'></h4>
-		  				{{status}}
-		  			</div>
-		  			</div>
-		  			
-		  			<div class='title'>
-		  				<h3>Weekly<br>Sustainability<br>Likelihood Report</h3>
-		  			</div>
-		  		</div>
-		  		
-		  		<div class='overview'>
-		  			{{content.Overview}}
-		  		</div>
-		  		<button class='collapsible'>Find out more</button>
-		  		<div class='content' id='collapsibleContent'>
-		  			{{content.ReportBreakdown}}
-		  		</div>
-		  		<script>
-		  		const collapsible = document.querySelector('.collapsible');
-		  		const collapsibleContent = document.querySelector('.content');
-		  		collapsible.addEventListener('click', () => {
-		  			const isExpanded = collapsibleContent.style.display === 'block';
-		  			collapsibleContent.style.display = isExpanded ? 'none' : 'block';
-		  			collapsibleContent.style.color = document.body.style.color;
-		  			collapsible.remove();
-		  		});
-		  
-		  		function calculateColor(percentage) {
-		  			let red, green;
-		  			if (percentage <= 50) {
-		  			red = 255;
-		  			green = Math.round(percentage * 5.1);
-		  			} else {
-		  			red = Math.round((100 - percentage) * 5.1);
-		  			green = 255;
-		  			}
-		  			return `rgb(${red}, ${green}, 0)`;
-		  		}
-		  		const percentage = {{percentage}};
-		  		const circle = document.getElementById('percentageCircle');
-		  		const percentageValue = document.getElementById('percentageValue');
-		  		circle.style.setProperty('--color', calculateColor(percentage));
-		  		circle.style.setProperty('--percentage', `${percentage}%`);
-		  		percentageValue.textContent = `${percentage}%`;
-		  		</script>
-		  	</body>
-		  </html>
-		  """;
+			<head>
+			  <style>
+				body {
+				  font-family: Arial, sans-serif;
+				  display: flex;
+				  flex-direction: column;
+				  align-items: center;
+				  padding: 20px;
+				  margin: 0;
+				}
 
-	private async Task<(string, double, string)?> ConstructLikelihoodPrompt()
+				.circle {
+				  position: relative;
+				  width: 100px;
+				  height: 100px;
+				  border-radius: 50%;
+				  background: conic-gradient(var(--color, red) 0%, var(--color, red) var(--percentage, 0%), #ccc var(--percentage, 0%));
+				  display: flex;
+				  justify-content: center;
+				  align-items: center;
+				  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+				  margin-right: 20px;
+				}
+
+				.circle::before {
+				  content: '';
+				  position: absolute;
+				  min-width: 80px;
+				  min-height: 80px;
+				  background-color: #f4f4f9;
+				  border-radius: 50%;
+				}
+
+				.circle .grid-inner {
+				  position: absolute;
+				  color: #333;
+				  align-items: center;
+				  justify-content: center;
+				  display: flex;
+				}
+
+				.circle .grid-inner svg {
+				  padding-bottom: 2px;
+				}
+
+				.overview {
+				  margin-bottom: 5px;
+				}
+
+				.collapsible {
+				  background-color: #039967;
+				  color: white;
+				  border: none;
+				  outline: none;
+				  align-self: start;
+				  padding: 7px 10px;
+				  cursor: pointer;
+				  border-radius: 5px;
+				  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+				}
+
+				.collapsible:hover {
+				  background-color: #026343;
+				}
+
+				.content {
+				  margin-top: 5px;
+				  display: none;
+				  width: 100%;
+				}
+
+				.flex-container {
+				  display: flex;
+				  flex-wrap: wrap;
+				}
+
+				.title {
+				  height: auto;
+				  flex-basis: 10px;
+				}
+
+				.chart-row {
+				  display: flex;
+				  flex-wrap: wrap;
+				  align-items: center;
+				  margin-bottom: 10px;
+				  min-width: 300px;
+				}
+
+				.chart-label {
+				  width: 30%;
+				  text-align: left;
+				}
+
+				.chart-bar {
+				  display: flex;
+				  height: 25px;
+				  width: 50%;
+				  background-color: #ccc;
+				  border-radius: 5px;
+				  overflow: hidden;
+				  position: relative;
+				}
+
+				.unsustainable {
+				  background-color: #FF474D;
+				  display: flex;
+				  align-items: center;
+				  justify-content: center;
+				  color: white;
+				  font-size: 12px;
+				  padding-left: 10px;
+				  padding-right: 10px;
+				}
+
+				.sustainable {
+				  background-color: #429642;
+				  display: flex;
+				  align-items: center;
+				  justify-content: center;
+				  color: white;
+				  font-size: 12px;
+				  padding-left: 10px;
+				  padding-right: 10px;
+				}
+
+				.legend-item {
+				  display: flex;
+				  margin-bottom: 5px;
+				  flex-wrap: wrap;
+				  gap:5px;
+				}
+
+				.legend-group {
+				  display: flex;
+				  gap:5px;
+				  flex-wrap: wrap;
+				}
+
+				.color-box {
+				  width: 15px;
+				  height: 20px;
+				  border-radius: 3px;
+				}
+
+				.green {
+				  background-color: green;
+				}
+
+				.red {
+				  background-color: red;
+				}
+				@media only screen and (max-width: 250px) {
+					  .chart-row {
+						  display: block;
+					  }
+				  }
+			  </style>
+			</head>
+			<body>
+			  <div class='flex-container'>
+				<div class='circle' id='percentageCircle'>
+				  <div class='grid-inner'>
+					<h4 id='percentageValue'></h4>
+					{{status}}
+				  </div>
+				</div>
+				<div class='title'>
+				  <h3>{{sustainabilityLevel}}</h3>
+				</div>
+			  </div>
+			  <div>
+				<h3>Weekly Sustainability Likelihood Report</h3>
+			  </div>
+			  <div class='overview'>
+				{{content.Overview}}
+			  </div>
+			  <button class='collapsible' id='moreCollapsible'>Find out more</button>
+			  <div class='content' id='moreContent'>
+				<div>
+					<div>
+					  <h3>Legend</h3>
+					  <div class="legend-group">
+						<div class="legend-item">
+						  <span class="color-box green"></span>
+						  <span>Sustainable</span>
+						</div>
+						<div class="legend-item">
+						  <span class="color-box red"></span>
+						  <span>Unsustainable</span>
+						</div>
+					  </div>
+					</div>
+					{{currChartContent}}
+					{{prevChartContent}}
+				<div>
+				<div>
+				  {{content.ReportBreakdown}}
+				</div>
+			  </div>
+			  <button class='collapsible' id='computeCollapsible'>How is this computed?</button>
+			  <div class='content' id='computeContent'>
+				{{content.ComputeBreakdown}}
+			  </div>
+			  <script>
+				const moreCollapsible = document.getElementById('moreCollapsible');
+				const moreCollapsibleContent = document.getElementById('moreContent');
+				const computeCollapsible = document.getElementById('computeCollapsible');
+				const computeCollapsibleContent = document.getElementById('computeContent');
+				computeCollapsible.style.display = 'none';
+				moreCollapsible.addEventListener('click', () => {
+				  const isExpanded = moreCollapsibleContent.style.display === 'block';
+				  moreCollapsibleContent.style.display = isExpanded ? 'none' : 'block';
+				  moreCollapsibleContent.style.color = document.body.style.color;
+				  moreCollapsible.remove();
+				  computeCollapsible.style.display = 'block';
+				});
+				computeCollapsible.addEventListener('click', () => {
+				  const isExpanded = computeCollapsibleContent.style.display === 'block';
+				  computeCollapsibleContent.style.display = isExpanded ? 'none' : 'block';
+				  computeCollapsibleContent.style.color = document.body.style.color;
+				  computeCollapsible.remove();
+				});
+
+				function calculateColor(percentage) {
+				  let red, green;
+				  if (percentage <= 50) {
+					red = 255;
+					green = Math.round(percentage * 5.1);
+				  } else {
+					red = Math.round((100 - percentage) * 5.1);
+					green = 255;
+				  }
+				  return `rgb(${red}, ${green}, 0)`;
+				}
+				const percentage = {{percentage}};
+				const circle = document.getElementById('percentageCircle');
+				const percentageValue = document.getElementById('percentageValue');
+				circle.style.setProperty('--color', calculateColor(percentage));
+				circle.style.setProperty('--percentage', `${percentage}%`);
+				percentageValue.textContent = `${percentage}%`;
+			  </script>
+			</body>
+		  </html>
+		""";
+
+	private async Task<(string, double, string, string, string, string)?> ConstructLikelihoodPrompt()
 	{
 		const string upArrowSvg = """
 		                          <svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' width='20' height='20' viewBox='1 1 256 256' xml:space='preserve'>
@@ -265,16 +380,27 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		var triggerRepo = GlobalContext.Services.GetRequiredService<TriggerRepository>();
 		var promptRepo = GlobalContext.Services.GetRequiredService<PromptRepository>();
 		var currentWeekTriggerRecords = (await triggerRepo.FetchWeekOneTriggerRecords()).ToDictionary();
-		var currentWeekResult = GetLikelihoodPromptFromRecords(currentWeekTriggerRecords);
+		var currentWeekResult = GetLikelihoodPromptFromRecords(currentWeekTriggerRecords, false);
 		if (currentWeekResult == null)
 			return null;
+
+		string sustainabilityLevel = currentWeekResult.Value.Probability switch
+		{
+			>= 90 => "High Sustainability",
+			>= 75 and < 90 => "Sustainable",
+			>= 60 and < 75 => "Close to Sustainable",
+			>= 45 and < 60 => "Average Sustainability",
+			>= 30 and < 45 => "Signs of Unsustainability",
+			>= 15 and < 30 => "Unsustainable",
+			_ => "Crisis level"
+		};
 
 		// check if we have data from last 2 weeks
 		if (await triggerRepo.HasHistory())
 		{
 			// fetch data from last 2 weeks
 			var lastWeekTriggerRecords = (await triggerRepo.FetchWeekTwoTriggerRecords()).ToDictionary();
-			var lastWeekResult = GetLikelihoodPromptFromRecords(lastWeekTriggerRecords);
+			var lastWeekResult = GetLikelihoodPromptFromRecords(lastWeekTriggerRecords, true);
 			if (lastWeekResult != null)
 			{
 				string statusIcon =
@@ -288,19 +414,16 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 				// build likelihood prompt
 				return (await promptRepo.GetLikelihoodWithHistoryPrompt(
 					currentWeekResult.Value.Probability, currentWeekResult.Value.PositiveComputation,
-					currentWeekResult.Value.Frequency,
-					lastWeekResult.Value.Probability, lastWeekResult.Value.PositiveComputation,
-					lastWeekResult.Value.Frequency), currentWeekResult.Value.Probability, statusIcon);
+					lastWeekResult.Value.Probability, lastWeekResult.Value.PositiveComputation, sustainabilityLevel), currentWeekResult.Value.Probability, statusIcon, sustainabilityLevel, currentWeekResult.Value.chartLayout, lastWeekResult.Value.chartLayout);
 			}
 		}
 
 		return (await promptRepo.GetLikelihoodPrompt(currentWeekResult.Value.Probability,
-			currentWeekResult.Value.PositiveComputation,
-			currentWeekResult.Value.Frequency), currentWeekResult.Value.Probability, "");
+			currentWeekResult.Value.PositiveComputation, sustainabilityLevel), currentWeekResult.Value.Probability, "", sustainabilityLevel, currentWeekResult.Value.chartLayout, "");
 	}
 
-	private (string PositiveComputation, string Frequency, double Probability)? GetLikelihoodPromptFromRecords(
-		Dictionary<DeviceInteractionTrigger, int> currentWeekTriggerRecords)
+	private (string PositiveComputation, double Probability, string chartLayout)? GetLikelihoodPromptFromRecords(
+		Dictionary<DeviceInteractionTrigger, int> currentWeekTriggerRecords, bool isPrevious)
 	{
 		int chargingPositive =
 			currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.ChargingSustainable, 0);
@@ -333,11 +456,28 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		// gets values we need for prompt
 		var currWeekComputationResult = currWeekBayesInst.Compute();
 		var currWeekComputationStr = currWeekBayesInst.GetComputationInString();
-		string currWeekFrequencyStr = currWeekBayesInst.GetFrequencyInString();
 		double currSustainableProportionalProbability = Math.Round(currWeekComputationResult.PositiveProbs, 2);
 
-		return (currWeekComputationStr.PositiveComputation, currWeekFrequencyStr,
-			currSustainableProportionalProbability);
+		var chartLayout = new StringBuilder();
+		chartLayout.Append("<div class='chart-group'>");
+		string chartHeading = isPrevious ? "<h3>Previous Week Mobile Habits Sustainability Breakdown</h3>" : "<h3>Current Week Mobile Habits Sustainability Breakdown</h3>";
+		chartLayout.Append(chartHeading);
+		foreach (var attrib in currWeekBayesInst._frequencyTbl)
+		{
+			chartLayout.Append($"""
+				<div class='chart-row'>
+				  <div class='chart-label'>{attrib.Key}</div>
+				  <div class='chart-bar'>
+				    <div class='unsustainable' style='flex: {attrib.Value.Negative};'>{attrib.Value.Negative}</div>
+				    <div class='sustainable' style='flex: {attrib.Value.Positive};'>{attrib.Value.Positive}</div>
+				  </div>
+				</div>
+				""");
+		}
+		chartLayout.Append("</div>");
+
+		return (currWeekComputationStr.PositiveComputation,
+			currSustainableProportionalProbability, chartLayout.ToString());
 	}
 
 	private async Task RunDeviceUsageLogger()

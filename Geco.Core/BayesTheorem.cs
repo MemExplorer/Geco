@@ -7,7 +7,7 @@ public record BayesTheoremAttribute(int Positive, int Negative);
 public class BayesTheorem
 {
 	const double Alpha = 0.1;
-	readonly Dictionary<string, BayesTheoremAttribute> _frequencyTbl = new();
+	public Dictionary<string, BayesTheoremAttribute> _frequencyTbl = new();
 	private bool _needSmoothing;
 
 	public void AppendData(string attrName, int positive, int negative)
@@ -16,23 +16,6 @@ public class BayesTheorem
 			_needSmoothing = true;
 
 		_frequencyTbl.Add(attrName, new BayesTheoremAttribute(positive, negative));
-	}
-
-	public string GetFrequencyInString()
-	{
-		var sb = new StringBuilder();
-		sb.AppendLine("Attribute Name | Positive | Negative ");
-		foreach (var k in _frequencyTbl)
-		{
-			sb.Append(k.Key);
-			sb.Append(" | ");
-			sb.Append(k.Value.Positive);
-			sb.Append(" | ");
-			sb.Append(k.Value.Negative);
-			sb.AppendLine();
-		}
-
-		return sb.ToString();
 	}
 
 	public (string PositiveComputation, string NegativeComputation) GetComputationInString()
@@ -163,8 +146,8 @@ public class BayesTheorem
 
 		// proportional probability
 		double posteriorSum = positivePosterior + negativePosterior;
-		double proportionalPositiveProb = positivePosterior / posteriorSum * 100;
-		double proportionalNegativeProb = negativePosterior / posteriorSum * 100;
+		double proportionalPositiveProb = (positivePosterior / posteriorSum) * 100;
+		double proportionalNegativeProb = (negativePosterior / posteriorSum) * 100;
 
 		return (positivePosterior > negativePosterior, proportionalPositiveProb, proportionalNegativeProb);
 	}

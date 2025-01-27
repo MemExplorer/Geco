@@ -31,7 +31,8 @@ public class PromptRepository : DbRepositoryBase
 		return await BuildPrompt(PromptCategory.SearchCtgBasedTemp,
 			new
 			{
-				PredefinedTopic = $"Sustainable {predefinedTopic}", StoredPromptRefinement = randomPromptRefinement
+				PredefinedTopic = $"Sustainable {predefinedTopic}",
+				StoredPromptRefinement = randomPromptRefinement
 			});
 	}
 
@@ -52,31 +53,27 @@ public class PromptRepository : DbRepositoryBase
 	}
 
 	public async Task<string> GetLikelihoodPrompt(double currentSustainabilityLikelihood,
-		string currentLikelihoodComputation,
-		string currentFrequencyData) => await BuildPrompt(PromptCategory.LikelihoodNoPrevDataTemp,
+		string currentLikelihoodComputation, string sustainabilityLevel) => await BuildPrompt(PromptCategory.LikelihoodNoPrevDataTemp,
 		new
 		{
 			CurrentSustainabilityLikelihood =
 				currentSustainabilityLikelihood.ToString(CultureInfo.InvariantCulture) + "%",
 			CurrentLikelihoodComputation = currentLikelihoodComputation,
-			CurrentFrequencyData = currentFrequencyData
+			SustainabilityLevel = sustainabilityLevel
 		});
 
 	public async Task<string> GetLikelihoodWithHistoryPrompt(double currentSustainabilityLikelihood,
-		string currentLikelihoodComputation,
-		string currentFrequencyData, double previousSustainabilityLikelihood, string previousLikelihoodComputation,
-		string previousFrequencyData) =>
+		string currentLikelihoodComputation, double previousSustainabilityLikelihood, string previousLikelihoodComputation, string sustainabilityLevel) =>
 		await BuildPrompt(PromptCategory.LikelihoodWithPrevDataTemp,
 			new
 			{
 				CurrentSustainabilityLikelihood =
 					currentSustainabilityLikelihood.ToString(CultureInfo.InvariantCulture) + "%",
 				CurrentLikelihoodComputation = currentLikelihoodComputation,
-				CurrentFrequencyData = currentFrequencyData,
 				PreviousSustainabilityLikelihood =
 					previousSustainabilityLikelihood.ToString(CultureInfo.InvariantCulture) + "%",
 				PreviousLikelihoodComputation = previousLikelihoodComputation,
-				PreviousFrequencyData = previousFrequencyData
+				SustainabilityLevel = sustainabilityLevel
 			});
 
 	protected override async Task InitializeTables()
@@ -139,83 +136,244 @@ public class PromptRepository : DbRepositoryBase
 				"""
 				# Task  
 				Write a weekly report on mobile sustainability using the specified format.
-
+				
 				# Response Format  
-
-				- The content of the `Overview` and `ReportBreakdown` property must be written in **Markdown style** but delivered as **HTML format**.  
+				
+				- The content of the `Overview`, `ReportBreakdown`, and `ComputeBreakdown` property must be written in **Markdown style** but delivered as **HTML format**.  
 				- Ensure the guidance is **clear, concise, and properly formatted**.  
 				- Use only **black text**.  
-				- Avoid using font sizes larger than `<h2>`.
-				- Do not include percentage in the titles
+				- Avoid using font sizes larger than `<h3>`.
+				
+				## Contents of the `Overview` property
+				
+				### General Guidance
+				- The tone and response should adapt to the specific Sustainability Level of: `{SustainabilityLevel}`.  
+				- Responses should always remain constructive, empathetic, and solution-oriented, but the focus will vary depending on the likelihood.  
+				- Use appropriate emojis for the overview.
+				- Use simple and easy to understand words.
+				- Do not include title for the overview.
 
 				---
-				## Contents of the `Overview` property
-				A summary and encouraging message to a user about their mobile phone sustainability in a paragraph form. 
-				* **Purpose:** Clearly state the purpose of the report (analyzing the sustainability of their mobile phone usage).
-				* **Score:** Present a sustainability score with enthusiastic language.
-				* **Explanation:** Briefly explain what the score signifies in terms of the user's environmentally conscious habits.
-				* **Call to Action:** Imply a call to action to continue these sustainable practices." 
+				
+				### Sustainability Level Guidance
+				
+				### **Crisis Level**
+				- **Focus:** Immediate action. Acknowledge the urgency and provide critical next steps to address the situation.  
+				- **Tone:** Serious yet hopeful. Stress the need for decisive action without being overly discouraging.  
+				- **Example phrases:**  
+				  - "This is a critical moment. We need to prioritize actions that will create an immediate impact."  
+				  - "The current trajectory presents significant challenges, but it’s possible to turn things around with bold measures."  
+				  - "Let’s identify the most urgent areas to address and act swiftly."  
+				
+				---
+				
+				### **Unsustainable**
+				- **Focus:** Highlight areas for improvement and encourage focused efforts to reverse unsustainability.  
+				- **Tone:** Determined and supportive. Acknowledge the difficulty while inspiring confidence in the ability to improve.  
+				- **Example phrases:**  
+				  - "There are clear signs of unsustainability, but targeted efforts can drive improvement."  
+				  - "By addressing the core issues, we can begin to shift toward a more sustainable path."  
+				  - "This is a challenging position, but there’s potential for progress with the right focus."  
+				
+				---
+				
+				### **Signs of Unsustainability**
+				- **Focus:** Identify key areas where change can make the biggest impact. Build optimism for improvement.  
+				- **Tone:** Constructive and encouraging. Acknowledge the warning signs and motivate action.  
+				- **Example phrases:**  
+				  - "There are signs that we need to make adjustments, and this is a great opportunity to do so."  
+				  - "With focused effort, we can address these issues and start to see real progress."  
+				  - "This is a critical moment for improvement—let’s work together to make an impact."  
+				
+				---
+				
+				### **Average Sustainability**
+				- **Focus:** Recognize the potential to move from average to sustainable. Encourage efforts to break through barriers.  
+				- **Tone:** Balanced and optimistic. Acknowledge progress while motivating further improvement.  
+				- **Example phrases:**  
+				  - "You’re on the right track, but there’s room to push further toward sustainability."  
+				  - "This is a strong foundation to build on—let’s refine and enhance our approach."  
+				  - "You’ve made steady progress; let’s focus on closing the gap to full sustainability."  
+				
+				---
+				
+				### **Close to Sustainable**
+				- **Focus:** Celebrate progress while emphasizing the importance of maintaining and advancing efforts.  
+				- **Tone:** Positive and motivating. Build confidence while inspiring continuous improvement.  
+				- **Example phrases:**  
+				  - "You’re so close to reaching sustainable levels—great work so far!"  
+				  - "This progress is impressive, and with continued focus, you’ll achieve full sustainability."  
+				  - "Let’s refine our efforts to ensure consistent and lasting success."  
+				
+				---
+				
+				### **Sustainable**
+				- **Focus:** Acknowledge achievements and encourage consistent practices to maintain sustainability.  
+				- **Tone:** Celebratory and supportive. Recognize the effort behind the success while inspiring further commitment.  
+				- **Example phrases:**  
+				  - "This is a fantastic accomplishment! Keep up the excellent work to sustain this progress."  
+				  - "You’ve reached a sustainable level—let’s continue to build resilience and consistency."  
+				  - "This is a testament to your dedication—keep striving for even greater heights."  
+				
+				---
+				
+				### **High Sustainability**
+				- **Focus:** Celebrate and reinforce confidence. Highlight the importance of maintaining momentum and serving as a role model for success.  
+				- **Tone:** Highly celebratory and motivational. Inspire pride in the achievement while encouraging continued commitment.  
+				- **Example phrases:**  
+				  - "Outstanding work! You’ve achieved high sustainability, and this sets a great example for others."  
+				  - "This is a remarkable achievement—maintaining this level will ensure lasting success."  
+				  - "Your efforts have paid off, and this is truly inspiring. Let’s keep leading the way!"  
+				
+				---
+				
+				## Tone Principles
+				- **Empathetic:** Tailor responses to the emotional context of each likelihood.  
+				- **Actionable:** Provide specific next steps, particularly at lower levels.  
+				- **Motivational:** Inspire confidence and highlight the potential for progress or sustained success.
+				
+				---
 
 				## Contents of the `ReportBreakdown` property
 
-				1. **Current Sustainability Likelihood:**  
+				- **Information: ** This section will help users know more about the weekly sustainability report. Help them understand the report and build have stronger foundation towards achieving sustainability.
+
+				### **Current Sustainability Likelihood:**  
 				   Emphasize the computed likelihood of sustainable mobile usage in a paragraph: `{CurrentSustainabilityLikelihood}`.
 
-				2. **Current Likelihood Posterior Computation:**  
-				   Explain the computation for the current likelihood: `{CurrentLikelihoodComputation}`.  
-				   Emphasize that this is the posterior computation, and the sustainability likelihood percentage shown is a converted proportional probability.
-
-				3. **Frequency Data (Current):**  
-				   Include the frequency data used in the computation and display the data in a table format: `{CurrentFrequencyData}`.
-
-				4. **Previous Week's Sustainability Likelihood:**  
+				### **Previous Week's Sustainability Likelihood:**  
 				   Emphasize the previous week's computed likelihood of sustainable mobile usage in a paragraph: `{PreviousSustainabilityLikelihood}`.
 
-				5. **Previous Week's Likelihood Posterior Computation:**  
-				   Explain the computation for the previous week's likelihood: `{PreviousLikelihoodComputation}`.  
-				   Emphasize that this is the posterior computation, and the sustainability likelihood percentage shown is a converted proportional probability.
-
-				6. **Frequency Data (Previous):**  
-				   Include the frequency data from the previous week used in the computation and display the data in a table format: `{PreviousFrequencyData}`.
-
-				7. **Comparison:**  
+				### **Comparison:**  
 				   Compare previous week's results to the current week's result in a paragraph.
+
+				### **Recommendations:**  
+				   Suggest actionable steps to help the user maintain or improve their sustainability score in a paragraph. Only suggest actions related to Charging, Screen Time, and Use of WiFi instead of Mobile Data.
+				
+
+				## Contents of the `ComputeBreakdown` property
+
+				### **How was this computed:**  
+				    This is the computation for the current likelihood: `{CurrentLikelihoodComputation}`, also this is the computation for the previous week's likelihood: `{PreviousLikelihoodComputation}`. do not include this in the text, this is just for additinal context.  
+				    Give a short paragraph explaining that the sustainability likelihood was computed using Bayesian Theorem, specifically to get the Posterior probabiltiy. It is then converted into Proportional probability.   
 				"""),
 			((int)PromptCategory.LikelihoodNoPrevDataTemp,
-				"""
+				$$"""
 				# Task  
 				Write a weekly report on mobile sustainability using the specified format.
 
-				# Response Format  
+				# Response Format
 
-				- The content of the `Overview` and `ReportBreakdown` property must be written in **Markdown style** but delivered as **HTML format**.  
+				- The content of the `Overview`, `ReportBreakdown`, and `ComputeBreakdown` property must be written in **Markdown style** but delivered as **HTML format**.  
 				- Ensure the guidance is **clear, concise, and properly formatted**.  
 				- Use only **black text**.  
-				- Avoid using font sizes larger than `<h2>`.
-				- Do not include percentage in the title
+				- Avoid using font sizes larger than `<h3>`.
+				- Do not include percentage in the title.
+
+				## Contents of the `Overview` property
+
+				### General Guidance
+				- The tone and response should adapt to the specific Sustainability Level of: `{SustainabilityLevel}`.  
+				- Responses should always remain constructive, empathetic, and solution-oriented, but the focus will vary depending on the likelihood.  
+				- Use appropriate emojis for the overview.
+				- Use simple and easy to understand words.
 
 				---
-				## Contents of the `Overview` property
-				A summary and encouraging message to a user about their mobile phone sustainability in a paragraph form. 
-				* **Purpose:** Clearly state the purpose of the report (analyzing the sustainability of their mobile phone usage).
-				* **Score:** Present a sustainability score with enthusiastic language.
-				* **Explanation:** Briefly explain what the score signifies in terms of the user's environmentally conscious habits.
-				* **Call to Action:** Imply a call to action to continue these sustainable practices." 
+				
+				### Sustainability Level Guidance
+				
+				### **Crisis Level**
+				- **Focus:** Immediate action. Acknowledge the urgency and provide critical next steps to address the situation.  
+				- **Tone:** Serious yet hopeful. Stress the need for decisive action without being overly discouraging.  
+				- **Example phrases:**  
+				  - "This is a critical moment. We need to prioritize actions that will create an immediate impact."  
+				  - "The current trajectory presents significant challenges, but it’s possible to turn things around with bold measures."  
+				  - "Let’s identify the most urgent areas to address and act swiftly."  
+				
+				---
+				
+				### **Unsustainable**
+				- **Focus:** Highlight areas for improvement and encourage focused efforts to reverse unsustainability.  
+				- **Tone:** Determined and supportive. Acknowledge the difficulty while inspiring confidence in the ability to improve.  
+				- **Example phrases:**  
+				  - "There are clear signs of unsustainability, but targeted efforts can drive improvement."  
+				  - "By addressing the core issues, we can begin to shift toward a more sustainable path."  
+				  - "This is a challenging position, but there’s potential for progress with the right focus."  
+				
+				---
+				
+				### **Signs of Unsustainability**
+				- **Focus:** Identify key areas where change can make the biggest impact. Build optimism for improvement.  
+				- **Tone:** Constructive and encouraging. Acknowledge the warning signs and motivate action.  
+				- **Example phrases:**  
+				  - "There are signs that we need to make adjustments, and this is a great opportunity to do so."  
+				  - "With focused effort, we can address these issues and start to see real progress."  
+				  - "This is a critical moment for improvement—let’s work together to make an impact."  
+				
+				---
+				
+				### **Average Sustainability**
+				- **Focus:** Recognize the potential to move from average to sustainable. Encourage efforts to break through barriers.  
+				- **Tone:** Balanced and optimistic. Acknowledge progress while motivating further improvement.  
+				- **Example phrases:**  
+				  - "You’re on the right track, but there’s room to push further toward sustainability."  
+				  - "This is a strong foundation to build on—let’s refine and enhance our approach."  
+				  - "You’ve made steady progress; let’s focus on closing the gap to full sustainability."  
+				
+				---
+				
+				### **Close to Sustainable**
+				- **Focus:** Celebrate progress while emphasizing the importance of maintaining and advancing efforts.  
+				- **Tone:** Positive and motivating. Build confidence while inspiring continuous improvement.  
+				- **Example phrases:**  
+				  - "You’re so close to reaching sustainable levels—great work so far!"  
+				  - "This progress is impressive, and with continued focus, you’ll achieve full sustainability."  
+				  - "Let’s refine our efforts to ensure consistent and lasting success."  
+				
+				---
+				
+				### **Sustainable**
+				- **Focus:** Acknowledge achievements and encourage consistent practices to maintain sustainability.  
+				- **Tone:** Celebratory and supportive. Recognize the effort behind the success while inspiring further commitment.  
+				- **Example phrases:**  
+				  - "This is a fantastic accomplishment! Keep up the excellent work to sustain this progress."  
+				  - "You’ve reached a sustainable level—let’s continue to build resilience and consistency."  
+				  - "This is a testament to your dedication—keep striving for even greater heights."  
+				
+				---
+				
+				### **High Sustainability**
+				- **Focus:** Celebrate and reinforce confidence. Highlight the importance of maintaining momentum and serving as a role model for success.  
+				- **Tone:** Highly celebratory and motivational. Inspire pride in the achievement while encouraging continued commitment.  
+				- **Example phrases:**  
+				  - "Outstanding work! You’ve achieved high sustainability, and this sets a great example for others."  
+				  - "This is a remarkable achievement—maintaining this level will ensure lasting success."  
+				  - "Your efforts have paid off, and this is truly inspiring. Let’s keep leading the way!"  
+				
+				---
+				
+				## Tone Principles
+				- **Empathetic:** Tailor responses to the emotional context of each likelihood.  
+				- **Actionable:** Provide specific next steps, particularly at lower levels.  
+				- **Motivational:** Inspire confidence and highlight the potential for progress or sustained success.
+				
+				---
 
 				## Contents of the `ReportBreakdown` property
 
-				1. **Current Sustainability Likelihood:**  
+				- **Information: ** This section will help users know more about the weekly sustainability report. Help them understand the report and build have stronger foundation towards achieving sustainability.
+
+				### **Current Sustainability Likelihood:**  
 				   Emphasize the computed likelihood of sustainable mobile usage in a paragraph: `{CurrentSustainabilityLikelihood}`.
 
-				2. **Current Likelihood Posterior Computation:**  
-				   Explain the computation for the current likelihood: `{CurrentLikelihoodComputation}`.  
-				   Emphasize that this is the posterior computation, and the sustainability likelihood percentage shown is a converted proportional probability.
+				### **Recommendations:**  
+				   Suggest actionable steps to help the user maintain or improve their sustainability score in a paragraph. Only suggest actions related to Charging, Screen Time, and Use of WiFi instead of Mobile Data.
+				
+				## Contents of the `ComputeBreakdown` property
 
-				3. **Frequency Data (Current):**  
-				   Include the frequency data used in the computation and display the data in a table format: `{CurrentFrequencyData}`.
-
-				4. **Recommendations:**  
-				   Suggest actionable steps to help the user maintain or improve their sustainability score in a paragraph.
+				###. **How was this computed:**  
+				   This is the computation for the current likelihood: `{CurrentLikelihoodComputation}`, do not include this in the text, this is just for additinal context.  
+				   Give a short paragraph explaining that the sustainability likelihood was computed using Bayesian Theorem, specifically to get the Posterior probabiltiy. It is then converted into Proportional probability.
 				"""),
 			((int)PromptCategory.EnergySearchRefinement, "Awareness and Advocacy"),
 			((int)PromptCategory.EnergySearchRefinement, "Comparative Analysis"),
