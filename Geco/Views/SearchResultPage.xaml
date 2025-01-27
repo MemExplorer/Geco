@@ -17,11 +17,12 @@
     <ContentPage.Resources>
         <ResourceDictionary>
             <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+            <helpers:HtmlConverter x:Key="HtmlConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
 
     <StackLayout Padding="10"
-                 Spacing="15">
+                 Spacing="5">
         <!-- Search Bar -->
         <Border Padding="5"
                 BackgroundColor="{AppThemeBinding Light=#e3e3e3,
@@ -65,14 +66,57 @@
             </StackLayout>
         </Border>
 
-        <!-- Line Border -->
-        <BoxView
-            Color="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
-            CornerRadius="10"
-            HeightRequest="2"
-            HorizontalOptions="FillAndExpand"
+        <!-- AI summary shimmer -->
+        <shimmer:SfShimmer
+            IsVisible="{Binding AiSummaryVisible, Converter={StaticResource InvertedBoolConverter}}"
+            Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
+            WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
             BackgroundColor="Transparent"
-            VerticalOptions="Center" />
+            HeightRequest="160">
+            <shimmer:SfShimmer.CustomView>
+                <VerticalStackLayout Padding="5" Spacing="5">
+
+                    <HorizontalStackLayout>
+                        <shimmer:ShimmerView HeightRequest="35"
+                                             Margin="1,5,5,5"
+                                             HorizontalOptions="Start"
+                                             ShapeType="Circle"
+                                             WidthRequest="28" />
+                        <shimmer:ShimmerView HeightRequest="15"
+                                             HorizontalOptions="Start"
+                                             ShapeType="RoundedRectangle"
+                                             WidthRequest="90" />
+                    </HorizontalStackLayout>
+
+                    <StackLayout Spacing="5" Margin="0, -3,0,0">
+                        <shimmer:ShimmerView HeightRequest="10"
+                                             HorizontalOptions="Start"
+                                             ShapeType="RoundedRectangle"
+                                             WidthRequest="360" />
+                        <shimmer:ShimmerView HeightRequest="10"
+                                             HorizontalOptions="Start"
+                                             ShapeType="RoundedRectangle"
+                                             WidthRequest="360" />
+                        <shimmer:ShimmerView HeightRequest="10"
+                                             HorizontalOptions="Start"
+                                             ShapeType="RoundedRectangle"
+                                             WidthRequest="360" />
+                        <shimmer:ShimmerView HeightRequest="10"
+                                             HorizontalOptions="Start"
+                                             ShapeType="RoundedRectangle"
+                                             WidthRequest="360" />
+                        <shimmer:ShimmerView HeightRequest="10"
+                                             HorizontalOptions="Start"
+                                             ShapeType="RoundedRectangle"
+                                             WidthRequest="360" />
+                        <shimmer:ShimmerView HeightRequest="10"
+                                             HorizontalOptions="Start"
+                                             ShapeType="RoundedRectangle"
+                                             WidthRequest="360" />
+                    </StackLayout>
+                </VerticalStackLayout>
+            </shimmer:SfShimmer.CustomView>
+        </shimmer:SfShimmer>
 
         <!-- Shimmer -->
         <StackLayout Orientation="Vertical" Spacing="10" IsVisible="{Binding IsSearching}">
@@ -394,6 +438,59 @@
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
             </CollectionView.ItemsLayout>
+            <CollectionView.Header>
+                <StackLayout>
+                    <Grid MaximumHeightRequest="{Binding MaxAiSummaryHeight}">
+                        <Border Padding="3"
+                                StrokeShape="RoundRectangle 10"
+                                Stroke="transparent"
+                                IsVisible="{Binding AiSummaryVisible}">
+                            <StackLayout>
+                                <HorizontalStackLayout>
+                                    <Image Background="Transparent" WidthRequest="30" Source="geco_search_icon"
+                                           HorizontalOptions="Start" />
+                                    <Label FontSize="16" VerticalTextAlignment="Center" Text="  AI Overview" />
+                                </HorizontalStackLayout>
+                                <WebView
+                                    x:Name="AIOverviewWebview"
+                                    Margin="0,10,0,3"
+                                    Navigated="WebView_OnNavigated"
+                                    Navigating="AIOverviewWebview_OnNavigating"
+                                    Source="{Binding AiOverview, Converter={StaticResource HtmlConverter}}" />
+                            </StackLayout>
+                        </Border>
+                        <Border IsVisible="{Binding ShowMoreButtonVisibility}" Stroke="transparent">
+                            <Border.Background>
+                                <LinearGradientBrush EndPoint="0,1">
+                                    <GradientStop Color="Transparent"
+                                                  Offset="0.1" />
+                                    <GradientStop Color="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
+                                                  Offset="1.0" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer />
+                            </Border.GestureRecognizers>
+                        </Border>
+                    </Grid>
+                    <Border IsVisible="{Binding ShowMoreButtonVisibility}" Margin="0,5,0,0"
+                            StrokeShape="RoundRectangle 16">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ShowMoreCommand}" />
+                        </Border.GestureRecognizers>
+                        <Label Padding="10" HorizontalOptions="Center">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="Show more  " />
+                                    <Span FontFamily="FontAwesome"
+                                          TextColor="#a8c7fa"
+                                          Text="{x:Static helpers:IconFont.ChevronDown}" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </Border>
+                </StackLayout>
+            </CollectionView.Header>
             <CollectionView.EmptyView>
                 <Label HorizontalTextAlignment="Center" VerticalTextAlignment="Center" Text="No results found" />
             </CollectionView.EmptyView>

@@ -20,4 +20,5 @@ internal static class GlobalContext
 	internal const int GeminiChat = 0;
 	internal const int GeminiNotification = 1;
 	internal const int GeminiWeeklyReport = 2;
+	internal const int GeminiSearchSummary = 3;
 }

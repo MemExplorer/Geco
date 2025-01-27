@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Web;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -6,29 +7,27 @@ using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Brave;
 using Geco.Core.Database;
 using Geco.Core.Models.ActionObserver;
-using Geco.Core.Models.Prompt;
+using GoogleGeminiSDK;
 
 namespace Geco.ViewModels;
 
 public partial class SearchResultViewModel : ObservableObject, IQueryAttributable
 {
-	[ObservableProperty] ObservableCollection<WebResultEntry> _searchResults;
+	const int MaxAiSummaryHeightValue = 180;
+	[ObservableProperty] ObservableCollection<WebResultEntry> _searchResults = [];
 	[ObservableProperty] string? _searchInput;
-	bool _isPredefined;
+	[ObservableProperty] string? _aiOverview;
 	[ObservableProperty] bool _isSearching;
-	[ObservableProperty] bool _finalPageReached;
-	SearchAPI BraveSearchAPI { get; }
-	uint CurrentPageOffset { get; set; }
-	string? CurrentSearchQuery { get; set; }
+	[ObservableProperty] double _maxAiSummaryHeight = MaxAiSummaryHeightValue;
+	[ObservableProperty] bool _finalPageReached = true;
+	[ObservableProperty] bool _aiSummaryVisible;
+	[ObservableProperty] bool _showMoreButtonVisibility;
 
-	public SearchResultViewModel()
-	{
-		_searchResults = [];
-		CurrentPageOffset = 1;
-		CurrentSearchQuery = null;
-		_finalPageReached = false;
-		BraveSearchAPI = GlobalContext.Services.GetRequiredService<SearchAPI>();
-	}
+	bool _isPredefined;
+	SearchAPI BraveSearchApi { get; } = GlobalContext.Services.GetRequiredService<SearchAPI>();
+	GeminiChat ChatClient { get; } = GlobalContext.Services.GetRequiredService<GeminiChat>();
+	uint CurrentPageOffset { get; set; } = 1;
+	string? CurrentSearchQuery { get; set; }
 
 	[RelayCommand]
 	async Task UpdateSearch(Entry searchEntry)
@@ -58,17 +57,46 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 			if (string.IsNullOrEmpty(unescapeDataString))
 				return;
 
-			var promptRepo = GlobalContext.Services.GetRequiredService<PromptRepository>();
 			var triggerRepo = GlobalContext.Services.GetRequiredService<TriggerRepository>();
+			var geminiSearchConfig =
+				GlobalContext.Services.GetRequiredKeyedService<GeminiSettings>(GlobalContext.GeminiSearchSummary);
 
 			try
 			{
+				// Search result settings
 				CurrentPageOffset = 1;
 				CurrentSearchQuery = unescapeDataString;
-				FinalPageReached = false;
+				FinalPageReached = true;
+
+				// AI Overview settings
+				AiOverview = null;
+				AiSummaryVisible = false;
+				MaxAiSummaryHeight = MaxAiSummaryHeightValue;
+				ShowMoreButtonVisibility = false;
+
 				await triggerRepo.LogTrigger(DeviceInteractionTrigger.BrowserUsageSustainable, 0);
-				foreach (var searchResult in await BraveSearchAPI.Search(unescapeDataString, CurrentPageOffset))
-					SearchResults.Add(searchResult);
+
+				// run search task on a separate thread
+				_ = Task.Run(async () =>
+				{
+					var braveSearchResult = await BraveSearchApi.Search(unescapeDataString, CurrentPageOffset);
+
+					// Run AI Summary task on a separate thread
+					_ = Task.Run(async () =>
+					{
+						string jsonContent = JsonSerializer.Serialize(braveSearchResult);
+						var chatSummaryResponse =
+							await ChatClient.SendMessage($"Topic: {unescapeDataString}\nSearch Result: {jsonContent}",
+								settings: geminiSearchConfig);
+						AiOverview = chatSummaryResponse.Text;
+						AiSummaryVisible = true;
+						ShowMoreButtonVisibility = true;
+					});
+					foreach (var searchResult in braveSearchResult)
+						SearchResults.Add(searchResult);
+
+					FinalPageReached = false;
+				});
 			}
 			catch (Exception searchEx)
 			{
@@ -84,6 +112,13 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 	}
 
 	[RelayCommand]
+	void ShowMore()
+	{
+		MaxAiSummaryHeight = double.PositiveInfinity;
+		ShowMoreButtonVisibility = false;
+	}
+
+	[RelayCommand]
 	async Task LoadMore()
 	{
 		if (string.IsNullOrEmpty(CurrentSearchQuery))
@@ -92,7 +127,7 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 		try
 		{
 			CurrentPageOffset++;
-			foreach (var searchResult in await BraveSearchAPI.Search(CurrentSearchQuery, CurrentPageOffset))
+			foreach (var searchResult in await BraveSearchApi.Search(CurrentSearchQuery, CurrentPageOffset))
 				SearchResults.Add(searchResult);
 		}
 		catch (Exception ex)
@@ -102,8 +137,9 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 			{
 				// make button invisible
 				FinalPageReached = true;
-				return; 
+				return;
 			}
+
 			GlobalContext.Logger.Error<SearchViewModel>(ex);
 		}
 	}

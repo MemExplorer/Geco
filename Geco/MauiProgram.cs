@@ -172,6 +172,22 @@ public static class MauiProgram
 			)
 		});
 
+		builder.Services.AddKeyedSingleton(GlobalContext.GeminiSearchSummary, new GeminiSettings
+		{
+			Conversational = false,
+			SystemInstructions = """
+			                     You are Geco, a large language model based on Google Gemini. 
+			                     You are developed by SS Bois. 
+			                     You are also a search engine that gives an AI overview. 
+			                     The information from your AI Overview is based on what you know and also from the 'Search Result' that is in json format
+			                     Your response should always be sustainability focused.
+			                     All responses must be presented in **Markdown style** but delivered as **HTML format**.
+			                     Avoid using font sizes larger than `<h3>`.
+			                     Text color must only be **black**.
+			                     Do not include AI overview in the titles.
+			                     """
+		});
+
 		builder.Services.AddTransient<GeminiChat>(_ =>
 			new GeminiChat(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest"));
 		return builder;
