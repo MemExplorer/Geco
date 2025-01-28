@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Geco.Views.Tutorial.SearchTutorial"
+             Title="SearchTutorial">
+
+    <VerticalStackLayout
+        Margin="30, 20">
+        <Label 
+            Text="Discover about sustainability"
+            FontSize="32"
+            FontFamily="Poppins"
+            FontAttributes="Bold"
+            VerticalOptions="Center" 
+            HorizontalOptions="Start" 
+            Margin="0, 25"
+            Padding="0, 15"/>
+        
+        <Image
+            Source="geco_search_crop.jpg"
+            HeightRequest="185"
+            Aspect="AspectFit"
+            SemanticProperties.Description="dot net bot in a hovercraft number nine"
+            Margin="0, 10, 0, 100"/>
+
+        <Button
+            x:Name="btnNextPermission"
+            Clicked="btnNextPermission_Clicked"
+            Text="Next" 
+            BackgroundColor="#5ea94b"
+            TextColor="#ffffff"
+            Margin="15,70"
+            Padding="50, 15"
+            HorizontalOptions="End">
+        </Button>
+    </VerticalStackLayout>
+    
+</ContentPage>

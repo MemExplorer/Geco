@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Geco.Views.Tutorial.IntroTutorial"
+             Title="IntroTutorial">
+    
+    <!-- <ContentPage.Background>
+        <LinearGradientBrush EndPoint="0,1"> 
+                <GradientStop
+                    Color="#cbf5dd"
+                    Offset="0.01"/>
+                <GradientStop
+                    Color="#aaf0c9"
+                    Offset="1.0"/>
+            </LinearGradientBrush>
+    </ContentPage.Background> -->
+
+    <VerticalStackLayout
+        Margin="30, 20">
+        <Image
+            Source="geco_logo.png"
+            HeightRequest="185"
+            Aspect="AspectFit"
+            SemanticProperties.Description="dot net bot in a hovercraft number nine"
+            Margin="0, 80, 0, 50">
+        </Image>
+        <Label 
+            Text="Hi, I'm Geco,"
+            FontSize="40"
+            FontFamily="Poppins"
+            FontAttributes="Bold"
+            VerticalOptions="Center" 
+            HorizontalOptions="Start"
+            Padding="0, 15"/>
+        <Label 
+            Text="Your sustainability habit &#10;companion"
+            FontSize="Medium"
+            FontFamily="Poppins"
+            FontAttributes="Bold"
+            VerticalOptions="Center" 
+            HorizontalOptions="Start" />
+        <Button 
+            x:Name="btnNextChat"
+            Clicked="btnNextChat_Clicked" 
+            Text="Next" 
+            BackgroundColor="#5ea94b"
+            TextColor="#ffffff"
+            Margin="15,75"
+            Padding="50, 15"
+            HorizontalOptions="End">
+        </Button>
+        
+    </VerticalStackLayout>
+</ContentPage>

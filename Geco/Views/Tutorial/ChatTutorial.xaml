@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Geco.Views.Tutorial.ChatTutorial"
+             Title="ChatTutorial">
+
+    <VerticalStackLayout
+        Margin="30, 20">
+        <Label 
+            Text="Start a conversation with GECO"
+            FontSize="32"
+            FontFamily="Poppins"
+            FontAttributes="Bold"
+            VerticalOptions="Center" 
+            HorizontalOptions="Start" 
+            Margin="0, 25"
+            Padding="0, 15"/>
+        <Label 
+            Text="using the initial prompts"
+            FontSize="17"
+            FontFamily="Poppins"
+            FontAttributes="Bold"
+            VerticalOptions="Center" 
+            HorizontalOptions="Start" 
+            Padding="0, 5"/>
+
+        <!-- Initial Prompts -->
+        <HorizontalStackLayout 
+            Spacing="10"
+            Margin="0, 5">
+            <Button
+                Text="Impacts of fast fashion"
+                FontSize="14"
+                FontFamily="Poppins"
+                FontAttributes="Bold"
+                BackgroundColor="#FFFFFF"
+                TextColor="#000000"
+                CornerRadius="20"
+                Padding="10, 5"
+                HorizontalOptions="Fill"
+                IsEnabled="False"/>
+            <Button
+                Text="Surprise me"
+                FontSize="14"
+                FontFamily="Poppins"
+                FontAttributes="Bold"
+                BackgroundColor="#FFFFFF"
+                TextColor="#000000"
+                CornerRadius="20"
+                Padding="10, 5"
+                HorizontalOptions="Fill"
+                IsEnabled="False"/>
+        </HorizontalStackLayout>
+
+        <HorizontalStackLayout 
+            Spacing="10"
+            Margin="0, 5">
+            <Button
+                Text="Sustainability Advice"
+                FontSize="14"
+                FontFamily="Poppins"
+                FontAttributes="Bold"
+                BackgroundColor="#FFFFFF"
+                TextColor="#000000"
+                CornerRadius="20"
+                Padding="10, 5"
+                HorizontalOptions="Fill"
+                IsEnabled="False"/>
+            <Button
+                Text="Tutorial"
+                FontSize="14"
+                FontFamily="Poppins"
+                FontAttributes="Bold"
+                BackgroundColor="#FFFFFF"
+                TextColor="#000000"
+                CornerRadius="20"
+                Padding="10, 5"
+                HorizontalOptions="Fill"
+                IsEnabled="False"/>
+        </HorizontalStackLayout>
+
+
+        <Label 
+            Text="or by chatting to it directly"
+            FontSize="17"
+            FontFamily="Poppins"
+            FontAttributes="Bold"
+            VerticalOptions="Center" 
+            HorizontalOptions="Start" 
+            Margin="0, 45, 0, 0"
+            Padding="0, 15"/>
+
+        <!-- Chat Input Box -->
+        <Frame
+            BackgroundColor="#FFFFFF"
+            CornerRadius="20"
+            Padding="0">
+            <HorizontalStackLayout Padding="10, 0">
+                <Entry
+                    Placeholder="Message to GECO"
+                    FontSize="14"
+                    TextColor="#000000"
+                    PlaceholderColor="#AAAAAA"
+                    IsEnabled="False"/>
+                <ImageButton
+                    Source="send_icon.png"
+                    BackgroundColor="Transparent"
+                    HeightRequest="30"
+                    WidthRequest="30"
+                    HorizontalOptions="End"/>
+            </HorizontalStackLayout>
+        </Frame>
+        
+        <Button
+            x:Name="btnNextSearch"
+            Clicked="btnNextSearch_Clicked"
+            Text="Next" 
+            BackgroundColor="#5ea94b"
+            TextColor="#ffffff"
+            Margin="15,75"
+            Padding="50, 15"
+            HorizontalOptions="End">
+        </Button>
+    </VerticalStackLayout>
+
+</ContentPage>

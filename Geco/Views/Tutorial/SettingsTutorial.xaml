@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Geco.Views.Tutorial.SettingsTutorial"
+             Title="SettingsTutorial">
+    <VerticalStackLayout
+        Margin="30, 15">
+        <Label 
+            Text="Let's look at your permissions"
+            FontSize="32"
+            FontFamily="Poppins"
+            FontAttributes="Bold"
+            VerticalOptions="Center" 
+            HorizontalOptions="Start" 
+            Margin="0, 25"
+            Padding="0, 15"/>
+        <Label 
+            Text="I work best when I can give you personalized suggestions. You can change these settings anytime in the app."
+            FontSize="17"
+            FontFamily="Poppins"
+            FontAttributes="Bold"
+            VerticalOptions="Center" 
+            HorizontalOptions="Start" 
+            Margin="0, 5, 0, 25"/>
+        <Image
+            Source="geco_monitor_habits.jpg"
+            HeightRequest="115"
+            Aspect="AspectFit"
+            SemanticProperties.Description="dot net bot in a hovercraft number nine"/>
+        <Image
+            Source="geco_notification.jpg"
+            HeightRequest="100"
+            Aspect="AspectFit"
+            SemanticProperties.Description="dot net bot in a hovercraft number nine"/>
+        <Button
+            x:Name="btnNextApp"
+            Clicked="btnNextApp_Clicked"
+            Text="Next" 
+            BackgroundColor="#5ea94b"
+            TextColor="#ffffff"
+            Margin="15,75"
+            Padding="50, 15"
+            HorizontalOptions="End">
+        </Button>
+    </VerticalStackLayout>
+</ContentPage>
