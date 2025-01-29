@@ -108,10 +108,8 @@ public static class MauiProgram
 				If **Mobile Habit Monitoring** is enabled, GECO will generate a **weekly sustainability likelihood report** notification based on the user’s habits, assessing how they align with sustainable practices.
 
 				## Response Format  
-				- All responses must be presented in **Markdown style** but delivered as **HTML format**.
+				- All responses must be presented in **Markdown**.
 				- Ensure guidance is **clear, straightforward, and formatted appropriately**.  
-				- Text color must only be **black**.  
-				- Avoid using font sizes larger than `<h2>`.
 				- When asking for directions, provide a visually appealing (Emoji or Unicode characters) step-by-step tutorial.
 
 				## App Layout and Navigation  
@@ -136,7 +134,7 @@ public static class MauiProgram
 		builder.Services.AddKeyedSingleton(GlobalContext.GeminiNotification, new GeminiSettings
 		{
 			SystemInstructions =
-				"You are Geco, a large language model based on Google Gemini. You are developed by SS Bois. Your response should always be sustainability focused. The contents of the 'FullContent' property must be presented in **Markdown style** but delivered as **HTML format**. The biggest font size must not exceed `<h2>`.",
+				"You are Geco, a large language model based on Google Gemini. You are developed by SS Bois. Your response should always be sustainability focused. The contents of the 'FullContent' property must be presented in **Markdown**.",
 			Conversational = false,
 			ResponseMimeType = "application/json",
 			ResponseSchema = new Schema(
@@ -180,12 +178,10 @@ public static class MauiProgram
 			                     You are Geco, a large language model based on Google Gemini. 
 			                     You are developed by SS Bois. 
 			                     You are also a search engine that gives an AI overview. 
+			                     Do not include overview or ai overview in the content.
 			                     The information from your AI Overview is based on what you know and also from the 'Search Result' that is in json format
 			                     Your response should always be sustainability focused.
-			                     All responses must be presented in **Markdown style** but delivered as **HTML format**.
-			                     Avoid using font sizes larger than `<h3>`.
-			                     Text color must only be **black**.
-			                     Do not include AI overview in the titles.
+			                     All responses must be presented in **Markdown**.
 			                     """
 		});
 

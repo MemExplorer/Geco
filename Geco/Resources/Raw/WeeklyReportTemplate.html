@@ -1,4 +1,4 @@
-<html>
+weeklyreport<html>
 <head>
     <style>
         body {
@@ -9,6 +9,11 @@
             padding: 20px;
             margin: 0;
         }
+		
+		#wrComputeContent, #wrBreakdown, #wrOverview {
+			word-wrap: break-word;
+			overflow: hidden;
+		}
 
         .circle {
             position: relative;
@@ -173,8 +178,8 @@
     <div>
         <h3>Weekly Sustainability Likelihood Report</h3>
     </div>
-    <div class="overview">
-        {Overview}
+    <div class="overview" id="wrOverview">
+{Overview}
     </div>
     <button class="collapsible" id="moreCollapsible">Find out more</button>
     <div class="content" id="moreContent">
@@ -195,15 +200,15 @@
             <div id="currWeekChartContent"></div>
             <div id="prevWeekChartContent"></div>
             <div>
-                <div>
-                    {ReportBreakdown}
+                <div id="wrBreakdown">
+{ReportBreakdown}
                 </div>
             </div>
             <button class="collapsible" id="computeCollapsible">
                 How is this computed?
             </button>
-            <div class="content" id="computeContent">
-                {ComputeBreakdown}
+            <div class="content" id="wrComputeContent">
+{ComputeBreakdown}
             </div>
         </div>
     </div>
@@ -223,7 +228,7 @@
             "computeCollapsible",
         );
         const computeCollapsibleContent = document
-            .getElementById("computeContent");
+            .getElementById("wrComputeContent");
         const gridInner = document.getElementById(
             "gridInner",
         );

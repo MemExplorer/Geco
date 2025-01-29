@@ -54,24 +54,61 @@ public partial class ChatPage : ContentPage
 			CurrentViewModel.ChipClick(c, ChatEntry);
 	}
 
-	private void WebView_Navigated(object sender, WebNavigatedEventArgs e)
+	private async void WebView_Navigated(object sender, WebNavigatedEventArgs e)
 	{
-		if (sender is WebView w)
+		try
 		{
+			if (sender is not WebView w) 
+				return;
+		
 			string backgroundColor = GecoSettings.DarkMode ? "#1C1C1C" : "#FFFFFF";
 			string textColor = GecoSettings.DarkMode ? "#ffffff" : "#000000";
 
-			w.EvaluateJavaScriptAsync(@$"
-				(function() {{
-					function modifyStyles(backgroundColor, textColor) {{
-						document.body.style.overflow = 'hidden'; 
-						document.body.style.backgroundColor = backgroundColor; 
-						document.body.style.color = textColor; 
-					}}
+			// load md to html converter script
+			await using var stream = await FileSystem.OpenAppPackageFileAsync("showdown.min.js");
+			using var reader = new StreamReader(stream);
+			var showdownJs = await reader.ReadToEndAsync();
+		
+			await w.EvaluateJavaScriptAsync($$"""
+			                                  {{showdownJs}}
+			                                  var converter = new showdown.Converter();
+			                                  converter.setOption('tables', true);
+			                                  converter.setOption('simpleLineBreaks', true);
+			                                  converter.setOption('requireSpaceBeforeHeadingText', true);
+			                                  converter.setOption('simplifiedAutoLink', true);
+			                                  const contentElement = document.getElementById('gecocontent');
+			                                  contentElement.innerHTML = converter.makeHtml(contentElement.innerHTML);
+			                                  (function() {
+			                                  	function modifyStyles(backgroundColor, textColor) {
+			                                  		document.body.style.backgroundColor = backgroundColor; 
+			                                  		document.body.style.color = textColor; 
+			                                  	}
+			                                  
+			                                  	modifyStyles('{{backgroundColor}}', '{{textColor}}');
+			                                  })();
+			                                  """);
+		}
+		catch (Exception ex)
+		{
+			GlobalContext.Logger.Error<ChatPage>(ex);
+		}
+	}
 
-					modifyStyles('{backgroundColor}', '{textColor}');
-				}})();
-			");
+	void WebView_OnNavigating(object? sender, WebNavigatingEventArgs e)
+	{
+		try
+		{
+			if (e.Url.StartsWith("https://") || e.Url.StartsWith("http://"))
+			{
+				e.Cancel = true;
+				_ = Utils.OpenBrowserView(e.Url);
+			}
+			else if (!e.Url.StartsWith("data:text/html;base64,"))
+				e.Cancel = true;
+		}
+		catch (Exception exception)
+		{
+			GlobalContext.Logger.Error<ChatPage>(exception);
 		}
 	}
 }

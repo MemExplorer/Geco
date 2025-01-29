@@ -27,4 +27,17 @@ internal class Utils
 			}
 		} while (hasError);
 	}
+	
+	public static async Task OpenBrowserView(string url)
+	{
+		var options = new BrowserLaunchOptions
+		{
+			LaunchMode = BrowserLaunchMode.SystemPreferred,
+			TitleMode = BrowserTitleMode.Show,
+			PreferredToolbarColor = Color.Parse(GecoSettings.DarkMode ? "#324b4a" : "#e1edec"),
+			PreferredControlColor = Color.Parse(GecoSettings.DarkMode ? "#e1edec" : "#324b4a")
+		};
+
+		await Browser.Default.OpenAsync(url, options);
+	}
 }

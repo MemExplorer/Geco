@@ -54,6 +54,7 @@
                                 Grid.Column="1"
                                 IsVisible="{Binding Role, Converter={StaticResource IsModelToBooleanConverter}}"
                                 Navigated="WebView_Navigated"
+                                Navigating="WebView_OnNavigating"
                                 Source="{Binding Text, Converter={StaticResource HtmlConverter}}" />
                         </Grid>
                     </Border>

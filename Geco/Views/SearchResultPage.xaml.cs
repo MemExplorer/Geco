@@ -13,7 +13,7 @@ public partial class SearchResultPage : ContentPage
 			if (e.Parameter is not WebResultEntry wre)
 				return;
 
-			await OpenBrowserView(wre.Url.ToString());
+			await Utils.OpenBrowserView(wre.Url.ToString());
 		}
 		catch (Exception ex)
 		{
@@ -21,38 +21,45 @@ public partial class SearchResultPage : ContentPage
 		}
 	}
 
-	async Task OpenBrowserView(string url)
+	async void WebView_OnNavigated(object? sender, WebNavigatedEventArgs e)
 	{
-		var options = new BrowserLaunchOptions
+		try
 		{
-			LaunchMode = BrowserLaunchMode.SystemPreferred,
-			TitleMode = BrowserTitleMode.Show,
-			PreferredToolbarColor = Color.Parse(GecoSettings.DarkMode ? "#324b4a" : "#e1edec"),
-			PreferredControlColor = Color.Parse(GecoSettings.DarkMode ? "#e1edec" : "#324b4a")
-		};
+			if (sender is not WebView w) 
+				return;
+		
+			string backgroundColor = GecoSettings.DarkMode ? "#1C1C1C" : "#FFFFFF";
+			string textColor = GecoSettings.DarkMode ? "#ffffff" : "#000000";
 
-		await Browser.Default.OpenAsync(url, options);
-	}
-
-	void WebView_OnNavigated(object? sender, WebNavigatedEventArgs e)
-	{
-		if (sender is not WebView w)
-			return;
-
-		string backgroundColor = GecoSettings.DarkMode ? "#1C1C1C" : "#FFFFFF";
-		string textColor = GecoSettings.DarkMode ? "#ffffff" : "#000000";
-
-		w.EvaluateJavaScriptAsync(@$"
-				(function() {{
-					function modifyStyles(backgroundColor, textColor) {{
-						document.body.style.overflow = 'hidden'; 
-						document.body.style.backgroundColor = backgroundColor; 
-						document.body.style.color = textColor; 
-					}}
-
-					modifyStyles('{backgroundColor}', '{textColor}');
-				}})();
-			");
+			// load md to html converter script
+			await using var stream = await FileSystem.OpenAppPackageFileAsync("showdown.min.js");
+			using var reader = new StreamReader(stream);
+			var showdownJs = await reader.ReadToEndAsync();
+		
+			await w.EvaluateJavaScriptAsync($$"""
+			                                  {{showdownJs}}
+			                                  var converter = new showdown.Converter();
+			                                  converter.setOption('tables', true);
+			                                  converter.setOption('simpleLineBreaks', true);
+			                                  converter.setOption('headerLevelStart', 2);
+			                                  converter.setOption('simplifiedAutoLink', true);
+			                                  converter.setOption('requireSpaceBeforeHeadingText', true);
+			                                  const contentElement = document.getElementById('gecocontent');
+			                                  contentElement.innerHTML = converter.makeHtml(contentElement.innerHTML);
+			                                  (function() {
+			                                  	function modifyStyles(backgroundColor, textColor) {
+			                                  		document.body.style.backgroundColor = backgroundColor; 
+			                                  		document.body.style.color = textColor; 
+			                                  	}
+			                                  
+			                                  	modifyStyles('{{backgroundColor}}', '{{textColor}}');
+			                                  })();
+			                                  """);
+		}
+		catch (Exception ex)
+		{
+			GlobalContext.Logger.Error<SearchResultPage>(ex);
+		}
 	}
 
 	void AIOverviewWebview_OnNavigating(object? sender, WebNavigatingEventArgs e)
@@ -62,7 +69,7 @@ public partial class SearchResultPage : ContentPage
 			if (e.Url.StartsWith("https://") || e.Url.StartsWith("http://"))
 			{
 				e.Cancel = true;
-				_ = OpenBrowserView(e.Url);
+				_ = Utils.OpenBrowserView(e.Url);
 			}
 			else if (!e.Url.StartsWith("data:text/html;base64,"))
 				e.Cancel = true;
