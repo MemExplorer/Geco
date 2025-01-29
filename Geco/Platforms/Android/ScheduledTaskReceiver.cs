@@ -52,11 +52,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 			return;
 
 		string likelihoodPrompt = constructedPrompt.GetValueOrDefault().Item1;
-		double likelihoodProbability = constructedPrompt.GetValueOrDefault().Item2;
-		string statusIcon = constructedPrompt.GetValueOrDefault().Item3;
-		string sustainabilityLevel = constructedPrompt.GetValueOrDefault().Item4;
-		string currChartLayout = constructedPrompt.GetValueOrDefault().Item5;
-		string prevChartLayout = constructedPrompt.GetValueOrDefault().Item6;
+		string htmlTemplate = constructedPrompt.GetValueOrDefault().Item2;
 		GlobalContext.Logger.Info<ScheduledTaskReceiver>("Created weekly report likelihood prompt.");
 		try
 		{
@@ -73,7 +69,12 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 
 				// create chat history
 				var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
-				string weeklyReportMessage = BuildWeeklyReport(firstItem, statusIcon, likelihoodProbability, sustainabilityLevel, currChartLayout, prevChartLayout);
+				string weeklyReportMessage = StringHelpers.FormatString(htmlTemplate, new
+				{
+					Overview = firstItem.Overview,
+					ReportBreakdown = firstItem.ReportBreakdown,
+					ComputeBreakdown = firstItem.ComputeBreakdown
+				});
 				var chatMsg = new ChatMessage(new ChatRole("model"), weeklyReportMessage);
 				chatMsg.AdditionalProperties = new AdditionalPropertiesDictionary { ["id"] = (ulong)0 };
 				string chatTitle = firstItem.NotificationTitle;
@@ -94,297 +95,27 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		}
 	}
 
-	private string BuildWeeklyReport(WeeklyReportContent content, string status, double percentage, string sustainabilityLevel, string currChartContent, string prevChartContent) =>
-		$$"""
-		  <html>
-			<head>
-			  <style>
-				body {
-				  font-family: Arial, sans-serif;
-				  display: flex;
-				  flex-direction: column;
-				  align-items: center;
-				  padding: 20px;
-				  margin: 0;
-				}
-
-				.circle {
-				  position: relative;
-				  width: 100px;
-				  height: 100px;
-				  border-radius: 50%;
-				  background: conic-gradient(var(--color, red) 0%, var(--color, red) var(--percentage, 0%), #ccc var(--percentage, 0%));
-				  display: flex;
-				  justify-content: center;
-				  align-items: center;
-				  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-				  margin-right: 20px;
-				}
-
-				.circle::before {
-				  content: '';
-				  position: absolute;
-				  min-width: 80px;
-				  min-height: 80px;
-				  background-color: #f4f4f9;
-				  border-radius: 50%;
-				}
-
-				.circle .grid-inner {
-				  position: absolute;
-				  color: #333;
-				  align-items: center;
-				  justify-content: center;
-				  display: flex;
-				}
-
-				.circle .grid-inner svg {
-				  padding-bottom: 2px;
-				}
-
-				.overview {
-				  margin-bottom: 5px;
-				}
-
-				.collapsible {
-				  background-color: #039967;
-				  color: white;
-				  border: none;
-				  outline: none;
-				  align-self: start;
-				  padding: 7px 10px;
-				  cursor: pointer;
-				  border-radius: 5px;
-				  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-				}
-
-				.collapsible:hover {
-				  background-color: #026343;
-				}
-
-				.content {
-				  margin-top: 5px;
-				  display: none;
-				  width: 100%;
-				}
-
-				.flex-container {
-				  display: flex;
-				  flex-wrap: wrap;
-				}
-
-				.title {
-				  height: auto;
-				  flex-basis: 10px;
-				}
-
-				.chart-row {
-				  display: flex;
-				  flex-wrap: wrap;
-				  align-items: center;
-				  margin-bottom: 10px;
-				  min-width: 300px;
-				}
-
-				.chart-label {
-				  width: 30%;
-				  text-align: left;
-				}
-
-				.chart-bar {
-				  display: flex;
-				  height: 25px;
-				  width: 50%;
-				  background-color: #ccc;
-				  border-radius: 5px;
-				  overflow: hidden;
-				  position: relative;
-				}
-
-				.unsustainable {
-				  background-color: #FF474D;
-				  display: flex;
-				  align-items: center;
-				  justify-content: center;
-				  color: white;
-				  font-size: 12px;
-				  padding-left: 10px;
-				  padding-right: 10px;
-				}
-
-				.sustainable {
-				  background-color: #429642;
-				  display: flex;
-				  align-items: center;
-				  justify-content: center;
-				  color: white;
-				  font-size: 12px;
-				  padding-left: 10px;
-				  padding-right: 10px;
-				}
-
-				.legend-item {
-				  display: flex;
-				  margin-bottom: 5px;
-				  flex-wrap: wrap;
-				  gap:5px;
-				}
-
-				.legend-group {
-				  display: flex;
-				  gap:5px;
-				  flex-wrap: wrap;
-				}
-
-				.color-box {
-				  width: 15px;
-				  height: 20px;
-				  border-radius: 3px;
-				}
-
-				.green {
-				  background-color: green;
-				}
-
-				.red {
-				  background-color: red;
-				}
-				@media only screen and (max-width: 250px) {
-					  .chart-row {
-						  display: block;
-					  }
-				  }
-			  </style>
-			</head>
-			<body>
-			  <div class='flex-container'>
-				<div class='circle' id='percentageCircle'>
-				  <div class='grid-inner'>
-					<h4 id='percentageValue'></h4>
-					{{status}}
-				  </div>
-				</div>
-				<div class='title'>
-				  <h3>{{sustainabilityLevel}}</h3>
-				</div>
-			  </div>
-			  <div>
-				<h3>Weekly Sustainability Likelihood Report</h3>
-			  </div>
-			  <div class='overview'>
-				{{content.Overview}}
-			  </div>
-			  <button class='collapsible' id='moreCollapsible'>Find out more</button>
-			  <div class='content' id='moreContent'>
-				<div>
-					<div>
-					  <h3>Legend</h3>
-					  <div class="legend-group">
-						<div class="legend-item">
-						  <span class="color-box green"></span>
-						  <span>Sustainable</span>
-						</div>
-						<div class="legend-item">
-						  <span class="color-box red"></span>
-						  <span>Unsustainable</span>
-						</div>
-					  </div>
-					</div>
-					{{currChartContent}}
-					{{prevChartContent}}
-				<div>
-				<div>
-				  {{content.ReportBreakdown}}
-				</div>
-			  </div>
-			  <button class='collapsible' id='computeCollapsible'>How is this computed?</button>
-			  <div class='content' id='computeContent'>
-				{{content.ComputeBreakdown}}
-			  </div>
-			  <script>
-				const moreCollapsible = document.getElementById('moreCollapsible');
-				const moreCollapsibleContent = document.getElementById('moreContent');
-				const computeCollapsible = document.getElementById('computeCollapsible');
-				const computeCollapsibleContent = document.getElementById('computeContent');
-				computeCollapsible.style.display = 'none';
-				moreCollapsible.addEventListener('click', () => {
-				  const isExpanded = moreCollapsibleContent.style.display === 'block';
-				  moreCollapsibleContent.style.display = isExpanded ? 'none' : 'block';
-				  moreCollapsibleContent.style.color = document.body.style.color;
-				  moreCollapsible.remove();
-				  computeCollapsible.style.display = 'block';
-				});
-				computeCollapsible.addEventListener('click', () => {
-				  const isExpanded = computeCollapsibleContent.style.display === 'block';
-				  computeCollapsibleContent.style.display = isExpanded ? 'none' : 'block';
-				  computeCollapsibleContent.style.color = document.body.style.color;
-				  computeCollapsible.remove();
-				});
-
-				function calculateColor(percentage) {
-				  let red, green;
-				  if (percentage <= 50) {
-					red = 255;
-					green = Math.round(percentage * 5.1);
-				  } else {
-					red = Math.round((100 - percentage) * 5.1);
-					green = 255;
-				  }
-				  return `rgb(${red}, ${green}, 0)`;
-				}
-				const percentage = {{percentage}};
-				const circle = document.getElementById('percentageCircle');
-				const percentageValue = document.getElementById('percentageValue');
-				circle.style.setProperty('--color', calculateColor(percentage));
-				circle.style.setProperty('--percentage', `${percentage}%`);
-				percentageValue.textContent = `${percentage}%`;
-			  </script>
-			</body>
-		  </html>
-		""";
-
-	private async Task<(string, double, string, string, string, string)?> ConstructLikelihoodPrompt()
+	private async Task<(string, string)?> ConstructLikelihoodPrompt()
 	{
-		const string upArrowSvg = """
-		                          <svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' width='20' height='20' viewBox='1 1 256 256' xml:space='preserve'>
-		                          <defs>
-		                          </defs>
-		                          <g style='stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;' transform='translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)' >
-		                          <path d='M 43.779 0.434 L 12.722 25.685 c -0.452 0.368 -0.714 0.92 -0.714 1.502 v 19.521 c 0 0.747 0.43 1.427 1.104 1.748 c 0.674 0.321 1.473 0.225 2.053 -0.246 L 45 23.951 l 29.836 24.258 c 0.579 0.471 1.378 0.567 2.053 0.246 c 0.674 -0.321 1.104 -1.001 1.104 -1.748 V 27.187 c 0 -0.582 -0.263 -1.134 -0.714 -1.502 L 46.221 0.434 C 45.51 -0.145 44.49 -0.145 43.779 0.434 z' style='stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(39,193,39); fill-rule: nonzero; opacity: 1;' transform=' matrix(1 0 0 1 0 0) ' stroke-linecap='round' />
-		                          <path d='M 43.779 41.792 l -31.057 25.25 c -0.452 0.368 -0.714 0.919 -0.714 1.502 v 19.52 c 0 0.747 0.43 1.427 1.104 1.748 c 0.674 0.321 1.473 0.225 2.053 -0.246 L 45 65.308 l 29.836 24.258 c 0.579 0.471 1.378 0.567 2.053 0.246 c 0.674 -0.321 1.104 -1.001 1.104 -1.748 V 68.544 c 0 -0.583 -0.263 -1.134 -0.714 -1.502 l -31.057 -25.25 C 45.51 41.214 44.49 41.214 43.779 41.792 z' style='stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(39,193,39); fill-rule: nonzero; opacity: 1;' transform=' matrix(1 0 0 1 0 0) ' stroke-linecap='round' />
-		                          </g>
-		                          </svg>
-		                          """;
-
-		const string downArrowSvg = """
-		                            <svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' width='20' height='20' viewBox='0 0 256 256' xml:space='preserve'>
-		                            <defs>
-		                            </defs>
-		                            <g style='stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;' transform='translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)' >
-		                            <path d='M 43.779 89.566 L 12.722 64.315 c -0.452 -0.368 -0.714 -0.92 -0.714 -1.502 V 43.293 c 0 -0.747 0.43 -1.427 1.104 -1.748 c 0.674 -0.321 1.473 -0.225 2.053 0.246 L 45 66.049 l 29.836 -24.258 c 0.579 -0.471 1.378 -0.567 2.053 -0.246 c 0.674 0.321 1.104 1.001 1.104 1.748 v 19.521 c 0 0.582 -0.263 1.134 -0.714 1.502 L 46.221 89.566 C 45.51 90.145 44.49 90.145 43.779 89.566 z' style='stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(206,62,62); fill-rule: nonzero; opacity: 1;' transform=' matrix(1 0 0 1 0 0) ' stroke-linecap='round' />
-		                            <path d='M 43.779 48.208 l -31.057 -25.25 c -0.452 -0.368 -0.714 -0.919 -0.714 -1.502 V 1.936 c 0 -0.747 0.43 -1.427 1.104 -1.748 c 0.674 -0.321 1.473 -0.225 2.053 0.246 L 45 24.692 L 74.836 0.434 c 0.579 -0.471 1.378 -0.567 2.053 -0.246 c 0.674 0.321 1.104 1.001 1.104 1.748 v 19.521 c 0 0.583 -0.263 1.134 -0.714 1.502 l -31.057 25.25 C 45.51 48.786 44.49 48.786 43.779 48.208 z' style='stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(206,62,62); fill-rule: nonzero; opacity: 1;' transform=' matrix(1 0 0 1 0 0) ' stroke-linecap='round' />
-		                            </g>
-		                            </svg>
-		                            """;
-
-		const string tildeSvg = """
-		                        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 50' width='20' height='50'>
-		                        	<path d='M1 25 Q 25 5, 50 25 T 90 25' 
-		                        			fill='none' 
-		                        			stroke='gray' 
-		                        			stroke-width='15' />
-		                        </svg>
-		                        """;
 
 		// fetch trigger records for current week
 		var triggerRepo = GlobalContext.Services.GetRequiredService<TriggerRepository>();
 		var promptRepo = GlobalContext.Services.GetRequiredService<PromptRepository>();
+
+		using var stream = await FileSystem.OpenAppPackageFileAsync("WeeklyReportTemplate.html");
+		using var reader = new StreamReader(stream);
+		var htmlTemplate = reader.ReadToEnd();
+
+		// current bayes computation
 		var currentWeekTriggerRecords = (await triggerRepo.FetchWeekOneTriggerRecords()).ToDictionary();
-		var currentWeekResult = GetLikelihoodPromptFromRecords(currentWeekTriggerRecords, false);
-		if (currentWeekResult == null)
+		var currentWeekBayesInstance = BayesInstanceFromRecords(currentWeekTriggerRecords);
+		if (currentWeekBayesInstance == null)
 			return null;
 
-		string sustainabilityLevel = currentWeekResult.Value.Probability switch
+		var currentWeekPercentage = currentWeekBayesInstance.Compute();
+		var currentWeekComputationSolution = currentWeekBayesInstance.GetComputationSolution();
+		double currentWeekProbabilityRounded = Math.Round(currentWeekPercentage.PositiveProbability, 2);
+		string sustainabilityLevel = currentWeekProbabilityRounded switch
 		{
 			>= 90 => "High Sustainability",
 			>= 75 and < 90 => "Sustainable",
@@ -395,35 +126,73 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 			_ => "Crisis level"
 		};
 
+		// set values for current week data
+		htmlTemplate = StringHelpers.FormatString(htmlTemplate, new
+		{
+			CurrentWeekPercentage = currentWeekProbabilityRounded.ToString(),
+			CurrentWeekTableFrequency = BayesFrequencyToJavascript(currentWeekBayesInstance.GetFrequencyData())
+		});
+
 		// check if we have data from last 2 weeks
 		if (await triggerRepo.HasHistory())
 		{
 			// fetch data from last 2 weeks
-			var lastWeekTriggerRecords = (await triggerRepo.FetchWeekTwoTriggerRecords()).ToDictionary();
-			var lastWeekResult = GetLikelihoodPromptFromRecords(lastWeekTriggerRecords, true);
-			if (lastWeekResult != null)
+			var previousWeekTriggerRecords = (await triggerRepo.FetchWeekTwoTriggerRecords()).ToDictionary();
+			var previousWeekBayesInstance = BayesInstanceFromRecords(previousWeekTriggerRecords);
+			if (previousWeekBayesInstance != null)
 			{
-				string statusIcon =
-					currentWeekResult.Value.Probability.CompareTo(lastWeekResult.Value.Probability) switch
-					{
-						-1 => downArrowSvg,
-						1 => upArrowSvg,
-						_ => tildeSvg
-					};
+				// previous week bayes computation
+				var previousWeekPercentage = previousWeekBayesInstance.Compute();
+				var previousWeekComputationSolution = previousWeekBayesInstance.GetComputationSolution();
+				double previousWeekProbabilityRounded = Math.Round(previousWeekPercentage.PositiveProbability, 2);
+
+				// set values for previous week data
+				htmlTemplate = StringHelpers.FormatString(htmlTemplate, new
+				{
+					PreviousWeekPercentage = previousWeekProbabilityRounded.ToString(),
+					PreviousWeekTableFrequency = BayesFrequencyToJavascript(previousWeekBayesInstance.GetFrequencyData())
+				});
 
 				// build likelihood prompt
 				return (await promptRepo.GetLikelihoodWithHistoryPrompt(
-					currentWeekResult.Value.Probability, currentWeekResult.Value.PositiveComputation,
-					lastWeekResult.Value.Probability, lastWeekResult.Value.PositiveComputation, sustainabilityLevel), currentWeekResult.Value.Probability, statusIcon, sustainabilityLevel, currentWeekResult.Value.chartLayout, lastWeekResult.Value.chartLayout);
+					currentWeekProbabilityRounded, currentWeekComputationSolution.PositiveComputation,
+					previousWeekProbabilityRounded, previousWeekComputationSolution.PositiveComputation, sustainabilityLevel), htmlTemplate);
 			}
 		}
 
-		return (await promptRepo.GetLikelihoodPrompt(currentWeekResult.Value.Probability,
-			currentWeekResult.Value.PositiveComputation, sustainabilityLevel), currentWeekResult.Value.Probability, "", sustainabilityLevel, currentWeekResult.Value.chartLayout, "");
+		// replace previous week data with null
+		htmlTemplate = StringHelpers.FormatString(htmlTemplate, new
+		{
+			PreviousWeekPercentage = "null",
+			PreviousWeekTableFrequency = "null"
+		});
+
+		return (await promptRepo.GetLikelihoodPrompt(currentWeekProbabilityRounded, currentWeekComputationSolution.PositiveComputation, sustainabilityLevel), htmlTemplate);
 	}
 
-	private (string PositiveComputation, double Probability, string chartLayout)? GetLikelihoodPromptFromRecords(
-		Dictionary<DeviceInteractionTrigger, int> currentWeekTriggerRecords, bool isPrevious)
+	private string BayesFrequencyToJavascript(IDictionary<string, BayesTheoremAttribute> frequencyData)
+	{
+		var sb = new StringBuilder();
+		sb.Append('{');
+		foreach (var entry in frequencyData)
+		{
+			sb.Append('"');
+			sb.Append(entry.Key);
+			sb.Append("\":");
+
+			sb.Append('[');
+			sb.Append(entry.Value.Positive);
+			sb.Append(',');
+			sb.Append(entry.Value.Negative);
+			sb.Append("],");
+		}
+		sb.Append("};");
+
+		return sb.ToString();
+	}
+
+	private BayesTheorem? BayesInstanceFromRecords(
+		Dictionary<DeviceInteractionTrigger, int> currentWeekTriggerRecords)
 	{
 		int chargingPositive =
 			currentWeekTriggerRecords.GetValueOrDefault(DeviceInteractionTrigger.ChargingSustainable, 0);
@@ -447,37 +216,12 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		if (deviceUsagePositive == 0 && deviceUsageNegative == 0)
 			return null;
 
-		// pass the first week's data to Bayes Math Model
-		var currWeekBayesInst = new BayesTheorem();
-		currWeekBayesInst.AppendData("Charging", chargingPositive, chargingNegative);
-		currWeekBayesInst.AppendData("Network Usage", networkUsagePositive, networkUsageNegative);
-		currWeekBayesInst.AppendData("Device Usage", deviceUsagePositive, deviceUsageNegative);
-
-		// gets values we need for prompt
-		var currWeekComputationResult = currWeekBayesInst.Compute();
-		var currWeekComputationStr = currWeekBayesInst.GetComputationInString();
-		double currSustainableProportionalProbability = Math.Round(currWeekComputationResult.PositiveProbs, 2);
-
-		var chartLayout = new StringBuilder();
-		chartLayout.Append("<div class='chart-group'>");
-		string chartHeading = isPrevious ? "<h3>Previous Week Mobile Habits Sustainability Breakdown</h3>" : "<h3>Current Week Mobile Habits Sustainability Breakdown</h3>";
-		chartLayout.Append(chartHeading);
-		foreach (var attrib in currWeekBayesInst._frequencyTbl)
-		{
-			chartLayout.Append($"""
-				<div class='chart-row'>
-				  <div class='chart-label'>{attrib.Key}</div>
-				  <div class='chart-bar'>
-				    <div class='unsustainable' style='flex: {attrib.Value.Negative};'>{attrib.Value.Negative}</div>
-				    <div class='sustainable' style='flex: {attrib.Value.Positive};'>{attrib.Value.Positive}</div>
-				  </div>
-				</div>
-				""");
-		}
-		chartLayout.Append("</div>");
-
-		return (currWeekComputationStr.PositiveComputation,
-			currSustainableProportionalProbability, chartLayout.ToString());
+		// pass frequency data to Bayes Math Model
+		var bayesInst = new BayesTheorem();
+		bayesInst.AppendData("Charging", chargingPositive, chargingNegative);
+		bayesInst.AppendData("Network Usage", networkUsagePositive, networkUsageNegative);
+		bayesInst.AppendData("Device Usage", deviceUsagePositive, deviceUsageNegative);
+		return bayesInst;
 	}
 
 	private async Task RunDeviceUsageLogger()

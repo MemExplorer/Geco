@@ -3,12 +3,15 @@ using System.Text;
 namespace Geco.Core;
 
 public record BayesTheoremAttribute(int Positive, int Negative);
+public record BayesComputationResult(double PositiveProbability, double NegativeProbability);
 
 public class BayesTheorem
 {
 	const double Alpha = 0.1;
-	public Dictionary<string, BayesTheoremAttribute> _frequencyTbl = new();
+	readonly Dictionary<string, BayesTheoremAttribute> _frequencyTbl = new();
 	private bool _needSmoothing;
+
+	public IDictionary<string, BayesTheoremAttribute> GetFrequencyData() => _frequencyTbl;
 
 	public void AppendData(string attrName, int positive, int negative)
 	{
@@ -18,7 +21,7 @@ public class BayesTheorem
 		_frequencyTbl.Add(attrName, new BayesTheoremAttribute(positive, negative));
 	}
 
-	public (string PositiveComputation, string NegativeComputation) GetComputationInString()
+	public (string PositiveComputation, string NegativeComputation) GetComputationSolution()
 	{
 		double totalPositiveAttr = _frequencyTbl.Values.Sum(attr => attr.Positive);
 		double totalNegativeAttr = _frequencyTbl.Values.Sum(attr => attr.Negative);
@@ -116,7 +119,7 @@ public class BayesTheorem
 		return (positiveComputation.ToString(), negativeComputation.ToString());
 	}
 
-	public (bool IsPositive, double PositiveProbs, double NegativeProbs) Compute()
+	public BayesComputationResult Compute()
 	{
 		double totalPositiveAttr = _frequencyTbl.Values.Sum(attr => attr.Positive);
 		double totalNegativeAttr = _frequencyTbl.Values.Sum(attr => attr.Negative);
@@ -149,6 +152,6 @@ public class BayesTheorem
 		double proportionalPositiveProb = (positivePosterior / posteriorSum) * 100;
 		double proportionalNegativeProb = (negativePosterior / posteriorSum) * 100;
 
-		return (positivePosterior > negativePosterior, proportionalPositiveProb, proportionalNegativeProb);
+		return new BayesComputationResult(proportionalPositiveProb, proportionalNegativeProb);
 	}
 }

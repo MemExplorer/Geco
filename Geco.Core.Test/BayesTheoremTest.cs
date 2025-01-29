@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using Geco.Core.Database;
 using Xunit.Abstractions;
 
@@ -11,6 +12,23 @@ public class BayesTheoremTest
 	public BayesTheoremTest(ITestOutputHelper output) =>
 		_output = output;
 
+	string GetFrequencyInString(IDictionary<string, BayesTheoremAttribute> tbl)
+	{
+		var sb = new StringBuilder();
+		sb.AppendLine("Attribute Name | Positive | Negative ");
+		foreach (var k in tbl)
+		{
+			sb.Append(k.Key);
+			sb.Append(" | ");
+			sb.Append(k.Value.Positive);
+			sb.Append(" | ");
+			sb.Append(k.Value.Negative);
+			sb.AppendLine();
+		}
+
+		return sb.ToString();
+	}
+
 	[Fact]
 	void StabilityTest()
 	{
@@ -19,12 +37,12 @@ public class BayesTheoremTest
 		bayesInst.AppendData("Usage", 8, 12);
 		bayesInst.AppendData("Network", 6, 10);
 		var computation = bayesInst.Compute();
-		var computationStr = bayesInst.GetComputationInString();
+		var computationStr = bayesInst.GetComputationSolution();
 		_output.WriteLine("Positive: " + computationStr.PositiveComputation);
 		_output.WriteLine("Negative: " + computationStr.NegativeComputation);
-		string? frequencyStr = bayesInst.GetFrequencyInString();
+		string? frequencyStr = GetFrequencyInString(bayesInst.GetFrequencyData());
 		_output.WriteLine("Frequency: \n" + frequencyStr);
-		Debug.Assert(computation.IsPositive == false);
+		Debug.Assert((computation.PositiveProbability > computation.NegativeProbability) == false);
 	}
 
 	[Fact]
@@ -38,9 +56,9 @@ public class BayesTheoremTest
 		currWeekBayesInst.AppendData("Network", 6, 10);
 		// gets values we need for prompt
 		var currWeekComputationResult = currWeekBayesInst.Compute();
-		var currWeekComputationStr = currWeekBayesInst.GetComputationInString();
-		string currWeekFrequencyStr = currWeekBayesInst.GetFrequencyInString();
-		double currSustainableProportionalProbability = Math.Round(currWeekComputationResult.PositiveProbs, 2);
+		var currWeekComputationStr = currWeekBayesInst.GetComputationSolution();
+		string currWeekFrequencyStr = GetFrequencyInString(currWeekBayesInst.GetFrequencyData());
+		double currSustainableProportionalProbability = Math.Round(currWeekComputationResult.PositiveProbability, 2);
 		string? finalPrompt = await promptRepo.GetLikelihoodPrompt(currSustainableProportionalProbability,
 			currWeekComputationStr.PositiveComputation, currWeekFrequencyStr);
 		_output.WriteLine(finalPrompt);
@@ -57,9 +75,9 @@ public class BayesTheoremTest
 		currWeekBayesInst.AppendData("Network", 6, 10);
 		// gets values we need for prompt
 		var currWeekComputationResult = currWeekBayesInst.Compute();
-		var currWeekComputationStr = currWeekBayesInst.GetComputationInString();
-		string currWeekFrequencyStr = currWeekBayesInst.GetFrequencyInString();
-		double currSustainableProportionalProbability = Math.Round(currWeekComputationResult.PositiveProbs, 2);
+		var currWeekComputationStr = currWeekBayesInst.GetComputationSolution();
+		string currWeekFrequencyStr = GetFrequencyInString(currWeekBayesInst.GetFrequencyData());
+		double currSustainableProportionalProbability = Math.Round(currWeekComputationResult.PositiveProbability, 2);
 
 		var prevWeekBayesInst = new BayesTheorem();
 		prevWeekBayesInst.AppendData("Charging", 2, 0);
@@ -67,12 +85,12 @@ public class BayesTheoremTest
 		prevWeekBayesInst.AppendData("Network", 6, 0);
 		// gets values we need for prompt
 		var prevWeekComputationResult = prevWeekBayesInst.Compute();
-		var prevWeekComputationStr = prevWeekBayesInst.GetComputationInString();
-		string prevWeekFrequencyStr = prevWeekBayesInst.GetFrequencyInString();
-		double prevSustainableProportionalProbability = Math.Round(prevWeekComputationResult.PositiveProbs, 2);
+		var prevWeekComputationStr = prevWeekBayesInst.GetComputationSolution();
+		string prevWeekFrequencyStr = GetFrequencyInString(prevWeekBayesInst.GetFrequencyData());
+		double prevSustainableProportionalProbability = Math.Round(prevWeekComputationResult.PositiveProbability, 2);
 		string? finalPrompt = await promptRepo.GetLikelihoodWithHistoryPrompt(currSustainableProportionalProbability,
-			currWeekComputationStr.PositiveComputation, currWeekFrequencyStr, prevSustainableProportionalProbability,
-			prevWeekComputationStr.PositiveComputation, prevWeekFrequencyStr);
+			currWeekComputationStr.PositiveComputation, prevSustainableProportionalProbability,
+			prevWeekComputationStr.PositiveComputation, "Status");
 		_output.WriteLine(finalPrompt);
 	}
 }

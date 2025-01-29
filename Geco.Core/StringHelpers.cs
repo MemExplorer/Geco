@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace Geco.Core;
 
-internal partial class StringHelpers
+public partial class StringHelpers
 {
 	[GeneratedRegex(@"\{[A-Za-z_][A-Za-z0-9_]*\}")]
 	private static partial Regex GetNamedPlaceholderPattern();
