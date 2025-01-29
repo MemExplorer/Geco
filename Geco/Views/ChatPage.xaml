@@ -78,7 +78,8 @@
                 <DataTemplate x:DataType="mai:ChatMessage">
                     <Border Padding="0,10"
                             Stroke="Transparent">
-                        <Grid ColumnDefinitions="auto, *">
+                        <Grid ColumnDefinitions="auto, *"
+                              RowDefinitions="auto">
                             <Image Grid.Column="0"
                                    Source="geco_logo.png"
                                    MaximumWidthRequest="50"
