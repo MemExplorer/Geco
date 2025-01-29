@@ -42,7 +42,7 @@ public class BayesTheoremTest
 		_output.WriteLine("Negative: " + computationStr.NegativeComputation);
 		string? frequencyStr = GetFrequencyInString(bayesInst.GetFrequencyData());
 		_output.WriteLine("Frequency: \n" + frequencyStr);
-		Debug.Assert((computation.PositiveProbability > computation.NegativeProbability) == false);
+		Debug.Assert(computation.PositiveProbability > computation.NegativeProbability == false);
 	}
 
 	[Fact]

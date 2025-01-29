@@ -27,7 +27,7 @@ internal class Utils
 			}
 		} while (hasError);
 	}
-	
+
 	public static async Task OpenBrowserView(string url)
 	{
 		var options = new BrowserLaunchOptions

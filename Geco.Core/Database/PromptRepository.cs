@@ -31,8 +31,7 @@ public class PromptRepository : DbRepositoryBase
 		return await BuildPrompt(PromptCategory.SearchCtgBasedTemp,
 			new
 			{
-				PredefinedTopic = $"Sustainable {predefinedTopic}",
-				StoredPromptRefinement = randomPromptRefinement
+				PredefinedTopic = $"Sustainable {predefinedTopic}", StoredPromptRefinement = randomPromptRefinement
 			});
 	}
 
@@ -53,7 +52,8 @@ public class PromptRepository : DbRepositoryBase
 	}
 
 	public async Task<string> GetLikelihoodPrompt(double currentSustainabilityLikelihood,
-		string currentLikelihoodComputation, string sustainabilityLevel) => await BuildPrompt(PromptCategory.LikelihoodNoPrevDataTemp,
+		string currentLikelihoodComputation, string sustainabilityLevel) => await BuildPrompt(
+		PromptCategory.LikelihoodNoPrevDataTemp,
 		new
 		{
 			CurrentSustainabilityLikelihood =
@@ -63,7 +63,8 @@ public class PromptRepository : DbRepositoryBase
 		});
 
 	public async Task<string> GetLikelihoodWithHistoryPrompt(double currentSustainabilityLikelihood,
-		string currentLikelihoodComputation, double previousSustainabilityLikelihood, string previousLikelihoodComputation, string sustainabilityLevel) =>
+		string currentLikelihoodComputation, double previousSustainabilityLikelihood,
+		string previousLikelihoodComputation, string sustainabilityLevel) =>
 		await BuildPrompt(PromptCategory.LikelihoodWithPrevDataTemp,
 			new
 			{
@@ -136,17 +137,17 @@ public class PromptRepository : DbRepositoryBase
 				"""
 				# Task  
 				Write a weekly report on mobile sustainability using the specified format.
-				
+
 				## Contents of the `Overview` property
-				
+
 				### General Guidance
 				- The tone and response should adapt to the specific Sustainability Level of: `{SustainabilityLevel}`.  
 				- Responses should always remain constructive, empathetic, and solution-oriented, but the focus will vary depending on the likelihood.  
 				- Use appropriate emojis for the overview.
 				- Use simple and easy to understand words.
-				
+
 				### Sustainability Level Guidance
-				
+
 				#### **Crisis Level**
 				- **Focus:** Immediate action. Acknowledge the urgency and provide critical next steps to address the situation.  
 				- **Tone:** Serious yet hopeful. Stress the need for decisive action without being overly discouraging.  
@@ -154,7 +155,7 @@ public class PromptRepository : DbRepositoryBase
 				    - "This is a critical moment. We need to prioritize actions that will create an immediate impact."  
 				    - "The current trajectory presents significant challenges, but it’s possible to turn things around with bold measures."  
 				    - "Let’s identify the most urgent areas to address and act swiftly."  
-				
+
 				#### **Unsustainable**
 				- **Focus:** Highlight areas for improvement and encourage focused efforts to reverse unsustainability.  
 				- **Tone:** Determined and supportive. Acknowledge the difficulty while inspiring confidence in the ability to improve.  
@@ -162,7 +163,7 @@ public class PromptRepository : DbRepositoryBase
 				    - "There are clear signs of unsustainability, but targeted efforts can drive improvement."  
 				    - "By addressing the core issues, we can begin to shift toward a more sustainable path."  
 				    - "This is a challenging position, but there’s potential for progress with the right focus."  
-				
+
 				#### **Signs of Unsustainability**
 				- **Focus:** Identify key areas where change can make the biggest impact. Build optimism for improvement.  
 				- **Tone:** Constructive and encouraging. Acknowledge the warning signs and motivate action.  
@@ -170,7 +171,7 @@ public class PromptRepository : DbRepositoryBase
 				    - "There are signs that we need to make adjustments, and this is a great opportunity to do so."  
 				    - "With focused effort, we can address these issues and start to see real progress."  
 				    - "This is a critical moment for improvement—let’s work together to make an impact."  
-				
+
 				#### **Average Sustainability**
 				- **Focus:** Recognize the potential to move from average to sustainable. Encourage efforts to break through barriers.  
 				- **Tone:** Balanced and optimistic. Acknowledge progress while motivating further improvement.  
@@ -178,7 +179,7 @@ public class PromptRepository : DbRepositoryBase
 				    - "You’re on the right track, but there’s room to push further toward sustainability."  
 				    - "This is a strong foundation to build on—let’s refine and enhance our approach."  
 				    - "You’ve made steady progress; let’s focus on closing the gap to full sustainability."  
-				
+
 				#### **Close to Sustainable**
 				- **Focus:** Celebrate progress while emphasizing the importance of maintaining and advancing efforts.  
 				- **Tone:** Positive and motivating. Build confidence while inspiring continuous improvement.  
@@ -186,7 +187,7 @@ public class PromptRepository : DbRepositoryBase
 				    - "You’re so close to reaching sustainable levels—great work so far!"  
 				    - "This progress is impressive, and with continued focus, you’ll achieve full sustainability."  
 				    - "Let’s refine our efforts to ensure consistent and lasting success."  
-				
+
 				#### **Sustainable**
 				- **Focus:** Acknowledge achievements and encourage consistent practices to maintain sustainability.  
 				- **Tone:** Celebratory and supportive. Recognize the effort behind the success while inspiring further commitment.  
@@ -194,7 +195,7 @@ public class PromptRepository : DbRepositoryBase
 				    - "This is a fantastic accomplishment! Keep up the excellent work to sustain this progress."  
 				    - "You’ve reached a sustainable level—let’s continue to build resilience and consistency."  
 				    - "This is a testament to your dedication—keep striving for even greater heights."  
-				
+
 				#### **High Sustainability**
 				- **Focus:** Celebrate and reinforce confidence. Highlight the importance of maintaining momentum and serving as a role model for success.  
 				- **Tone:** Highly celebratory and motivational. Inspire pride in the achievement while encouraging continued commitment.  
@@ -202,54 +203,54 @@ public class PromptRepository : DbRepositoryBase
 				    - "Outstanding work! You’ve achieved high sustainability, and this sets a great example for others."  
 				    - "This is a remarkable achievement—maintaining this level will ensure lasting success."  
 				    - "Your efforts have paid off, and this is truly inspiring. Let’s keep leading the way!"  
-				
+
 				## Contents of the `ReportBreakdown` property
-				
+
 				**Information:** This section will help users know more about the weekly sustainability report. Help them understand the report and build have stronger foundation towards achieving sustainability.
-				
+
 				### **Current Sustainability Likelihood (This text title should be bold):**  
 				Emphasize the computed likelihood of sustainable mobile usage in a paragraph: `{CurrentSustainabilityLikelihood}`.
-				
+
 				### **Previous Week's Sustainability Likelihood (This text title should be bold):**  
 				Emphasize the previous week's computed likelihood of sustainable mobile usage in a paragraph: `{PreviousSustainabilityLikelihood}`.
-				
+
 				### **Comparison (This text title should be bold):**  
 				Compare previous week's results to the current week's result in a paragraph.
-				
+
 				### **Recommendations (This text title should be bold):**  
 				Suggest actionable steps to help the user maintain or improve their sustainability score in a paragraph. Only suggest actions related to Charging, Screen Time, and Use of WiFi instead of Mobile Data.
-				
-				
+
+
 				## Contents of the `ComputeBreakdown` property
 				This is the computation for the current likelihood: `{CurrentLikelihoodComputation}`, also this is the computation for the previous week's likelihood: `{PreviousLikelihoodComputation}`. do not include this in the text, this is just for additinal context.  
 				The title is "How was this computed" and it should be bold. 
 				Give a short paragraph explaining that the sustainability likelihood was computed using Bayesian Theorem, specifically to get the Posterior probabiltiy. It is then converted into Proportional probability. 
-				
+
 				## Tone Principles
 				- **Empathetic:** Tailor responses to the emotional context of each likelihood.  
 				- **Actionable:** Provide specific next steps, particularly at lower levels.  
 				- **Motivational:** Inspire confidence and highlight the potential for progress or sustained success.
-				
+
 				## Response Format  
 				- The content of the `Overview`, `ReportBreakdown`, and `ComputeBreakdown` property must be written in **Markdown**.  
 				- Ensure the guidance is **clear, concise, and properly formatted**. 
 				- Do not include percentage in the title. 
 				"""),
 			((int)PromptCategory.LikelihoodNoPrevDataTemp,
-				$$"""
+				"""
 				# Task  
 				Write a weekly report on mobile sustainability using the specified format.
-				
+
 				## Contents of the `Overview` property
-				
+
 				### General Guidance
 				- The tone and response should adapt to the specific Sustainability Level of: `{SustainabilityLevel}`.  
 				- Responses should always remain constructive, empathetic, and solution-oriented, but the focus will vary depending on the likelihood.  
 				- Use appropriate emojis for the overview.
 				- Use simple and easy to understand words.
-				
+
 				### Sustainability Level Guidance
-				
+
 				#### **Crisis Level**
 				- **Focus:** Immediate action. Acknowledge the urgency and provide critical next steps to address the situation.  
 				- **Tone:** Serious yet hopeful. Stress the need for decisive action without being overly discouraging.  
@@ -257,7 +258,7 @@ public class PromptRepository : DbRepositoryBase
 				    - "This is a critical moment. We need to prioritize actions that will create an immediate impact."  
 				    - "The current trajectory presents significant challenges, but it’s possible to turn things around with bold measures."  
 				    - "Let’s identify the most urgent areas to address and act swiftly."  
-				
+
 				#### **Unsustainable**
 				- **Focus:** Highlight areas for improvement and encourage focused efforts to reverse unsustainability.  
 				- **Tone:** Determined and supportive. Acknowledge the difficulty while inspiring confidence in the ability to improve.  
@@ -265,7 +266,7 @@ public class PromptRepository : DbRepositoryBase
 				    - "There are clear signs of unsustainability, but targeted efforts can drive improvement."  
 				    - "By addressing the core issues, we can begin to shift toward a more sustainable path."  
 				    - "This is a challenging position, but there’s potential for progress with the right focus."  
-				
+
 				#### **Signs of Unsustainability**
 				- **Focus:** Identify key areas where change can make the biggest impact. Build optimism for improvement.  
 				- **Tone:** Constructive and encouraging. Acknowledge the warning signs and motivate action.  
@@ -273,7 +274,7 @@ public class PromptRepository : DbRepositoryBase
 				    - "There are signs that we need to make adjustments, and this is a great opportunity to do so."  
 				    - "With focused effort, we can address these issues and start to see real progress."  
 				    - "This is a critical moment for improvement—let’s work together to make an impact."  
-				
+
 				#### **Average Sustainability**
 				- **Focus:** Recognize the potential to move from average to sustainable. Encourage efforts to break through barriers.  
 				- **Tone:** Balanced and optimistic. Acknowledge progress while motivating further improvement.  
@@ -281,7 +282,7 @@ public class PromptRepository : DbRepositoryBase
 				    - "You’re on the right track, but there’s room to push further toward sustainability."  
 				    - "This is a strong foundation to build on—let’s refine and enhance our approach."  
 				    - "You’ve made steady progress; let’s focus on closing the gap to full sustainability."  
-				
+
 				#### **Close to Sustainable**
 				- **Focus:** Celebrate progress while emphasizing the importance of maintaining and advancing efforts.  
 				- **Tone:** Positive and motivating. Build confidence while inspiring continuous improvement.  
@@ -289,7 +290,7 @@ public class PromptRepository : DbRepositoryBase
 				    - "You’re so close to reaching sustainable levels—great work so far!"  
 				    - "This progress is impressive, and with continued focus, you’ll achieve full sustainability."  
 				    - "Let’s refine our efforts to ensure consistent and lasting success."  
-				
+
 				#### **Sustainable**
 				- **Focus:** Acknowledge achievements and encourage consistent practices to maintain sustainability.  
 				- **Tone:** Celebratory and supportive. Recognize the effort behind the success while inspiring further commitment.  
@@ -297,7 +298,7 @@ public class PromptRepository : DbRepositoryBase
 				    - "This is a fantastic accomplishment! Keep up the excellent work to sustain this progress."  
 				    - "You’ve reached a sustainable level—let’s continue to build resilience and consistency."  
 				    - "This is a testament to your dedication—keep striving for even greater heights."  
-				
+
 				#### **High Sustainability**
 				- **Focus:** Celebrate and reinforce confidence. Highlight the importance of maintaining momentum and serving as a role model for success.  
 				- **Tone:** Highly celebratory and motivational. Inspire pride in the achievement while encouraging continued commitment.  
@@ -305,29 +306,29 @@ public class PromptRepository : DbRepositoryBase
 				    - "Outstanding work! You’ve achieved high sustainability, and this sets a great example for others."  
 				    - "This is a remarkable achievement—maintaining this level will ensure lasting success."  
 				    - "Your efforts have paid off, and this is truly inspiring. Let’s keep leading the way!"  
-				
+
 				## Contents of the `ReportBreakdown` property
-				
+
 				**Information:** This section will help users know more about the weekly sustainability report. Help them understand the report and build have stronger foundation towards achieving sustainability.
-				
+
 				### **Current Sustainability Likelihood (This text title should be bold):**  
 				Emphasize the computed likelihood of sustainable mobile usage in a paragraph: `{CurrentSustainabilityLikelihood}`.
-				
+
 				### **Recommendations (This text title should be bold):**  
 				Suggest actionable steps to help the user maintain or improve their sustainability score in a paragraph. Only suggest actions related to Charging, Screen Time, and Use of WiFi instead of Mobile Data.
-				
+
 				## Contents of the `ComputeBreakdown` property
 				This is the computation for the current likelihood: `{CurrentLikelihoodComputation}`, do not include this in the text, this is just for additinal context.
 				The title is "How was this computed" and it should be bold.  
 				Give a short paragraph explaining that the sustainability likelihood was computed using Bayesian Theorem, specifically to get the Posterior probabiltiy. It is then converted into Proportional probability.
-				
+
 				## Tone Principles
 				- **Empathetic:** Tailor responses to the emotional context of each likelihood.  
 				- **Actionable:** Provide specific next steps, particularly at lower levels.  
 				- **Motivational:** Inspire confidence and highlight the potential for progress or sustained success.
-				
+
 				## Response Format
-				
+
 				- The content of the `Overview`, `ReportBreakdown`, and `ComputeBreakdown` property must be written in **Markdown**.  
 				- Ensure the guidance is **clear, concise, and properly formatted**.  
 				- Do not include percentage in the title.

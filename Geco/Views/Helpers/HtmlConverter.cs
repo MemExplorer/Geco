@@ -1,7 +1,5 @@
 using System.Globalization;
 using System.Text;
-using System.Text.Encodings.Web;
-using System.Text.Json;
 using Geco.Core;
 
 namespace Geco.Views.Helpers;
@@ -13,7 +11,7 @@ public class HtmlConverter : IValueConverter
 		const string WeeklyReportHeader = "weeklyreport";
 		if (value is not string markdownContent)
 			return null;
-		
+
 		// override content if when we detect the weekly report header
 		if (markdownContent.StartsWith(WeeklyReportHeader))
 			markdownContent = markdownContent[WeeklyReportHeader.Length..];
@@ -21,13 +19,10 @@ public class HtmlConverter : IValueConverter
 		{
 			using var stream = FileSystem.OpenAppPackageFileAsync("ChatTemplate.html");
 			using var reader = new StreamReader(stream.Result);
-			var htmlTemplate = reader.ReadToEnd();
-		
+			string? htmlTemplate = reader.ReadToEnd();
+
 			markdownContent = markdownContent.Trim();
-			markdownContent = StringHelpers.FormatString(htmlTemplate, new
-			{
-				MdContent = markdownContent
-			});
+			markdownContent = StringHelpers.FormatString(htmlTemplate, new { MdContent = markdownContent });
 		}
 
 		string base64Html = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(markdownContent));

@@ -3,6 +3,7 @@ using System.Text;
 namespace Geco.Core;
 
 public record BayesTheoremAttribute(int Positive, int Negative);
+
 public record BayesComputationResult(double PositiveProbability, double NegativeProbability);
 
 public class BayesTheorem
@@ -149,8 +150,8 @@ public class BayesTheorem
 
 		// proportional probability
 		double posteriorSum = positivePosterior + negativePosterior;
-		double proportionalPositiveProb = (positivePosterior / posteriorSum) * 100;
-		double proportionalNegativeProb = (negativePosterior / posteriorSum) * 100;
+		double proportionalPositiveProb = positivePosterior / posteriorSum * 100;
+		double proportionalNegativeProb = negativePosterior / posteriorSum * 100;
 
 		return new BayesComputationResult(proportionalPositiveProb, proportionalNegativeProb);
 	}

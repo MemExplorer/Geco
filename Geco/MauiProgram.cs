@@ -166,7 +166,11 @@ public static class MauiProgram
 						{ "ReportBreakdown", new Schema(SchemaType.STRING) },
 						{ "ComputeBreakdown", new Schema(SchemaType.STRING) }
 					},
-					Required: ["NotificationTitle", "NotificationDescription", "Overview", "ReportBreakdown", "ComputeBreakdown"]
+					Required:
+					[
+						"NotificationTitle", "NotificationDescription", "Overview", "ReportBreakdown",
+						"ComputeBreakdown"
+					]
 				)
 			)
 		});
@@ -261,12 +265,12 @@ public static class MauiProgram
 		});
 
 		// Hide scrollbar in webview
-        WebViewHandler.Mapper.AppendToMapping("RemoveScrollbars", (handler, view) =>
-        {
-            var nativeWebView = handler.PlatformView;
-            nativeWebView.VerticalScrollBarEnabled = false;
-            nativeWebView.HorizontalScrollBarEnabled = false;
-        });
+		WebViewHandler.Mapper.AppendToMapping("RemoveScrollbars", (handler, view) =>
+		{
+			var nativeWebView = handler.PlatformView;
+			nativeWebView.VerticalScrollBarEnabled = false;
+			nativeWebView.HorizontalScrollBarEnabled = false;
+		});
 #endif
 	}
 }

@@ -69,12 +69,8 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 
 				// create chat history
 				var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
-				string weeklyReportMessage = StringHelpers.FormatString(htmlTemplate, new
-				{
-					Overview = firstItem.Overview,
-					ReportBreakdown = firstItem.ReportBreakdown,
-					ComputeBreakdown = firstItem.ComputeBreakdown
-				});
+				string weeklyReportMessage = StringHelpers.FormatString(htmlTemplate,
+					new { firstItem.Overview, firstItem.ReportBreakdown, firstItem.ComputeBreakdown });
 				var chatMsg = new ChatMessage(new ChatRole("model"), weeklyReportMessage);
 				chatMsg.AdditionalProperties = new AdditionalPropertiesDictionary { ["id"] = (ulong)0 };
 				string chatTitle = firstItem.NotificationTitle;
@@ -97,14 +93,13 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 
 	private async Task<(string, string)?> ConstructLikelihoodPrompt()
 	{
-
 		// fetch trigger records for current week
 		var triggerRepo = GlobalContext.Services.GetRequiredService<TriggerRepository>();
 		var promptRepo = GlobalContext.Services.GetRequiredService<PromptRepository>();
 
 		using var stream = await FileSystem.OpenAppPackageFileAsync("WeeklyReportTemplate.html");
 		using var reader = new StreamReader(stream);
-		var htmlTemplate = reader.ReadToEnd();
+		string? htmlTemplate = reader.ReadToEnd();
 
 		// current bayes computation
 		var currentWeekTriggerRecords = (await triggerRepo.FetchWeekOneTriggerRecords()).ToDictionary();
@@ -127,11 +122,12 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 		};
 
 		// set values for current week data
-		htmlTemplate = StringHelpers.FormatString(htmlTemplate, new
-		{
-			CurrentWeekPercentage = currentWeekProbabilityRounded.ToString(),
-			CurrentWeekTableFrequency = BayesFrequencyToJavascript(currentWeekBayesInstance.GetFrequencyData())
-		});
+		htmlTemplate = StringHelpers.FormatString(htmlTemplate,
+			new
+			{
+				CurrentWeekPercentage = currentWeekProbabilityRounded.ToString(),
+				CurrentWeekTableFrequency = BayesFrequencyToJavascript(currentWeekBayesInstance.GetFrequencyData())
+			});
 
 		// check if we have data from last 2 weeks
 		if (await triggerRepo.HasHistory())
@@ -147,27 +143,29 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 				double previousWeekProbabilityRounded = Math.Round(previousWeekPercentage.PositiveProbability, 2);
 
 				// set values for previous week data
-				htmlTemplate = StringHelpers.FormatString(htmlTemplate, new
-				{
-					PreviousWeekPercentage = previousWeekProbabilityRounded.ToString(),
-					PreviousWeekTableFrequency = BayesFrequencyToJavascript(previousWeekBayesInstance.GetFrequencyData())
-				});
+				htmlTemplate = StringHelpers.FormatString(htmlTemplate,
+					new
+					{
+						PreviousWeekPercentage = previousWeekProbabilityRounded.ToString(),
+						PreviousWeekTableFrequency =
+							BayesFrequencyToJavascript(previousWeekBayesInstance.GetFrequencyData())
+					});
 
 				// build likelihood prompt
 				return (await promptRepo.GetLikelihoodWithHistoryPrompt(
 					currentWeekProbabilityRounded, currentWeekComputationSolution.PositiveComputation,
-					previousWeekProbabilityRounded, previousWeekComputationSolution.PositiveComputation, sustainabilityLevel), htmlTemplate);
+					previousWeekProbabilityRounded, previousWeekComputationSolution.PositiveComputation,
+					sustainabilityLevel), htmlTemplate);
 			}
 		}
 
 		// replace previous week data with null
-		htmlTemplate = StringHelpers.FormatString(htmlTemplate, new
-		{
-			PreviousWeekPercentage = "null",
-			PreviousWeekTableFrequency = "null"
-		});
+		htmlTemplate = StringHelpers.FormatString(htmlTemplate,
+			new { PreviousWeekPercentage = "null", PreviousWeekTableFrequency = "null" });
 
-		return (await promptRepo.GetLikelihoodPrompt(currentWeekProbabilityRounded, currentWeekComputationSolution.PositiveComputation, sustainabilityLevel), htmlTemplate);
+		return (
+			await promptRepo.GetLikelihoodPrompt(currentWeekProbabilityRounded,
+				currentWeekComputationSolution.PositiveComputation, sustainabilityLevel), htmlTemplate);
 	}
 
 	private string BayesFrequencyToJavascript(IDictionary<string, BayesTheoremAttribute> frequencyData)
@@ -186,6 +184,7 @@ internal class ScheduledTaskReceiver : BroadcastReceiver
 			sb.Append(entry.Value.Negative);
 			sb.Append("],");
 		}
+
 		sb.Append("};");
 
 		return sb.ToString();

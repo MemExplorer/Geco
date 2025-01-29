@@ -58,17 +58,17 @@ public partial class ChatPage : ContentPage
 	{
 		try
 		{
-			if (sender is not WebView w) 
+			if (sender is not WebView w)
 				return;
-		
+
 			string backgroundColor = GecoSettings.DarkMode ? "#1C1C1C" : "#FFFFFF";
 			string textColor = GecoSettings.DarkMode ? "#ffffff" : "#000000";
 
 			// load md to html converter script
 			await using var stream = await FileSystem.OpenAppPackageFileAsync("showdown.min.js");
 			using var reader = new StreamReader(stream);
-			var showdownJs = await reader.ReadToEndAsync();
-		
+			string? showdownJs = await reader.ReadToEndAsync();
+
 			await w.EvaluateJavaScriptAsync($$"""
 			                                  {{showdownJs}}
 			                                  var converter = new showdown.Converter();

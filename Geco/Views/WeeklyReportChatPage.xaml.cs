@@ -17,8 +17,8 @@ public partial class WeeklyReportChatPage : ContentPage
 			// load md to html converter script
 			await using var stream = await FileSystem.OpenAppPackageFileAsync("showdown.min.js");
 			using var reader = new StreamReader(stream);
-			var showdownJs = await reader.ReadToEndAsync();
-		
+			string? showdownJs = await reader.ReadToEndAsync();
+
 			await w.EvaluateJavaScriptAsync($$"""
 			                                  {{showdownJs}}
 			                                  var converter = new showdown.Converter();
@@ -38,7 +38,7 @@ public partial class WeeklyReportChatPage : ContentPage
 			                                  }
 			                                  else
 			                                      contentElement.innerHTML = converter.makeHtml(contentElement.innerHTML);
-			                                  
+
 			                                  (function() {
 			                                  	function modifyStyles(backgroundColor, textColor) {
 			                                  		document.body.style.backgroundColor = backgroundColor; 
