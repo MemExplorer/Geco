@@ -25,17 +25,17 @@ public partial class ReportsPage : ContentPage
 		string backgroundColor = GecoSettings.DarkMode ? "#191919" : "#e3e3e3";
 		string textColor = "#808080";
 
-		w.EvaluateJavaScriptAsync(@$"
-				(function() {{
-					function modifyStyles(backgroundColor, textColor) {{
-						document.body.style.overflow = 'hidden'; 
-						document.body.style.backgroundColor = backgroundColor; 
-						document.body.style.color = textColor; 
-					}}
-
-					modifyStyles('{backgroundColor}', '{textColor}');
-				}})();
-			");
+		w.EvaluateJavaScriptAsync($$"""
+		                            (function() {
+		                            	function modifyStyles(backgroundColor, textColor) {
+		                            		document.body.style.overflow = 'hidden'; 
+		                            		document.body.style.backgroundColor = backgroundColor; 
+		                            		document.body.style.color = textColor; 
+		                            	}
+		                            
+		                            	modifyStyles('{{backgroundColor}}', '{{textColor}}');
+		                            })();
+		                            """);
 	}
 
 	async void TapGestureRecognizer_OnTapped(object? sender, TappedEventArgs e)

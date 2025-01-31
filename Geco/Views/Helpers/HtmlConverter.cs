@@ -17,12 +17,14 @@ public class HtmlConverter : IValueConverter
 			markdownContent = markdownContent[WeeklyReportHeader.Length..];
 		else
 		{
+			string backgroundColor = GecoSettings.DarkMode ? "#1C1C1C" : "#FFFFFF";
+			string textColor = GecoSettings.DarkMode ? "#ffffff" : "#000000";
 			using var stream = FileSystem.OpenAppPackageFileAsync("ChatTemplate.html");
 			using var reader = new StreamReader(stream.Result);
-			string? htmlTemplate = reader.ReadToEnd();
+			string htmlTemplate = reader.ReadToEnd();
 
 			markdownContent = markdownContent.Trim();
-			markdownContent = StringHelpers.FormatString(htmlTemplate, new { MdContent = markdownContent });
+			markdownContent = StringHelpers.FormatString(htmlTemplate, new { MdContent = markdownContent, BgColor = backgroundColor, FgColor = textColor });
 		}
 
 		string base64Html = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(markdownContent));

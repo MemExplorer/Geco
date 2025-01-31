@@ -63,21 +63,7 @@ public partial class ChatPage : ContentPage
 
 			string backgroundColor = GecoSettings.DarkMode ? "#1C1C1C" : "#FFFFFF";
 			string textColor = GecoSettings.DarkMode ? "#ffffff" : "#000000";
-
-			// load md to html converter script
-			await using var stream = await FileSystem.OpenAppPackageFileAsync("showdown.min.js");
-			using var reader = new StreamReader(stream);
-			string? showdownJs = await reader.ReadToEndAsync();
-
 			await w.EvaluateJavaScriptAsync($$"""
-			                                  {{showdownJs}}
-			                                  var converter = new showdown.Converter();
-			                                  converter.setOption('tables', true);
-			                                  converter.setOption('simpleLineBreaks', true);
-			                                  converter.setOption('requireSpaceBeforeHeadingText', true);
-			                                  converter.setOption('simplifiedAutoLink', true);
-			                                  const contentElement = document.getElementById('gecocontent');
-			                                  contentElement.innerHTML = converter.makeHtml(contentElement.innerHTML);
 			                                  (function() {
 			                                  	function modifyStyles(backgroundColor, textColor) {
 			                                  		document.body.style.backgroundColor = backgroundColor; 
@@ -87,6 +73,21 @@ public partial class ChatPage : ContentPage
 			                                  	modifyStyles('{{backgroundColor}}', '{{textColor}}');
 			                                  })();
 			                                  """);
+			
+			// load md to html converter script
+			await using var stream = await FileSystem.OpenAppPackageFileAsync("showdown.min.js");
+			using var reader = new StreamReader(stream);
+			string showdownJs = await reader.ReadToEndAsync();
+			await w.EvaluateJavaScriptAsync($"""
+			                                 {showdownJs}
+			                                 var converter = new showdown.Converter();
+			                                 converter.setOption('tables', true);
+			                                 converter.setOption('simpleLineBreaks', true);
+			                                 converter.setOption('requireSpaceBeforeHeadingText', true);
+			                                 converter.setOption('simplifiedAutoLink', true);
+			                                 const contentElement = document.getElementById('gecocontent');
+			                                 contentElement.innerHTML = converter.makeHtml(contentElement.innerHTML);
+			                                 """);
 		}
 		catch (Exception ex)
 		{

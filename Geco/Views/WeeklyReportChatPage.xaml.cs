@@ -22,12 +22,21 @@ public partial class WeeklyReportChatPage : ContentPage
 
 			string backgroundColor = GecoSettings.DarkMode ? "#1C1C1C" : "#FFFFFF";
 			string textColor = GecoSettings.DarkMode ? "#ffffff" : "#000000";
+			await w.EvaluateJavaScriptAsync($$"""
+			                                  (function() {
+			                                  	function modifyStyles(backgroundColor, textColor) {
+			                                  		document.body.style.backgroundColor = backgroundColor; 
+			                                  		document.body.style.color = textColor; 
+			                                  	}
+			                                  
+			                                  	modifyStyles('{{backgroundColor}}', '{{textColor}}');
+			                                  })();
+			                                  """);
 
 			// load md to html converter script
 			await using var stream = await FileSystem.OpenAppPackageFileAsync("showdown.min.js");
 			using var reader = new StreamReader(stream);
-			string? showdownJs = await reader.ReadToEndAsync();
-
+			string showdownJs = await reader.ReadToEndAsync();
 			await w.EvaluateJavaScriptAsync($$"""
 			                                  {{showdownJs}}
 			                                  var converter = new showdown.Converter();
@@ -47,15 +56,6 @@ public partial class WeeklyReportChatPage : ContentPage
 			                                  }
 			                                  else
 			                                      contentElement.innerHTML = converter.makeHtml(contentElement.innerHTML);
-
-			                                  (function() {
-			                                  	function modifyStyles(backgroundColor, textColor) {
-			                                  		document.body.style.backgroundColor = backgroundColor; 
-			                                  		document.body.style.color = textColor; 
-			                                  	}
-			                                  
-			                                  	modifyStyles('{{backgroundColor}}', '{{textColor}}');
-			                                  })();
 			                                  """);
 		}
 		catch (Exception ex)
