@@ -11,9 +11,6 @@
              x:DataType="vm:SearchResultViewModel"
              Title="Search Result"
              Shell.FlyoutBehavior="Disabled">
-    <ContentPage.BindingContext>
-        <vm:SearchResultViewModel />
-    </ContentPage.BindingContext>
     <ContentPage.Resources>
         <ResourceDictionary>
             <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
@@ -40,13 +37,28 @@
                        Margin="20,0,7,0"
                        FontSize="18"
                        HorizontalOptions="FillAndExpand"
-                       Placeholder="Discover something..."
+                       Placeholder="{Binding SearchPlaceholder}"
+                       TextChanged="SearchEntry_OnTextChanged"
                        Text="{Binding SearchInput}" />
+                
+                <Label VerticalOptions="Center" 
+                       HorizontalTextAlignment="Center"
+                       FontSize="20"
+                       Margin="{Binding MicrophoneMargin}"
+                       IsEnabled="{Binding IsMicrophoneEnabled}"
+                       FontFamily="FontAwesome" 
+                       Text="{Binding MicrophoneIcon}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding MicrophoneClickCommand}"
+                                              CommandParameter="{x:Reference SearchEntry}"/>
+                    </Label.GestureRecognizers>
+                </Label>
 
                 <!--  Search Send Button  -->
                 <Button CornerRadius="30"
                         HorizontalOptions="Center"
                         FontFamily="FontAwesome"
+                        IsEnabled="{Binding IsSearchButtonEnabled}"
                         Text="{x:Static helpers:IconFont.MagnifyingGlass}"
                         Margin="3"
                         VerticalOptions="Center">

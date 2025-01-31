@@ -8,9 +8,6 @@
              xmlns:vm="clr-namespace:Geco.ViewModels"
              x:DataType="vm:SearchViewModel"
              Title="Search">
-    <ContentPage.BindingContext>
-        <vm:SearchViewModel />
-    </ContentPage.BindingContext>
     <Grid Padding="10"
           ColumnSpacing="10"
           RowSpacing="10"
@@ -40,13 +37,28 @@
                        Margin="20,0,7,0"
                        FontSize="18"
                        HorizontalOptions="FillAndExpand"
-                       Placeholder="Discover something..."
+                       Placeholder="{Binding SearchPlaceholder}"
+                       TextChanged="SearchEntry_OnTextChanged"
                        Text="{Binding SearchQuery}" />
+                
+                <Label VerticalOptions="Center" 
+                       HorizontalTextAlignment="Center"
+                       FontSize="20"
+                       Margin="{Binding MicrophoneMargin}"
+                       IsEnabled="{Binding IsMicrophoneEnabled}"
+                       FontFamily="FontAwesome" 
+                       Text="{Binding MicrophoneIcon}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding MicrophoneClickCommand}"
+                                              CommandParameter="{x:Reference SearchEntry}"/>
+                    </Label.GestureRecognizers>
+                </Label>
 
                 <!--  Search Send Button  -->
                 <Button CornerRadius="30"
                         HorizontalOptions="Center"
                         FontFamily="FontAwesome"
+                        IsEnabled="{Binding IsSearchButtonEnabled}"
                         Text="{x:Static helpers:IconFont.MagnifyingGlass}"
                         Margin="3"
                         VerticalOptions="Center">

@@ -1,10 +1,17 @@
 using Geco.Core.Brave;
+using Geco.ViewModels;
 
 namespace Geco.Views;
 
 public partial class SearchResultPage : ContentPage
 {
-	public SearchResultPage() => InitializeComponent();
+	SearchResultViewModel CurrentViewModel;
+	public SearchResultPage(SearchResultViewModel vm)
+	{
+		BindingContext = vm;
+		CurrentViewModel = vm;
+		InitializeComponent();
+	}
 
 	async void TapGestureRecognizer_OnTapped(object? sender, TappedEventArgs e)
 	{
@@ -79,4 +86,7 @@ public partial class SearchResultPage : ContentPage
 			GlobalContext.Logger.Error<SearchResultPage>(exception);
 		}
 	}
+
+	void SearchEntry_OnTextChanged(object? sender, TextChangedEventArgs e) => 
+		CurrentViewModel.SearchTextChanged(e.NewTextValue);
 }

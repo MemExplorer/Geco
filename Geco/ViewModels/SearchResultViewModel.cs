@@ -1,12 +1,14 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Text.Json;
-using System.Text.RegularExpressions;
-using System.Web;
+using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Brave;
 using Geco.Core.Database;
 using Geco.Core.Models.ActionObserver;
+using Geco.Views.Helpers;
 using GoogleGeminiSDK;
 
 namespace Geco.ViewModels;
@@ -14,6 +16,9 @@ namespace Geco.ViewModels;
 public partial class SearchResultViewModel : ObservableObject, IQueryAttributable
 {
 	const int MaxAiSummaryHeightValue = 180;
+	const string ListeningMessagePlaceholder = "GECO is listening...";
+	const string DefaultEditorPlaceholder = "Discover something...";
+	string _speechToTextResultHolder = string.Empty;
 	[ObservableProperty] ObservableCollection<WebResultEntry> _searchResults = [];
 	[ObservableProperty] string? _searchInput;
 	[ObservableProperty] string? _aiOverview;
@@ -22,12 +27,77 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 	[ObservableProperty] bool _finalPageReached = true;
 	[ObservableProperty] bool _aiSummaryVisible;
 	[ObservableProperty] bool _showMoreButtonVisibility;
+	[ObservableProperty] string _searchPlaceholder = DefaultEditorPlaceholder;
+	[ObservableProperty] bool _isSearchButtonEnabled;
+	
+	// Microphone properties
+	[ObservableProperty] string _microphoneIcon = IconFont.Microphone;
+	[ObservableProperty] bool _isMicrophoneEnabled = true;
+	[ObservableProperty] Thickness _microphoneMargin = new Thickness(0,0,10,0);
 
 	bool _isPredefined;
-	SearchAPI BraveSearchApi { get; } = GlobalContext.Services.GetRequiredService<SearchAPI>();
-	GeminiChat ChatClient { get; } = GlobalContext.Services.GetRequiredService<GeminiChat>();
+	SearchAPI BraveSearchApi { get; }
+	GeminiChat ChatClient { get; }
 	uint CurrentPageOffset { get; set; } = 1;
 	string? CurrentSearchQuery { get; set; }
+	ISpeechToText SpeechToText { get; } 
+
+	public SearchResultViewModel()
+	{
+		BraveSearchApi = GlobalContext.Services.GetRequiredService<SearchAPI>();
+		ChatClient = GlobalContext.Services.GetRequiredService<GeminiChat>();
+		SpeechToText = GlobalContext.Services.GetRequiredService<ISpeechToText>();
+		SpeechToText.RecognitionResultUpdated += SpeechToTextOnRecognitionResultUpdated;
+	}
+	
+	void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e) => 
+		_speechToTextResultHolder = e.RecognitionResult;
+
+	[RelayCommand]
+	async Task MicrophoneClick(Entry searchEntry)
+	{
+		bool isUseMicrophone = MicrophoneIcon == IconFont.Microphone;
+		MicrophoneMargin = new Thickness(0, 0, (int)MicrophoneMargin.Right == 10 ? 5.5 : 10, 0);
+		MicrophoneIcon = isUseMicrophone ? IconFont.MicrophoneSlash : IconFont.Microphone;
+		if (isUseMicrophone)
+		{
+			bool isAllowed = await SpeechToText.RequestPermissions();
+			if (!isAllowed)
+			{
+				await Toast.Make("Please grant microphone permission.").Show();
+				return;
+			}
+			
+			if (Connectivity.NetworkAccess != NetworkAccess.Internet)
+			{
+				await Toast.Make("Internet connection is required").Show();
+				return;
+			}
+			
+			// Update UI state
+			IsMicrophoneEnabled = false;
+			IsSearchButtonEnabled = false;
+			_speechToTextResultHolder = string.Empty;
+			await SpeechToText.StartListenAsync(CultureInfo.CurrentCulture);
+			await Task.Delay(1000);
+			SearchPlaceholder = ListeningMessagePlaceholder;
+		}
+		else
+		{
+			// Update UI state
+			SearchPlaceholder = DefaultEditorPlaceholder;
+			IsMicrophoneEnabled = false;
+			await Task.Delay(3000);
+			await SpeechToText.StopListenAsync();
+			searchEntry.Text += _speechToTextResultHolder;
+			IsSearchButtonEnabled = true;
+		}
+
+		IsMicrophoneEnabled = true;
+	}
+	
+	internal void SearchTextChanged(string newText) => 
+		IsSearchButtonEnabled = newText.Length != 0;
 
 	[RelayCommand]
 	async Task UpdateSearch(Entry searchEntry)
@@ -146,17 +216,10 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 
 	public void ApplyQueryAttributes(IDictionary<string, object> query)
 	{
-		string searchInput = HttpUtility.UrlDecode(query["query"].ToString())!;
-		SearchInput = RemoveEmojis(searchInput);
+		SearchInput = Uri.UnescapeDataString(query["query"].ToString()!);
 		string isPredefinedString = query["isPredefined"].ToString()!;
 		_isPredefined = bool.TryParse(isPredefinedString, out bool result) && result;
 		IsSearching = true;
 		SendSearch(_isPredefined);
 	}
-
-	private static string RemoveEmojis(string input) =>
-		RemoveEmojiPattern().Replace(input, string.Empty);
-
-	[GeneratedRegex(@"[\p{Cs}\p{So}\p{Sm}]")]
-	private static partial Regex RemoveEmojiPattern();
 }
