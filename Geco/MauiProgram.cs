@@ -1,4 +1,5 @@
 using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Media;
 using Geco.Core.Brave;
 using Geco.Core.Database;
 using Geco.Core.Models.ActionObserver;
@@ -41,8 +42,7 @@ public static class MauiProgram
 			.InitializeDatabaseServices()
 			.InitializeLoggerService()
 			.InitializeAndroidServices()
-			.InitializeGeminiServices()
-			.InitializeBraveService();
+			.InitializeBackendServices();
 
 		// platform specific modifications
 		ApplyAndroidUiModifications();
@@ -50,12 +50,14 @@ public static class MauiProgram
 		return builder.Build();
 	}
 
-	static MauiAppBuilder InitializeBraveService(this MauiAppBuilder builder)
+	static MauiAppBuilder InitializeBackendServices(this MauiAppBuilder builder)
 	{
+		builder.InitializeGeminiServices();
 		builder.Services.AddSingleton(new SearchAPI(GecoSecrets.BRAVE_SEARCH_API_KEY));
+		builder.Services.AddSingleton(SpeechToText.Default);
 		return builder;
 	}
-
+	
 	static MauiAppBuilder InitializeLoggerService(this MauiAppBuilder builder)
 	{
 #if ANDROID

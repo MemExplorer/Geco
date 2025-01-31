@@ -76,7 +76,20 @@
                         MaximumHeightRequest="100"
                         HorizontalOptions="FillAndExpand"
                         TextChanged="ChatEntry_OnTextChanged"
-                        Placeholder="Message to GECO" />
+                        Placeholder="{Binding EditorPlaceHolder}" />
+                
+                <Label VerticalOptions="Center" 
+                       HorizontalTextAlignment="Center"
+                       FontSize="20"
+                       Margin="{Binding MicrophoneMargin}"
+                       IsEnabled="{Binding IsMicrophoneEnabled}"
+                       FontFamily="FontAwesome" 
+                       Text="{Binding MicrophoneIcon}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding MicrophoneClickCommand}"
+                                              CommandParameter="{x:Reference ChatEntry}"/>
+                    </Label.GestureRecognizers>
+                </Label>
 
                 <!--  Chat Send Button  -->
                 <Button CornerRadius="30"

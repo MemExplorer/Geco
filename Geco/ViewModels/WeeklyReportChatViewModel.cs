@@ -1,7 +1,11 @@
 ﻿using System.Collections.ObjectModel;
+using System.Globalization;
+using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
+using Geco.Views.Helpers;
 using GoogleGeminiSDK;
 using Microsoft.Extensions.AI;
 
@@ -9,17 +13,77 @@ namespace Geco.ViewModels;
 
 public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttributable
 {
+	const string ListeningMessagePlaceholder = "GECO is listening...";
+	const string DefaultEditorPlaceholder = "Message to GECO";
+	string _speechToTextResultHolder = string.Empty;
+	
+	// Microphone properties
+	[ObservableProperty] string _microphoneIcon = IconFont.Microphone;
+	[ObservableProperty] bool _isMicrophoneEnabled = true;
+	[ObservableProperty] Thickness _microphoneMargin = new Thickness(0,0,10,0);
+	
+	// Chat Properties
 	[ObservableProperty] ObservableCollection<ChatMessage> _chatMessages = [];
+	[ObservableProperty] string _editorPlaceHolder = DefaultEditorPlaceholder;
 	[ObservableProperty] bool _isChatEnabled = false;
 	bool IsWaitingForResponse { get; set; } = false;
 	string? HistoryId { get; set; }
 	GeminiChat GeminiClient { get; }
+	ISpeechToText SpeechToText { get; }
 
 	public WeeklyReportChatViewModel()
 	{
 		GeminiClient = GlobalContext.Services.GetRequiredService<GeminiChat>();
 		GeminiClient.OnChatReceive += async (_, e) =>
 			await GeminiClientOnChatReceive(e);
+		SpeechToText = GlobalContext.Services.GetRequiredService<ISpeechToText>();
+		SpeechToText.RecognitionResultUpdated += SpeechToTextOnRecognitionResultUpdated;
+	}
+	
+	void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e) => 
+		_speechToTextResultHolder = e.RecognitionResult;
+
+	[RelayCommand]
+	async Task MicrophoneClick(Editor chatEditor)
+	{
+		bool isUseMicrophone = MicrophoneIcon == IconFont.Microphone;
+		MicrophoneMargin = new Thickness(0, 0, (int)MicrophoneMargin.Right == 10 ? 5.5 : 10, 0);
+		MicrophoneIcon = isUseMicrophone ? IconFont.MicrophoneSlash : IconFont.Microphone;
+		if (isUseMicrophone)
+		{
+			bool isAllowed = await SpeechToText.RequestPermissions();
+			if (!isAllowed)
+			{
+				await Toast.Make("Please grant microphone permission.").Show();
+				return;
+			}
+			
+			if (Connectivity.NetworkAccess != NetworkAccess.Internet)
+			{
+				await Toast.Make("Internet connection is required").Show();
+				return;
+			}
+			
+			// Update UI state
+			IsMicrophoneEnabled = false;
+			IsChatEnabled = false;
+			_speechToTextResultHolder = string.Empty;
+			await SpeechToText.StartListenAsync(CultureInfo.CurrentCulture);
+			await Task.Delay(1000);
+			EditorPlaceHolder = ListeningMessagePlaceholder;
+		}
+		else
+		{
+			// Update UI state
+			EditorPlaceHolder = DefaultEditorPlaceholder;
+			IsMicrophoneEnabled = false;
+			await Task.Delay(3000);
+			await SpeechToText.StopListenAsync();
+			chatEditor.Text += _speechToTextResultHolder;
+			IsChatEnabled = true;
+		}
+
+		IsMicrophoneEnabled = true;
 	}
 
 	internal void ChatTextChanged(string newText)
@@ -63,6 +127,7 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 		{
 			IsChatEnabled = false;
 			IsWaitingForResponse = true;
+			IsMicrophoneEnabled = false;
 
 			// send user message to Gemini and append its response
 			await GeminiClient.SendMessage(inputContent, settings: geminiConfig);
@@ -74,6 +139,7 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 		
 		// update chat controls
 		IsWaitingForResponse = false;
+		IsMicrophoneEnabled = true;
 		ChatTextChanged(inputEditor.Text);
 
 		IsChatEnabled = true;

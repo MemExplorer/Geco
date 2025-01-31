@@ -8,9 +8,9 @@ public partial class WeeklyReportChatPage : ContentPage
 
 	public WeeklyReportChatPage(WeeklyReportChatViewModel vm)
 	{
-		InitializeComponent();
 		BindingContext = vm;
 		CurrentViewModel = vm;
+		InitializeComponent();
 	}
 
 	private async void WebView_Navigated(object sender, WebNavigatedEventArgs e)

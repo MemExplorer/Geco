@@ -10,9 +10,9 @@ public partial class ChatPage : ContentPage
 
 	public ChatPage(ChatViewModel vm)
 	{
-		InitializeComponent();
 		BindingContext = vm;
 		CurrentViewModel = vm;
+		InitializeComponent();
 
 		// Create new instance of chat page every time page is loaded
 		Appearing += async (_, _) =>

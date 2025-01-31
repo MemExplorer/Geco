@@ -1,8 +1,12 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
+using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
 using Geco.Core.Models.Chat;
+using Geco.Views.Helpers;
 using GoogleGeminiSDK;
 using Microsoft.Extensions.AI;
 using Syncfusion.Maui.Toolkit.Chips;
@@ -11,19 +15,79 @@ namespace Geco.ViewModels;
 
 public partial class ChatViewModel : ObservableObject
 {
+	const string ListeningMessagePlaceholder = "GECO is listening...";
+	const string DefaultEditorPlaceholder = "Message to GECO";
+	string _speechToTextResultHolder = string.Empty;
+	
+	// Microphone properties
+	[ObservableProperty] string _microphoneIcon = IconFont.Microphone;
+	[ObservableProperty] bool _isMicrophoneEnabled = true;
+	[ObservableProperty] Thickness _microphoneMargin = new Thickness(0,0,10,0);
+	
+	// Chat properties
 	[ObservableProperty] ObservableCollection<ChatMessage> _chatMessages = [];
-	[ObservableProperty] bool _isAutoCompleteVisible = true;
+	[ObservableProperty] string _editorPlaceHolder = DefaultEditorPlaceholder;
 	[ObservableProperty] bool _isChatEnabled = false;
+	[ObservableProperty] bool _isAutoCompleteVisible = true;
 	bool IsWaitingForResponse { get; set; } = false;
 	GeminiChat GeminiClient { get; }
 	string? HistoryId { get; set; }
 	string? ActionTitle { get; set; }
+	ISpeechToText SpeechToText { get; }
 
 	public ChatViewModel()
 	{
 		GeminiClient = GlobalContext.Services.GetRequiredService<GeminiChat>();
+		SpeechToText = GlobalContext.Services.GetRequiredService<ISpeechToText>();
+		SpeechToText.RecognitionResultUpdated += SpeechToTextOnRecognitionResultUpdated;
 		GeminiClient.OnChatReceive += async (_, e) =>
 			await GeminiClientOnChatReceive(e);
+	}
+
+	void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e) => 
+		_speechToTextResultHolder = e.RecognitionResult;
+
+	[RelayCommand]
+	async Task MicrophoneClick(Editor chatEditor)
+	{
+		bool isUseMicrophone = MicrophoneIcon == IconFont.Microphone;
+		MicrophoneMargin = new Thickness(0, 0, (int)MicrophoneMargin.Right == 10 ? 5.5 : 10, 0);
+		MicrophoneIcon = isUseMicrophone ? IconFont.MicrophoneSlash : IconFont.Microphone;
+		if (isUseMicrophone)
+		{
+			bool isAllowed = await SpeechToText.RequestPermissions();
+			if (!isAllowed)
+			{
+				await Toast.Make("Please grant microphone permission.").Show();
+				return;
+			}
+			
+			if (Connectivity.NetworkAccess != NetworkAccess.Internet)
+			{
+				await Toast.Make("Internet connection is required").Show();
+				return;
+			}
+			
+			// Update UI state
+			IsMicrophoneEnabled = false;
+			IsChatEnabled = false;
+			_speechToTextResultHolder = string.Empty;
+			await SpeechToText.StartListenAsync(CultureInfo.CurrentCulture);
+			await Task.Delay(1000);
+			EditorPlaceHolder = ListeningMessagePlaceholder;
+		}
+		else
+		{
+			// Update UI state
+			EditorPlaceHolder = DefaultEditorPlaceholder;
+			IsMicrophoneEnabled = false;
+			await Task.Delay(3000);
+			await SpeechToText.StopListenAsync();
+			chatEditor.Text += _speechToTextResultHolder;
+			IsChatEnabled = true;
+		}
+
+		IsMicrophoneEnabled = true;
 	}
 
 	/// <summary>
@@ -119,6 +183,7 @@ public partial class ChatViewModel : ObservableObject
 		try
 		{
 			IsChatEnabled = false;
+			IsMicrophoneEnabled = false;
 			IsWaitingForResponse = true;
 
 			// send user message to Gemini and append its response
@@ -131,6 +196,7 @@ public partial class ChatViewModel : ObservableObject
 		
 		// update chat controls
 		IsWaitingForResponse = false;
+		IsMicrophoneEnabled = true;
 		ChatTextChanged(inputEditor.Text);
 		
 		if (isNewChat)
