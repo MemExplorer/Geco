@@ -17,12 +17,12 @@ public partial class SearchViewModel : ObservableObject
 	[ObservableProperty] string? _selectedCategory;
 	[ObservableProperty] string _searchPlaceholder = DefaultEditorPlaceholder;
 	[ObservableProperty] bool _isSearchButtonEnabled;
-	
+
 	// Microphone properties
 	[ObservableProperty] string _microphoneIcon = IconFont.Microphone;
 	[ObservableProperty] bool _isMicrophoneEnabled = true;
-	[ObservableProperty] Thickness _microphoneMargin = new Thickness(0,0,10,0);
-	
+	[ObservableProperty] Thickness _microphoneMargin = new(0, 0, 10, 0);
+
 	ISpeechToText SpeechToText { get; }
 
 	public SearchViewModel()
@@ -30,8 +30,8 @@ public partial class SearchViewModel : ObservableObject
 		SpeechToText = GlobalContext.Services.GetRequiredService<ISpeechToText>();
 		SpeechToText.RecognitionResultUpdated += SpeechToTextOnRecognitionResultUpdated;
 	}
-	
-	void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e) => 
+
+	void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e) =>
 		_speechToTextResultHolder = e.RecognitionResult;
 
 	[RelayCommand]
@@ -48,13 +48,13 @@ public partial class SearchViewModel : ObservableObject
 				await Toast.Make("Please grant microphone permission.").Show();
 				return;
 			}
-			
+
 			if (Connectivity.NetworkAccess != NetworkAccess.Internet)
 			{
 				await Toast.Make("Internet connection is required").Show();
 				return;
 			}
-			
+
 			// Update UI state
 			IsMicrophoneEnabled = false;
 			IsSearchButtonEnabled = false;
@@ -76,8 +76,8 @@ public partial class SearchViewModel : ObservableObject
 
 		IsMicrophoneEnabled = true;
 	}
-	
-	internal void SearchTextChanged(string newText) => 
+
+	internal void SearchTextChanged(string newText) =>
 		IsSearchButtonEnabled = newText.Length != 0;
 
 	[RelayCommand]
@@ -90,7 +90,7 @@ public partial class SearchViewModel : ObservableObject
 		// hide keyboard after sending a message
 		await searchEntry.HideSoftInputAsync(CancellationToken.None);
 
-		var escapedQuery = Uri.EscapeDataString(searchEntry.Text);
+		string escapedQuery = Uri.EscapeDataString(searchEntry.Text);
 		await SearchResultsAsync(escapedQuery, false);
 	}
 

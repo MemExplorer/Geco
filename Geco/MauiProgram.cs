@@ -57,7 +57,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton(SpeechToText.Default);
 		return builder;
 	}
-	
+
 	static MauiAppBuilder InitializeLoggerService(this MauiAppBuilder builder)
 	{
 #if ANDROID

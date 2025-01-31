@@ -5,7 +5,8 @@ namespace Geco.Views;
 
 public partial class SearchResultPage : ContentPage
 {
-	SearchResultViewModel CurrentViewModel;
+	readonly SearchResultViewModel CurrentViewModel;
+
 	public SearchResultPage(SearchResultViewModel vm)
 	{
 		BindingContext = vm;
@@ -88,6 +89,6 @@ public partial class SearchResultPage : ContentPage
 		}
 	}
 
-	void SearchEntry_OnTextChanged(object? sender, TextChangedEventArgs e) => 
+	void SearchEntry_OnTextChanged(object? sender, TextChangedEventArgs e) =>
 		CurrentViewModel.SearchTextChanged(e.NewTextValue);
 }

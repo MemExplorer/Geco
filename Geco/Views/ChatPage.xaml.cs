@@ -73,7 +73,7 @@ public partial class ChatPage : ContentPage
 			                                  	modifyStyles('{{backgroundColor}}', '{{textColor}}');
 			                                  })();
 			                                  """);
-			
+
 			// load md to html converter script
 			await using var stream = await FileSystem.OpenAppPackageFileAsync("showdown.min.js");
 			using var reader = new StreamReader(stream);

@@ -24,7 +24,8 @@ public class HtmlConverter : IValueConverter
 			string htmlTemplate = reader.ReadToEnd();
 
 			markdownContent = markdownContent.Trim();
-			markdownContent = StringHelpers.FormatString(htmlTemplate, new { MdContent = markdownContent, BgColor = backgroundColor, FgColor = textColor });
+			markdownContent = StringHelpers.FormatString(htmlTemplate,
+				new { MdContent = markdownContent, BgColor = backgroundColor, FgColor = textColor });
 		}
 
 		string base64Html = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(markdownContent));

@@ -13,6 +13,6 @@ public partial class SearchPage : ContentPage
 		InitializeComponent();
 	}
 
-	void SearchEntry_OnTextChanged(object? sender, TextChangedEventArgs e) => 
+	void SearchEntry_OnTextChanged(object? sender, TextChangedEventArgs e) =>
 		CurrentViewModel.SearchTextChanged(e.NewTextValue);
 }

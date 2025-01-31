@@ -16,17 +16,17 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 	const string ListeningMessagePlaceholder = "GECO is listening...";
 	const string DefaultEditorPlaceholder = "Message to GECO";
 	string _speechToTextResultHolder = string.Empty;
-	
+
 	// Microphone properties
 	[ObservableProperty] string _microphoneIcon = IconFont.Microphone;
 	[ObservableProperty] bool _isMicrophoneEnabled = true;
-	[ObservableProperty] Thickness _microphoneMargin = new Thickness(0,0,10,0);
-	
+	[ObservableProperty] Thickness _microphoneMargin = new(0, 0, 10, 0);
+
 	// Chat Properties
 	[ObservableProperty] ObservableCollection<ChatMessage> _chatMessages = [];
 	[ObservableProperty] string _editorPlaceHolder = DefaultEditorPlaceholder;
-	[ObservableProperty] bool _isChatEnabled = false;
-	bool IsWaitingForResponse { get; set; } = false;
+	[ObservableProperty] bool _isChatEnabled;
+	bool IsWaitingForResponse { get; set; }
 	string? HistoryId { get; set; }
 	GeminiChat GeminiClient { get; }
 	ISpeechToText SpeechToText { get; }
@@ -39,8 +39,8 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 		SpeechToText = GlobalContext.Services.GetRequiredService<ISpeechToText>();
 		SpeechToText.RecognitionResultUpdated += SpeechToTextOnRecognitionResultUpdated;
 	}
-	
-	void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e) => 
+
+	void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e) =>
 		_speechToTextResultHolder = e.RecognitionResult;
 
 	[RelayCommand]
@@ -57,13 +57,13 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 				await Toast.Make("Please grant microphone permission.").Show();
 				return;
 			}
-			
+
 			if (Connectivity.NetworkAccess != NetworkAccess.Internet)
 			{
 				await Toast.Make("Internet connection is required").Show();
 				return;
 			}
-			
+
 			// Update UI state
 			IsMicrophoneEnabled = false;
 			IsChatEnabled = false;
@@ -136,7 +136,7 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 		{
 			GlobalContext.Logger.Error<ChatViewModel>(ex);
 		}
-		
+
 		// update chat controls
 		IsWaitingForResponse = false;
 		IsMicrophoneEnabled = true;

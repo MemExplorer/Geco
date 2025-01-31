@@ -77,17 +77,17 @@
                         HorizontalOptions="FillAndExpand"
                         TextChanged="ChatEntry_OnTextChanged"
                         Placeholder="{Binding EditorPlaceHolder}" />
-                
-                <Label VerticalOptions="Center" 
+
+                <Label VerticalOptions="Center"
                        HorizontalTextAlignment="Center"
                        FontSize="20"
                        Margin="{Binding MicrophoneMargin}"
                        IsEnabled="{Binding IsMicrophoneEnabled}"
-                       FontFamily="FontAwesome" 
+                       FontFamily="FontAwesome"
                        Text="{Binding MicrophoneIcon}">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding MicrophoneClickCommand}"
-                                              CommandParameter="{x:Reference ChatEntry}"/>
+                                              CommandParameter="{x:Reference ChatEntry}" />
                     </Label.GestureRecognizers>
                 </Label>
 

@@ -18,18 +18,18 @@ public partial class ChatViewModel : ObservableObject
 	const string ListeningMessagePlaceholder = "GECO is listening...";
 	const string DefaultEditorPlaceholder = "Message to GECO";
 	string _speechToTextResultHolder = string.Empty;
-	
+
 	// Microphone properties
 	[ObservableProperty] string _microphoneIcon = IconFont.Microphone;
 	[ObservableProperty] bool _isMicrophoneEnabled = true;
-	[ObservableProperty] Thickness _microphoneMargin = new Thickness(0,0,10,0);
-	
+	[ObservableProperty] Thickness _microphoneMargin = new(0, 0, 10, 0);
+
 	// Chat properties
 	[ObservableProperty] ObservableCollection<ChatMessage> _chatMessages = [];
 	[ObservableProperty] string _editorPlaceHolder = DefaultEditorPlaceholder;
-	[ObservableProperty] bool _isChatEnabled = false;
+	[ObservableProperty] bool _isChatEnabled;
 	[ObservableProperty] bool _isAutoCompleteVisible = true;
-	bool IsWaitingForResponse { get; set; } = false;
+	bool IsWaitingForResponse { get; set; }
 	GeminiChat GeminiClient { get; }
 	string? HistoryId { get; set; }
 	string? ActionTitle { get; set; }
@@ -44,7 +44,7 @@ public partial class ChatViewModel : ObservableObject
 			await GeminiClientOnChatReceive(e);
 	}
 
-	void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e) => 
+	void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e) =>
 		_speechToTextResultHolder = e.RecognitionResult;
 
 	[RelayCommand]
@@ -61,13 +61,13 @@ public partial class ChatViewModel : ObservableObject
 				await Toast.Make("Please grant microphone permission.").Show();
 				return;
 			}
-			
+
 			if (Connectivity.NetworkAccess != NetworkAccess.Internet)
 			{
 				await Toast.Make("Internet connection is required").Show();
 				return;
 			}
-			
+
 			// Update UI state
 			IsMicrophoneEnabled = false;
 			IsChatEnabled = false;
@@ -193,12 +193,12 @@ public partial class ChatViewModel : ObservableObject
 		{
 			GlobalContext.Logger.Error<ChatViewModel>(ex);
 		}
-		
+
 		// update chat controls
 		IsWaitingForResponse = false;
 		IsMicrophoneEnabled = true;
 		ChatTextChanged(inputEditor.Text);
-		
+
 		if (isNewChat)
 			await currentShell.GoToAsync("//" + HistoryId);
 	}
