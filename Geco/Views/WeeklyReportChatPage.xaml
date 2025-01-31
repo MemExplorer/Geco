@@ -17,9 +17,6 @@
         <helpers:IsModelToShapeConverter x:Key="IsModelToShapeConverter" />
         <helpers:HtmlConverter x:Key="HtmlConverter" />
     </ContentPage.Resources>
-    <ContentPage.BindingContext>
-        <vm:WeeklyReportChatViewModel />
-    </ContentPage.BindingContext>
     <StackLayout Padding="10"
                  Spacing="10">
         <!--  Chat View  -->
@@ -78,6 +75,7 @@
                         AutoSize="TextChanges"
                         MaximumHeightRequest="100"
                         HorizontalOptions="FillAndExpand"
+                        TextChanged="ChatEntry_OnTextChanged"
                         Placeholder="Message to GECO" />
 
                 <!--  Chat Send Button  -->

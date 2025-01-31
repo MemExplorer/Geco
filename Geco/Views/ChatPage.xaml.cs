@@ -46,7 +46,7 @@ public partial class ChatPage : ContentPage
 	}
 
 	private void ChatEntry_TextChanged(object sender, TextChangedEventArgs e) =>
-		CurrentViewModel.ChatTextChanged(e);
+		CurrentViewModel.ChatTextChanged(e.NewTextValue);
 
 	private void Chip_Clicked(object sender, EventArgs e)
 	{

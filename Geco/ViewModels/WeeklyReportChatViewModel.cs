@@ -10,7 +10,8 @@ namespace Geco.ViewModels;
 public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttributable
 {
 	[ObservableProperty] ObservableCollection<ChatMessage> _chatMessages = [];
-	[ObservableProperty] bool _isChatEnabled = true;
+	[ObservableProperty] bool _isChatEnabled = false;
+	bool IsWaitingForResponse { get; set; } = false;
 	string? HistoryId { get; set; }
 	GeminiChat GeminiClient { get; }
 
@@ -19,6 +20,12 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 		GeminiClient = GlobalContext.Services.GetRequiredService<GeminiChat>();
 		GeminiClient.OnChatReceive += async (_, e) =>
 			await GeminiClientOnChatReceive(e);
+	}
+
+	internal void ChatTextChanged(string newText)
+	{
+		if (!IsWaitingForResponse)
+			IsChatEnabled = newText.Length != 0;
 	}
 
 	/// <summary>
@@ -55,6 +62,7 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 		try
 		{
 			IsChatEnabled = false;
+			IsWaitingForResponse = true;
 
 			// send user message to Gemini and append its response
 			await GeminiClient.SendMessage(inputContent, settings: geminiConfig);
@@ -63,6 +71,10 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 		{
 			GlobalContext.Logger.Error<ChatViewModel>(ex);
 		}
+		
+		// update chat controls
+		IsWaitingForResponse = false;
+		ChatTextChanged(inputEditor.Text);
 
 		IsChatEnabled = true;
 	}

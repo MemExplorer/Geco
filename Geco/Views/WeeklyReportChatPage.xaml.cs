@@ -1,8 +1,17 @@
-﻿namespace Geco.Views;
+﻿using Geco.ViewModels;
+
+namespace Geco.Views;
 
 public partial class WeeklyReportChatPage : ContentPage
 {
-	public WeeklyReportChatPage() => InitializeComponent();
+	WeeklyReportChatViewModel CurrentViewModel { get; }
+
+	public WeeklyReportChatPage(WeeklyReportChatViewModel vm)
+	{
+		InitializeComponent();
+		BindingContext = vm;
+		CurrentViewModel = vm;
+	}
 
 	private async void WebView_Navigated(object sender, WebNavigatedEventArgs e)
 	{
@@ -72,4 +81,7 @@ public partial class WeeklyReportChatPage : ContentPage
 			GlobalContext.Logger.Error<WeeklyReportChatPage>(exception);
 		}
 	}
+
+	void ChatEntry_OnTextChanged(object? sender, TextChangedEventArgs e) =>
+		CurrentViewModel.ChatTextChanged(e.NewTextValue);
 }

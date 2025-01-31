@@ -13,7 +13,8 @@ public partial class ChatViewModel : ObservableObject
 {
 	[ObservableProperty] ObservableCollection<ChatMessage> _chatMessages = [];
 	[ObservableProperty] bool _isAutoCompleteVisible = true;
-	[ObservableProperty] bool _isChatEnabled = true;
+	[ObservableProperty] bool _isChatEnabled = false;
+	bool IsWaitingForResponse { get; set; } = false;
 	GeminiChat GeminiClient { get; }
 	string? HistoryId { get; set; }
 	string? ActionTitle { get; set; }
@@ -88,10 +89,13 @@ public partial class ChatViewModel : ObservableObject
 		};
 	}
 
-	internal void ChatTextChanged(TextChangedEventArgs e)
+	internal void ChatTextChanged(string newText)
 	{
-		if (!IsAutoCompleteVisible && e.NewTextValue.Length == 0)
+		if (!IsAutoCompleteVisible && newText.Length == 0)
 			IsAutoCompleteVisible = true;
+
+		if (!IsWaitingForResponse)
+			IsChatEnabled = newText.Length != 0;
 	}
 
 	[RelayCommand]
@@ -115,6 +119,7 @@ public partial class ChatViewModel : ObservableObject
 		try
 		{
 			IsChatEnabled = false;
+			IsWaitingForResponse = true;
 
 			// send user message to Gemini and append its response
 			await GeminiClient.SendMessage(inputContent, settings: geminiConfig);
@@ -123,8 +128,11 @@ public partial class ChatViewModel : ObservableObject
 		{
 			GlobalContext.Logger.Error<ChatViewModel>(ex);
 		}
-
-		IsChatEnabled = true;
+		
+		// update chat controls
+		IsWaitingForResponse = false;
+		ChatTextChanged(inputEditor.Text);
+		
 		if (isNewChat)
 			await currentShell.GoToAsync("//" + HistoryId);
 	}
