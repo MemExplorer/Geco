@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Media;
@@ -6,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
 using Geco.Core.Models.Chat;
+using Geco.Views;
 using Geco.Views.Helpers;
 using GoogleGeminiSDK;
 using Microsoft.Extensions.AI;
@@ -34,7 +36,22 @@ public partial class ChatViewModel : ObservableObject
 	string? HistoryId { get; set; }
 	string? ActionTitle { get; set; }
 	ISpeechToText SpeechToText { get; }
+	Queue<Delegate> NavigationQueue { get; }
 
+	#region FunctionCalls
+	[Description("Opens or navigates to the settings.")]
+	void NavigateToSettingsPage() =>
+		NavigationQueue.Enqueue(async () => { await Shell.Current.GoToAsync(nameof(SettingsPage)); });
+	
+	[Description("Opens or navigates to the weekly reports page.")]
+	void NavigateToWeeklyReportsPage() =>
+		NavigationQueue.Enqueue(async () => { await Shell.Current.GoToAsync("//" + nameof(ReportsPage)); });
+	
+	[Description("Opens or navigates to the sustainable search page.")]
+	void NavigateToSearchPage() =>
+		NavigationQueue.Enqueue(async () => { await Shell.Current.GoToAsync("//" + nameof(SearchPage)); });
+	#endregion
+	
 	public ChatViewModel()
 	{
 		GeminiClient = GlobalContext.Services.GetRequiredService<GeminiChat>();
@@ -42,6 +59,7 @@ public partial class ChatViewModel : ObservableObject
 		SpeechToText.RecognitionResultUpdated += SpeechToTextOnRecognitionResultUpdated;
 		GeminiClient.OnChatReceive += async (_, e) =>
 			await GeminiClientOnChatReceive(e);
+		NavigationQueue = new Queue<Delegate>();
 	}
 
 	void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e) =>
@@ -98,6 +116,8 @@ public partial class ChatViewModel : ObservableObject
 	{
 		// append received message to chat UI
 		var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
+		if (NavigationQueue.Count > 0)
+			e.Message.Text = "The command is successfully executed.";
 		ChatMessages.Add(e.Message);
 
 		// save chat message to database
@@ -166,7 +186,13 @@ public partial class ChatViewModel : ObservableObject
 	async Task ChatSend(Editor inputEditor)
 	{
 		var currentShell = (AppShell)Shell.Current;
-		var geminiConfig = GlobalContext.Services.GetKeyedService<GeminiSettings>(GlobalContext.GeminiChat);
+		var geminiConfig = GlobalContext.Services.GetRequiredKeyedService<GeminiSettings>(GlobalContext.GeminiChat);
+		geminiConfig.Functions = new List<AIFunction>
+		{
+			AIFunctionFactory.Create(NavigateToSettingsPage), 
+			AIFunctionFactory.Create(NavigateToWeeklyReportsPage),
+			AIFunctionFactory.Create(NavigateToSearchPage)
+		};
 
 		// do not send an empty message
 		if (string.IsNullOrWhiteSpace(inputEditor.Text))
@@ -201,6 +227,9 @@ public partial class ChatViewModel : ObservableObject
 
 		if (isNewChat)
 			await currentShell.GoToAsync("//" + HistoryId);
+		
+		while (NavigationQueue.Count > 0)
+			NavigationQueue.Dequeue().DynamicInvoke(null);
 	}
 
 	async Task<bool> InitializeNewConversation(AppShell currentShell, string inputContent)

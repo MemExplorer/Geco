@@ -1,10 +1,12 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
+using Geco.Views;
 using Geco.Views.Helpers;
 using GoogleGeminiSDK;
 using Microsoft.Extensions.AI;
@@ -30,6 +32,21 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 	string? HistoryId { get; set; }
 	GeminiChat GeminiClient { get; }
 	ISpeechToText SpeechToText { get; }
+	Queue<Delegate> NavigationQueue { get; }
+
+	#region FunctionCalls
+	[Description("Opens or navigates to the settings.")]
+	void NavigateToSettingsPage() =>
+		NavigationQueue.Enqueue(async () => { await Shell.Current.GoToAsync(nameof(SettingsPage)); });
+	
+	[Description("Opens or navigates to the weekly reports page.")]
+	void NavigateToWeeklyReportsPage() =>
+		NavigationQueue.Enqueue(async () => { await Shell.Current.GoToAsync("//" + nameof(ReportsPage)); });
+	
+	[Description("Opens or navigates to the sustainable search page.")]
+	void NavigateToSearchPage() =>
+		NavigationQueue.Enqueue(async () => { await Shell.Current.GoToAsync("//" + nameof(SearchPage)); });
+	#endregion
 
 	public WeeklyReportChatViewModel()
 	{
@@ -38,6 +55,7 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 			await GeminiClientOnChatReceive(e);
 		SpeechToText = GlobalContext.Services.GetRequiredService<ISpeechToText>();
 		SpeechToText.RecognitionResultUpdated += SpeechToTextOnRecognitionResultUpdated;
+		NavigationQueue = new Queue<Delegate>();
 	}
 
 	void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e) =>
@@ -100,6 +118,8 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 	{
 		// append received message to chat UI
 		var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
+		if (NavigationQueue.Count > 0)
+			e.Message.Text = "The command is successfully executed.";
 		ChatMessages.Add(e.Message);
 
 		// save chat message to database
@@ -110,7 +130,13 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 	[RelayCommand]
 	async Task ChatSend(Editor inputEditor)
 	{
-		var geminiConfig = GlobalContext.Services.GetKeyedService<GeminiSettings>(GlobalContext.GeminiChat);
+		var geminiConfig = GlobalContext.Services.GetRequiredKeyedService<GeminiSettings>(GlobalContext.GeminiChat);
+		geminiConfig.Functions = new List<AIFunction>
+		{
+			AIFunctionFactory.Create(NavigateToSettingsPage), 
+			AIFunctionFactory.Create(NavigateToWeeklyReportsPage),
+			AIFunctionFactory.Create(NavigateToSearchPage)
+		};
 
 		// do not send an empty message
 		if (string.IsNullOrWhiteSpace(inputEditor.Text))
@@ -141,8 +167,9 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 		IsWaitingForResponse = false;
 		IsMicrophoneEnabled = true;
 		ChatTextChanged(inputEditor.Text);
-
-		IsChatEnabled = true;
+		
+		while (NavigationQueue.Count > 0)
+			NavigationQueue.Dequeue().DynamicInvoke(null);
 	}
 
 	public async void ApplyQueryAttributes(IDictionary<string, object> query)
