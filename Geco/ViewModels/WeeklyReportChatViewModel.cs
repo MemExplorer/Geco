@@ -15,6 +15,8 @@ namespace Geco.ViewModels;
 
 public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttributable
 {
+	#region Fields
+
 	const string ListeningMessagePlaceholder = "GECO is listening...";
 	const string DefaultEditorPlaceholder = "Message to GECO";
 	string _speechToTextResultHolder = string.Empty;
@@ -29,23 +31,15 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 	[ObservableProperty] string _editorPlaceHolder = DefaultEditorPlaceholder;
 	[ObservableProperty] bool _isChatEnabled;
 	bool IsWaitingForResponse { get; set; }
-	string? HistoryId { get; set; }
-	GeminiChat GeminiClient { get; }
-	ISpeechToText SpeechToText { get; }
 	Queue<Delegate> NavigationQueue { get; }
 
-	#region FunctionCalls
-	[Description("Opens or navigates to the settings.")]
-	void NavigateToSettingsPage() =>
-		NavigationQueue.Enqueue(async () => { await Shell.Current.GoToAsync(nameof(SettingsPage)); });
-	
-	[Description("Opens or navigates to the weekly reports page.")]
-	void NavigateToWeeklyReportsPage() =>
-		NavigationQueue.Enqueue(async () => { await Shell.Current.GoToAsync("//" + nameof(ReportsPage)); });
-	
-	[Description("Opens or navigates to the sustainable search page.")]
-	void NavigateToSearchPage() =>
-		NavigationQueue.Enqueue(async () => { await Shell.Current.GoToAsync("//" + nameof(SearchPage)); });
+	// Services
+	GeminiChat GeminiClient { get; }
+	ISpeechToText SpeechToText { get; }
+
+	// Chat configuration
+	string? HistoryId { get; set; }
+
 	#endregion
 
 	public WeeklyReportChatViewModel()
@@ -57,6 +51,24 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 		SpeechToText.RecognitionResultUpdated += SpeechToTextOnRecognitionResultUpdated;
 		NavigationQueue = new Queue<Delegate>();
 	}
+
+	#region FunctionCalls
+
+	[Description("Opens or navigates to the settings.")]
+	void NavigateToSettingsPage() =>
+		NavigationQueue.Enqueue(async () => { await Shell.Current.GoToAsync(nameof(SettingsPage)); });
+
+	[Description("Opens or navigates to the weekly reports page.")]
+	void NavigateToWeeklyReportsPage() =>
+		NavigationQueue.Enqueue(async () => { await Shell.Current.GoToAsync("//" + nameof(ReportsPage)); });
+
+	[Description("Opens or navigates to the sustainable search page.")]
+	void NavigateToSearchPage() =>
+		NavigationQueue.Enqueue(async () => { await Shell.Current.GoToAsync("//" + nameof(SearchPage)); });
+
+	#endregion
+
+	#region Event Handlers
 
 	void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e) =>
 		_speechToTextResultHolder = e.RecognitionResult;
@@ -133,7 +145,7 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 		var geminiConfig = GlobalContext.Services.GetRequiredKeyedService<GeminiSettings>(GlobalContext.GeminiChat);
 		geminiConfig.Functions = new List<AIFunction>
 		{
-			AIFunctionFactory.Create(NavigateToSettingsPage), 
+			AIFunctionFactory.Create(NavigateToSettingsPage),
 			AIFunctionFactory.Create(NavigateToWeeklyReportsPage),
 			AIFunctionFactory.Create(NavigateToSearchPage)
 		};
@@ -167,10 +179,12 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 		IsWaitingForResponse = false;
 		IsMicrophoneEnabled = true;
 		ChatTextChanged(inputEditor.Text);
-		
+
 		while (NavigationQueue.Count > 0)
 			NavigationQueue.Dequeue().DynamicInvoke(null);
 	}
+
+	#endregion
 
 	public async void ApplyQueryAttributes(IDictionary<string, object> query)
 	{

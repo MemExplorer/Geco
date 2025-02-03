@@ -17,14 +17,16 @@ namespace Geco.ViewModels;
 
 public partial class ChatViewModel : ObservableObject
 {
+	#region Fields
+
 	const string ListeningMessagePlaceholder = "GECO is listening...";
 	const string DefaultEditorPlaceholder = "Message to GECO";
-	string _speechToTextResultHolder = string.Empty;
 
 	// Microphone properties
 	[ObservableProperty] string _microphoneIcon = IconFont.Microphone;
 	[ObservableProperty] bool _isMicrophoneEnabled = true;
 	[ObservableProperty] Thickness _microphoneMargin = new(0, 0, 10, 0);
+	string _speechToTextResultHolder = string.Empty;
 
 	// Chat properties
 	[ObservableProperty] ObservableCollection<ChatMessage> _chatMessages = [];
@@ -32,26 +34,18 @@ public partial class ChatViewModel : ObservableObject
 	[ObservableProperty] bool _isChatEnabled;
 	[ObservableProperty] bool _isAutoCompleteVisible = true;
 	bool IsWaitingForResponse { get; set; }
-	GeminiChat GeminiClient { get; }
-	string? HistoryId { get; set; }
-	string? ActionTitle { get; set; }
-	ISpeechToText SpeechToText { get; }
 	Queue<Delegate> NavigationQueue { get; }
 
-	#region FunctionCalls
-	[Description("Opens or navigates to the settings.")]
-	void NavigateToSettingsPage() =>
-		NavigationQueue.Enqueue(async () => { await Shell.Current.GoToAsync(nameof(SettingsPage)); });
-	
-	[Description("Opens or navigates to the weekly reports page.")]
-	void NavigateToWeeklyReportsPage() =>
-		NavigationQueue.Enqueue(async () => { await Shell.Current.GoToAsync("//" + nameof(ReportsPage)); });
-	
-	[Description("Opens or navigates to the sustainable search page.")]
-	void NavigateToSearchPage() =>
-		NavigationQueue.Enqueue(async () => { await Shell.Current.GoToAsync("//" + nameof(SearchPage)); });
+	// Services
+	GeminiChat GeminiClient { get; }
+	ISpeechToText SpeechToText { get; }
+
+	// Chat configuration
+	string? HistoryId { get; set; }
+	string? ActionTitle { get; set; }
+
 	#endregion
-	
+
 	public ChatViewModel()
 	{
 		GeminiClient = GlobalContext.Services.GetRequiredService<GeminiChat>();
@@ -62,8 +56,91 @@ public partial class ChatViewModel : ObservableObject
 		NavigationQueue = new Queue<Delegate>();
 	}
 
+	#region FunctionCalls
+
+	[Description("Opens or navigates to the settings.")]
+	void NavigateToSettingsPage() =>
+		NavigationQueue.Enqueue(async () => { await Shell.Current.GoToAsync(nameof(SettingsPage)); });
+
+	[Description("Opens or navigates to the weekly reports page.")]
+	void NavigateToWeeklyReportsPage() =>
+		NavigationQueue.Enqueue(async () => { await Shell.Current.GoToAsync("//" + nameof(ReportsPage)); });
+
+	[Description("Opens or navigates to the sustainable search page.")]
+	void NavigateToSearchPage() =>
+		NavigationQueue.Enqueue(async () => { await Shell.Current.GoToAsync("//" + nameof(SearchPage)); });
+
+	#endregion
+
+	#region Controllers
+
+	/// <summary>
+	///     Loads chat history into the ChatViewModel instance
+	/// </summary>
+	/// <param name="conversationInfo">Conversation data</param>
+	public void LoadHistory(GecoConversation conversationInfo)
+	{
+		ChatMessages = conversationInfo.Messages;
+		GeminiClient.LoadHistory(conversationInfo.Messages);
+		HistoryId = conversationInfo.Id;
+	}
+
+	/// <summary>
+	///     Resets current chat instance
+	/// </summary>
+	public void Reset()
+	{
+		ChatMessages = [];
+		GeminiClient.ClearHistory();
+		HistoryId = null;
+
+#if ANDROID
+		// handle notification message
+		var intent = Platform.CurrentActivity?.Intent;
+		if (intent?.Action != "GecoNotif")
+			return;
+
+		string? msgContent = intent.GetStringExtra("message");
+		ActionTitle = intent.GetStringExtra("title");
+		var chatMsg = new ChatMessage(new ChatRole("model"), msgContent);
+		chatMsg.AdditionalProperties = new AdditionalPropertiesDictionary { ["id"] = (ulong)0 };
+		ChatMessages.Add(chatMsg);
+		intent.SetAction(null);
+#endif
+	}
+
+	#endregion
+
+	#region Event Handlers
+
 	void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e) =>
 		_speechToTextResultHolder = e.RecognitionResult;
+
+	/// <summary>
+	///     Handles chat send and receive events from Gemini
+	/// </summary>
+	/// <param name="e">Chat message data</param>
+	async Task GeminiClientOnChatReceive(ChatReceiveEventArgs e)
+	{
+		// append received message to chat UI
+		var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
+		if (NavigationQueue.Count > 0)
+			e.Message.Text = "The command is successfully executed.";
+		ChatMessages.Add(e.Message);
+
+		// save chat message to database
+		if (HistoryId != null)
+			await chatRepo.AppendChat(HistoryId, e.Message);
+	}
+
+	internal void ChatTextChanged(string newText)
+	{
+		if (!IsAutoCompleteVisible && newText.Length == 0)
+			IsAutoCompleteVisible = true;
+
+		if (!IsWaitingForResponse)
+			IsChatEnabled = newText.Length != 0;
+	}
 
 	[RelayCommand]
 	async Task MicrophoneClick(Editor chatEditor)
@@ -108,58 +185,6 @@ public partial class ChatViewModel : ObservableObject
 		IsMicrophoneEnabled = true;
 	}
 
-	/// <summary>
-	///     Handles chat send and receive events from Gemini
-	/// </summary>
-	/// <param name="e">Chat message data</param>
-	async Task GeminiClientOnChatReceive(ChatReceiveEventArgs e)
-	{
-		// append received message to chat UI
-		var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
-		if (NavigationQueue.Count > 0)
-			e.Message.Text = "The command is successfully executed.";
-		ChatMessages.Add(e.Message);
-
-		// save chat message to database
-		if (HistoryId != null)
-			await chatRepo.AppendChat(HistoryId, e.Message);
-	}
-
-	/// <summary>
-	///     Loads chat history into the ChatViewModel instance
-	/// </summary>
-	/// <param name="conversationInfo">Conversation data</param>
-	public void LoadHistory(GecoConversation conversationInfo)
-	{
-		ChatMessages = conversationInfo.Messages;
-		GeminiClient.LoadHistory(conversationInfo.Messages);
-		HistoryId = conversationInfo.Id;
-	}
-
-	/// <summary>
-	///     Resets current chat instance
-	/// </summary>
-	public void Reset()
-	{
-		ChatMessages = [];
-		GeminiClient.ClearHistory();
-		HistoryId = null;
-
-#if ANDROID
-		// handle notification message
-		var intent = Platform.CurrentActivity?.Intent;
-		if (intent?.Action != "GecoNotif")
-			return;
-
-		string? msgContent = intent.GetStringExtra("message");
-		ActionTitle = intent.GetStringExtra("title");
-		var chatMsg = new ChatMessage(new ChatRole("model"), msgContent);
-		chatMsg.AdditionalProperties = new AdditionalPropertiesDictionary { ["id"] = (ulong)0 };
-		ChatMessages.Add(chatMsg);
-		intent.SetAction(null);
-#endif
-	}
-
 	internal void ChipClick(SfChip chip, Editor chatEditor)
 	{
 		IsAutoCompleteVisible = false;
@@ -173,15 +198,6 @@ public partial class ChatViewModel : ObservableObject
 		};
 	}
 
-	internal void ChatTextChanged(string newText)
-	{
-		if (!IsAutoCompleteVisible && newText.Length == 0)
-			IsAutoCompleteVisible = true;
-
-		if (!IsWaitingForResponse)
-			IsChatEnabled = newText.Length != 0;
-	}
-
 	[RelayCommand]
 	async Task ChatSend(Editor inputEditor)
 	{
@@ -189,7 +205,7 @@ public partial class ChatViewModel : ObservableObject
 		var geminiConfig = GlobalContext.Services.GetRequiredKeyedService<GeminiSettings>(GlobalContext.GeminiChat);
 		geminiConfig.Functions = new List<AIFunction>
 		{
-			AIFunctionFactory.Create(NavigateToSettingsPage), 
+			AIFunctionFactory.Create(NavigateToSettingsPage),
 			AIFunctionFactory.Create(NavigateToWeeklyReportsPage),
 			AIFunctionFactory.Create(NavigateToSearchPage)
 		};
@@ -227,10 +243,14 @@ public partial class ChatViewModel : ObservableObject
 
 		if (isNewChat)
 			await currentShell.GoToAsync("//" + HistoryId);
-		
+
 		while (NavigationQueue.Count > 0)
 			NavigationQueue.Dequeue().DynamicInvoke(null);
 	}
+
+	#endregion
+
+	#region Utilities
 
 	async Task<bool> InitializeNewConversation(AppShell currentShell, string inputContent)
 	{
@@ -270,4 +290,6 @@ public partial class ChatViewModel : ObservableObject
 			return message.Trim() + "...";
 		return message[..17].Trim() + "...";
 	}
+
+	#endregion
 }
