@@ -468,8 +468,9 @@
                                     x:Name="AIOverviewWebview"
                                     Navigating="AIOverviewWebview_OnNavigating">
                                     <WebView.Source>
-                                        <HtmlWebViewSource Html="{Binding AiOverview, 
-                                Converter={StaticResource HtmlConverter}}"/>
+                                        <HtmlWebViewSource
+                                            Html="{Binding AiOverview, 
+                                Converter={StaticResource HtmlConverter}}" />
                                     </WebView.Source>
                                 </WebView>
                             </StackLayout>

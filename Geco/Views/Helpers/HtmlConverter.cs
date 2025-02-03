@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Text;
 using Geco.Core;
 using Markdig;
 
@@ -12,7 +11,7 @@ public class HtmlConverter : IValueConverter
 		const string WeeklyReportHeader = "weeklyreport";
 		if (value is not string markdownContent)
 			return null;
-		
+
 		string backgroundColor = GecoSettings.DarkMode ? "#1C1C1C" : "#FFFFFF";
 		string textColor = GecoSettings.DarkMode ? "#ffffff" : "#000000";
 
@@ -24,7 +23,7 @@ public class HtmlConverter : IValueConverter
 		{
 			markdownContent = markdownContent.Trim();
 			var pipeline = GlobalContext.Services.GetRequiredService<MarkdownPipeline>();
-			markdownContent =  Markdown.ToHtml(markdownContent, pipeline);
+			markdownContent = Markdown.ToHtml(markdownContent, pipeline);
 			markdownContent = StringHelpers.FormatString(GlobalContext.ChatHtmlTemplate,
 				new { MdContent = markdownContent, BgColor = backgroundColor, FgColor = textColor });
 		}

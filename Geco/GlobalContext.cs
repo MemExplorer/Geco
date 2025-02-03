@@ -2,7 +2,8 @@ namespace Geco;
 
 internal static class GlobalContext
 {
-	static string? chatHtmlTemplate = null;
+	static string? chatHtmlTemplate;
+
 	internal static IServiceProvider Services
 	{
 		get
@@ -19,9 +20,9 @@ internal static class GlobalContext
 	{
 		get
 		{
-			if (chatHtmlTemplate != null) 
+			if (chatHtmlTemplate != null)
 				return chatHtmlTemplate;
-			
+
 			using var stream = FileSystem.OpenAppPackageFileAsync("ChatTemplate.html");
 			using var reader = new StreamReader(stream.Result);
 			chatHtmlTemplate = reader.ReadToEnd();

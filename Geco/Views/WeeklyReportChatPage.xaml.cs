@@ -32,7 +32,7 @@ public partial class WeeklyReportChatPage : ContentPage
 
 	void ChatEntry_OnTextChanged(object? sender, TextChangedEventArgs e) =>
 		CurrentViewModel.ChatTextChanged(e.NewTextValue);
-	
+
 	async void TapGestureRecognizer_OnTapped(object? sender, TappedEventArgs e)
 	{
 		try

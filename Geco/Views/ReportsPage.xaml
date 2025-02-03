@@ -69,7 +69,8 @@
                                     MaximumHeightRequest="150"
                                     Margin="0,0,0,3">
                                     <WebView.Source>
-                                        <HtmlWebViewSource Html="{Binding FullContent, Converter={StaticResource HtmlConverter}}"/>
+                                        <HtmlWebViewSource
+                                            Html="{Binding FullContent, Converter={StaticResource HtmlConverter}}" />
                                     </WebView.Source>
                                 </WebView>
                                 <Border Stroke="transparent">

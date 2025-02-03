@@ -54,7 +54,7 @@ public partial class ChatPage : ContentPage
 		if (sender is SfChip c)
 			CurrentViewModel.ChipClick(c, ChatEntry);
 	}
-	
+
 	void WebView_OnNavigating(object? sender, WebNavigatingEventArgs e)
 	{
 		try
@@ -70,7 +70,7 @@ public partial class ChatPage : ContentPage
 			GlobalContext.Logger.Error<ChatPage>(exception);
 		}
 	}
-	
+
 	async void TapGestureRecognizer_OnTapped(object? sender, TappedEventArgs e)
 	{
 		try

@@ -47,22 +47,24 @@
                                 <Label Padding="15"
                                        Text="{Binding Text}" />
                             </Border>
-                            <StackLayout Grid.Column="1" 
+                            <StackLayout Grid.Column="1"
                                          IsVisible="{Binding Role, Converter={StaticResource IsModelToBooleanConverter}}">
                                 <WebView
                                     x:Name="LLMChatWv"
                                     Navigating="WebView_OnNavigating">
                                     <WebView.Source>
-                                        <HtmlWebViewSource Html="{Binding Text, 
-                                Converter={StaticResource HtmlConverter}}"></HtmlWebViewSource>
+                                        <HtmlWebViewSource
+                                            Html="{Binding Text, 
+                                Converter={StaticResource HtmlConverter}}" />
                                     </WebView.Source>
                                 </WebView>
-                                <Label FontFamily="FontAwesome" 
+                                <Label FontFamily="FontAwesome"
                                        FontSize="16"
                                        Padding="10,0,0,0"
                                        Text="{x:Static helpers:IconFont.Copy}">
                                     <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped" CommandParameter="{x:Reference LLMChatWv}"/>
+                                        <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped"
+                                                              CommandParameter="{x:Reference LLMChatWv}" />
                                     </Label.GestureRecognizers>
                                 </Label>
                             </StackLayout>

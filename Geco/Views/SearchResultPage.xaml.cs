@@ -28,7 +28,7 @@ public partial class SearchResultPage : ContentPage
 			GlobalContext.Logger.Error<SearchResultPage>(ex);
 		}
 	}
-	
+
 	void AIOverviewWebview_OnNavigating(object? sender, WebNavigatingEventArgs e)
 	{
 		try

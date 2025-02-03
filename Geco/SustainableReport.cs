@@ -41,14 +41,14 @@ public class SustainableReport
 			// ensure weekly report is not null
 			if (reportContent == null)
 				throw new Exception("Weekly report is null!");
-			
+
 			// replace placeholders
 			var mdPipeline = GlobalContext.Services.GetRequiredService<MarkdownPipeline>();
 			htmlTemplate = StringHelpers.FormatString(htmlTemplate,
 				new
 				{
-					Overview = Markdown.ToHtml(reportContent.Overview, mdPipeline), 
-					ReportBreakdown = Markdown.ToHtml(reportContent.ReportBreakdown, mdPipeline), 
+					Overview = Markdown.ToHtml(reportContent.Overview, mdPipeline),
+					ReportBreakdown = Markdown.ToHtml(reportContent.ReportBreakdown, mdPipeline),
 					ComputeBreakdown = Markdown.ToHtml(reportContent.ComputeBreakdown, mdPipeline)
 				});
 
