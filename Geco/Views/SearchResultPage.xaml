@@ -466,10 +466,12 @@
                                 <WebView
                                     MaximumHeightRequest="{Binding MaxAiSummaryHeight}"
                                     x:Name="AIOverviewWebview"
-                                    Margin="0,10,0,3"
-                                    Navigated="WebView_OnNavigated"
-                                    Navigating="AIOverviewWebview_OnNavigating"
-                                    Source="{Binding AiOverview, Converter={StaticResource HtmlConverter}}" />
+                                    Navigating="AIOverviewWebview_OnNavigating">
+                                    <WebView.Source>
+                                        <HtmlWebViewSource Html="{Binding AiOverview, 
+                                Converter={StaticResource HtmlConverter}}"/>
+                                    </WebView.Source>
+                                </WebView>
                             </StackLayout>
                         </Border>
                         <Border IsVisible="{Binding ShowMoreButtonVisibility}" Stroke="transparent">

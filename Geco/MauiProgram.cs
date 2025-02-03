@@ -9,6 +9,7 @@ using Geco.Views;
 using GoogleGeminiSDK;
 using GoogleGeminiSDK.Models.Components;
 using GoogleGeminiSDK.Models.ContentGeneration;
+using Markdig;
 using Syncfusion.Maui.Toolkit.Hosting;
 #if ANDROID
 using Application = Android.App.Application;
@@ -55,6 +56,7 @@ public static class MauiProgram
 		builder.InitializeGeminiServices();
 		builder.Services.AddSingleton(new SearchAPI(GecoSecrets.BRAVE_SEARCH_API_KEY));
 		builder.Services.AddSingleton(SpeechToText.Default);
+		builder.Services.AddSingleton(new MarkdownPipelineBuilder().UseAdvancedExtensions().Build());
 		return builder;
 	}
 

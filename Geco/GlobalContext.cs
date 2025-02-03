@@ -2,6 +2,7 @@ namespace Geco;
 
 internal static class GlobalContext
 {
+	static string? chatHtmlTemplate = null;
 	internal static IServiceProvider Services
 	{
 		get
@@ -11,6 +12,20 @@ internal static class GlobalContext
 				throw new InvalidOperationException(
 					"Cannot resolve current application. Services should be accessed after MauiProgram initialization.");
 			return app.Services;
+		}
+	}
+
+	internal static string ChatHtmlTemplate
+	{
+		get
+		{
+			if (chatHtmlTemplate != null) 
+				return chatHtmlTemplate;
+			
+			using var stream = FileSystem.OpenAppPackageFileAsync("ChatTemplate.html");
+			using var reader = new StreamReader(stream.Result);
+			chatHtmlTemplate = reader.ReadToEnd();
+			return chatHtmlTemplate;
 		}
 	}
 

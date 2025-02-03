@@ -33,7 +33,7 @@
                                    Source="geco_logo.png"
                                    MaximumWidthRequest="50"
                                    MaximumHeightRequest="50"
-                                   Margin="5,15,3,5"
+                                   Margin="5,0,3,0"
                                    VerticalOptions="Start"
                                    IsVisible="{Binding Role, Converter={StaticResource IsModelToBooleanConverter}}" />
                             <Border Margin="2"
@@ -47,12 +47,25 @@
                                 <Label Padding="15"
                                        Text="{Binding Text}" />
                             </Border>
-                            <WebView
-                                Grid.Column="1"
-                                IsVisible="{Binding Role, Converter={StaticResource IsModelToBooleanConverter}}"
-                                Navigated="WebView_Navigated"
-                                Navigating="WebView_OnNavigating"
-                                Source="{Binding Text, Converter={StaticResource HtmlConverter}}" />
+                            <StackLayout Grid.Column="1" 
+                                         IsVisible="{Binding Role, Converter={StaticResource IsModelToBooleanConverter}}">
+                                <WebView
+                                    x:Name="LLMChatWv"
+                                    Navigating="WebView_OnNavigating">
+                                    <WebView.Source>
+                                        <HtmlWebViewSource Html="{Binding Text, 
+                                Converter={StaticResource HtmlConverter}}"></HtmlWebViewSource>
+                                    </WebView.Source>
+                                </WebView>
+                                <Label FontFamily="FontAwesome" 
+                                       FontSize="16"
+                                       Padding="10,0,0,0"
+                                       Text="{x:Static helpers:IconFont.Copy}">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped" CommandParameter="{x:Reference LLMChatWv}"/>
+                                    </Label.GestureRecognizers>
+                                </Label>
+                            </StackLayout>
                         </Grid>
                     </Border>
                 </DataTemplate>

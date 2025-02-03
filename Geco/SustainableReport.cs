@@ -6,6 +6,7 @@ using Geco.Core.Database;
 using Geco.Core.Models.ActionObserver;
 using Geco.Core.Models.Notification;
 using GoogleGeminiSDK;
+using Markdig;
 
 namespace Geco;
 
@@ -40,10 +41,16 @@ public class SustainableReport
 			// ensure weekly report is not null
 			if (reportContent == null)
 				throw new Exception("Weekly report is null!");
-
+			
 			// replace placeholders
+			var mdPipeline = GlobalContext.Services.GetRequiredService<MarkdownPipeline>();
 			htmlTemplate = StringHelpers.FormatString(htmlTemplate,
-				new { reportContent.Overview, reportContent.ReportBreakdown, reportContent.ComputeBreakdown });
+				new
+				{
+					Overview = Markdown.ToHtml(reportContent.Overview, mdPipeline), 
+					ReportBreakdown = Markdown.ToHtml(reportContent.ReportBreakdown, mdPipeline), 
+					ComputeBreakdown = Markdown.ToHtml(reportContent.ComputeBreakdown, mdPipeline)
+				});
 
 			return (reportContent, htmlTemplate);
 		}

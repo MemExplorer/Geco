@@ -28,49 +28,7 @@ public partial class SearchResultPage : ContentPage
 			GlobalContext.Logger.Error<SearchResultPage>(ex);
 		}
 	}
-
-	async void WebView_OnNavigated(object? sender, WebNavigatedEventArgs e)
-	{
-		try
-		{
-			if (sender is not WebView w)
-				return;
-
-			string backgroundColor = GecoSettings.DarkMode ? "#1C1C1C" : "#FFFFFF";
-			string textColor = GecoSettings.DarkMode ? "#ffffff" : "#000000";
-			await w.EvaluateJavaScriptAsync($$"""
-			                                  (function() {
-			                                  	function modifyStyles(backgroundColor, textColor) {
-			                                  		document.body.style.backgroundColor = backgroundColor; 
-			                                  		document.body.style.color = textColor; 
-			                                  	}
-			                                  
-			                                  	modifyStyles('{{backgroundColor}}', '{{textColor}}');
-			                                  })();
-			                                  """);
-
-			// load md to html converter script
-			await using var stream = await FileSystem.OpenAppPackageFileAsync("showdown.min.js");
-			using var reader = new StreamReader(stream);
-			string showdownJs = await reader.ReadToEndAsync();
-			await w.EvaluateJavaScriptAsync($"""
-			                                 {showdownJs}
-			                                 var converter = new showdown.Converter();
-			                                 converter.setOption('tables', true);
-			                                 converter.setOption('simpleLineBreaks', true);
-			                                 converter.setOption('headerLevelStart', 2);
-			                                 converter.setOption('simplifiedAutoLink', true);
-			                                 converter.setOption('requireSpaceBeforeHeadingText', true);
-			                                 const contentElement = document.getElementById('gecocontent');
-			                                 contentElement.innerHTML = converter.makeHtml(contentElement.innerHTML);
-			                                 """);
-		}
-		catch (Exception ex)
-		{
-			GlobalContext.Logger.Error<SearchResultPage>(ex);
-		}
-	}
-
+	
 	void AIOverviewWebview_OnNavigating(object? sender, WebNavigatingEventArgs e)
 	{
 		try
@@ -80,8 +38,6 @@ public partial class SearchResultPage : ContentPage
 				e.Cancel = true;
 				_ = Utils.OpenBrowserView(e.Url);
 			}
-			else if (!e.Url.StartsWith("data:text/html;base64,"))
-				e.Cancel = true;
 		}
 		catch (Exception exception)
 		{

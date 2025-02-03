@@ -17,27 +17,6 @@ public partial class ReportsPage : ContentPage
 
 	async Task OnAppearingPage() => await ViewModel.LoadHistory();
 
-	void WebView_OnNavigated(object? sender, WebNavigatedEventArgs e)
-	{
-		if (sender is not WebView w)
-			return;
-
-		string backgroundColor = GecoSettings.DarkMode ? "#191919" : "#e3e3e3";
-		string textColor = "#808080";
-
-		w.EvaluateJavaScriptAsync($$"""
-		                            (function() {
-		                            	function modifyStyles(backgroundColor, textColor) {
-		                            		document.body.style.overflow = 'hidden'; 
-		                            		document.body.style.backgroundColor = backgroundColor; 
-		                            		document.body.style.color = textColor; 
-		                            	}
-		                            
-		                            	modifyStyles('{{backgroundColor}}', '{{textColor}}');
-		                            })();
-		                            """);
-	}
-
 	async void TapGestureRecognizer_OnTapped(object? sender, TappedEventArgs e)
 	{
 		try

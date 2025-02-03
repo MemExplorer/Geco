@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using Geco.Core;
+using Markdig;
 
 namespace Geco.Views.Helpers;
 
@@ -11,26 +12,24 @@ public class HtmlConverter : IValueConverter
 		const string WeeklyReportHeader = "weeklyreport";
 		if (value is not string markdownContent)
 			return null;
+		
+		string backgroundColor = GecoSettings.DarkMode ? "#1C1C1C" : "#FFFFFF";
+		string textColor = GecoSettings.DarkMode ? "#ffffff" : "#000000";
 
 		// override content if when we detect the weekly report header
 		if (markdownContent.StartsWith(WeeklyReportHeader))
-			markdownContent = markdownContent[WeeklyReportHeader.Length..];
+			markdownContent = StringHelpers.FormatString(markdownContent[WeeklyReportHeader.Length..],
+				new { BgColor = backgroundColor, FgColor = textColor });
 		else
 		{
-			string backgroundColor = GecoSettings.DarkMode ? "#1C1C1C" : "#FFFFFF";
-			string textColor = GecoSettings.DarkMode ? "#ffffff" : "#000000";
-			using var stream = FileSystem.OpenAppPackageFileAsync("ChatTemplate.html");
-			using var reader = new StreamReader(stream.Result);
-			string htmlTemplate = reader.ReadToEnd();
-
 			markdownContent = markdownContent.Trim();
-			markdownContent = StringHelpers.FormatString(htmlTemplate,
+			var pipeline = GlobalContext.Services.GetRequiredService<MarkdownPipeline>();
+			markdownContent =  Markdown.ToHtml(markdownContent, pipeline);
+			markdownContent = StringHelpers.FormatString(GlobalContext.ChatHtmlTemplate,
 				new { MdContent = markdownContent, BgColor = backgroundColor, FgColor = textColor });
 		}
 
-		string base64Html = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(markdownContent));
-		string urlEncodedHtmlContent = Uri.EscapeDataString(base64Html);
-		return $"data:text/html;base64,{urlEncodedHtmlContent}";
+		return markdownContent;
 	}
 
 	public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>

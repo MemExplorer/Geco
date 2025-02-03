@@ -1,3 +1,4 @@
+using CommunityToolkit.Maui.Alerts;
 using Geco.Core.Database;
 using Geco.ViewModels;
 using Syncfusion.Maui.Toolkit.Chips;
@@ -53,48 +54,7 @@ public partial class ChatPage : ContentPage
 		if (sender is SfChip c)
 			CurrentViewModel.ChipClick(c, ChatEntry);
 	}
-
-	private async void WebView_Navigated(object sender, WebNavigatedEventArgs e)
-	{
-		try
-		{
-			if (sender is not WebView w)
-				return;
-
-			string backgroundColor = GecoSettings.DarkMode ? "#1C1C1C" : "#FFFFFF";
-			string textColor = GecoSettings.DarkMode ? "#ffffff" : "#000000";
-			await w.EvaluateJavaScriptAsync($$"""
-			                                  (function() {
-			                                  	function modifyStyles(backgroundColor, textColor) {
-			                                  		document.body.style.backgroundColor = backgroundColor; 
-			                                  		document.body.style.color = textColor; 
-			                                  	}
-			                                  
-			                                  	modifyStyles('{{backgroundColor}}', '{{textColor}}');
-			                                  })();
-			                                  """);
-
-			// load md to html converter script
-			await using var stream = await FileSystem.OpenAppPackageFileAsync("showdown.min.js");
-			using var reader = new StreamReader(stream);
-			string showdownJs = await reader.ReadToEndAsync();
-			await w.EvaluateJavaScriptAsync($"""
-			                                 {showdownJs}
-			                                 var converter = new showdown.Converter();
-			                                 converter.setOption('tables', true);
-			                                 converter.setOption('simpleLineBreaks', true);
-			                                 converter.setOption('requireSpaceBeforeHeadingText', true);
-			                                 converter.setOption('simplifiedAutoLink', true);
-			                                 const contentElement = document.getElementById('gecocontent');
-			                                 contentElement.innerHTML = converter.makeHtml(contentElement.innerHTML);
-			                                 """);
-		}
-		catch (Exception ex)
-		{
-			GlobalContext.Logger.Error<ChatPage>(ex);
-		}
-	}
-
+	
 	void WebView_OnNavigating(object? sender, WebNavigatingEventArgs e)
 	{
 		try
@@ -104,12 +64,27 @@ public partial class ChatPage : ContentPage
 				e.Cancel = true;
 				_ = Utils.OpenBrowserView(e.Url);
 			}
-			else if (!e.Url.StartsWith("data:text/html;base64,"))
-				e.Cancel = true;
 		}
 		catch (Exception exception)
 		{
 			GlobalContext.Logger.Error<ChatPage>(exception);
+		}
+	}
+	
+	async void TapGestureRecognizer_OnTapped(object? sender, TappedEventArgs e)
+	{
+		try
+		{
+			if (e.Parameter is not WebView wv)
+				return;
+
+			string copiedTxt = await wv.EvaluateJavaScriptAsync("document.body.innerText");
+			await Clipboard.SetTextAsync(copiedTxt);
+			await Toast.Make("Copied text to clipboard.").Show();
+		}
+		catch (Exception ex)
+		{
+			GlobalContext.Logger.Error<WeeklyReportChatPage>(ex);
 		}
 	}
 }
