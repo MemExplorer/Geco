@@ -5,7 +5,6 @@ weeklyreport<html>
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
-            align-items: center;
             padding: 20px;
             margin: 0;
 			background-color: {BgColor};
@@ -35,7 +34,6 @@ weeklyreport<html>
             justify-content: center;
             align-items: center;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-right: 20px;
         }
 
             .circle::before {
@@ -91,8 +89,10 @@ weeklyreport<html>
         }
 
         .title {
-            height: auto;
-            flex-basis: 10px;
+			flex-basis: 10px;
+			height: auto;
+			display: flex;
+			align-items: center;
         }
 
         .chart-row {
@@ -151,11 +151,12 @@ weeklyreport<html>
             display: flex;
             gap: 5px;
             flex-wrap: wrap;
+			padding-top: 10px;
         }
 
         .color-box {
             width: 15px;
-            height: 20px;
+            height: 15px;
             border-radius: 3px;
         }
 
@@ -182,6 +183,7 @@ weeklyreport<html>
             </div>
         </div>
         <div class="title">
+			<img src="{EmojiPlaceholder}" height="70">
             <h3 id="reportTitle">(Sustainability Level)</h3>
         </div>
     </div>
@@ -194,19 +196,6 @@ weeklyreport<html>
     <button class="collapsible" id="moreCollapsible">Find out more</button>
     <div class="content" id="moreContent">
         <div>
-            <div>
-                <h3>Legend</h3>
-                <div class="legend-group">
-                    <div class="legend-item">
-                        <span class="color-box green"></span>
-                        <span>Sustainable</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="color-box red"></span>
-                        <span>Unsustainable</span>
-                    </div>
-                </div>
-            </div>
             <div id="currWeekChartContent"></div>
             <div id="prevWeekChartContent"></div>
             <div>
@@ -321,7 +310,20 @@ weeklyreport<html>
                                     </div>
                                     `;
             }
-
+			htmlTemplate += `
+            <div>
+                <div class="legend-group">
+                    <div class="legend-item">
+                        <span class="color-box green"></span>
+                        <span>Sustainable</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="color-box red"></span>
+                        <span>Unsustainable</span>
+                    </div>
+                </div>
+            </div>
+            `;
             htmlTemplate += "</div>";
             return htmlTemplate;
         }

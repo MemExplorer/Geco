@@ -69,9 +69,9 @@ public class SustainableReport
 		var triggerRepo = GlobalContext.Services.GetRequiredService<TriggerRepository>();
 		var promptRepo = GlobalContext.Services.GetRequiredService<PromptRepository>();
 
-		await using var stream = await FileSystem.OpenAppPackageFileAsync("WeeklyReportTemplate.html");
-		using var reader = new StreamReader(stream);
-		string htmlTemplate = await reader.ReadToEndAsync();
+		await using var weeklyReportTemplateStream = await FileSystem.OpenAppPackageFileAsync("WeeklyReportTemplate.html");
+		using var weeklyReportStreamReader = new StreamReader(weeklyReportTemplateStream);
+		string htmlTemplate = await weeklyReportStreamReader.ReadToEndAsync();
 
 		// current bayes computation
 		var currentWeekTriggerRecords = (await triggerRepo.FetchWeekOneTriggerRecords()).ToDictionary();
@@ -82,23 +82,30 @@ public class SustainableReport
 		var currentWeekPercentage = currentWeekBayesInstance.Compute();
 		var currentWeekComputationSolution = currentWeekBayesInstance.GetComputationSolution();
 		double currentWeekProbabilityRounded = Math.Round(currentWeekPercentage.PositiveProbability, 2);
-		string sustainabilityLevel = currentWeekProbabilityRounded switch
+		(string sustainabilityLevel, string gecoEmojiPath) = currentWeekProbabilityRounded switch
 		{
-			>= 90 => "High Sustainability",
-			>= 75 and < 90 => "Sustainable",
-			>= 60 and < 75 => "Close to Sustainable",
-			>= 45 and < 60 => "Average Sustainability",
-			>= 30 and < 45 => "Signs of Unsustainability",
-			>= 15 and < 30 => "Unsustainable",
-			_ => "Crisis level"
+			>= 90 => ("High Sustainability", "1_HighlySustainable.png"),
+			>= 75 and < 90 => ("Sustainable", "2_Sustainable.png"),
+			>= 60 and < 75 => ("Close to Sustainable", "3_ClosetoSustainable.png"),
+			>= 45 and < 60 => ("Average Sustainability", "4_AverageSustainability.png"),
+			>= 30 and < 45 => ("Signs of Unsustainability", "5_SignsofUnsustainability.png"),
+			>= 15 and < 30 => ("Unsustainable", "6_Unsustainable.png"),
+			_ => ("Crisis level", "7_CrisisLevel.png")
 		};
-
+		
+		await using var gecoEmoji = await FileSystem.OpenAppPackageFileAsync("GecoEmojis/" + gecoEmojiPath);
+		using var gecoEmojiStream = new MemoryStream();
+		await gecoEmoji.CopyToAsync(gecoEmojiStream);
+		byte[] gecoEmojiBytes = gecoEmojiStream.ToArray();
+		
 		// set values for current week data
+		string base64Image = "data:image/png;base64," + Convert.ToBase64String(gecoEmojiBytes);
 		htmlTemplate = StringHelpers.FormatString(htmlTemplate,
 			new
 			{
 				CurrentWeekPercentage = currentWeekProbabilityRounded.ToString(CultureInfo.InvariantCulture),
-				CurrentWeekTableFrequency = BayesFrequencyToJavascript(currentWeekBayesInstance.GetFrequencyData())
+				CurrentWeekTableFrequency = BayesFrequencyToJavascript(currentWeekBayesInstance.GetFrequencyData()),
+				EmojiPlaceholder = base64Image
 			});
 
 		// check if we have data from last 2 weeks
