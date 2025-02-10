@@ -12,7 +12,7 @@ public class HtmlConverter : IValueConverter
 		if (value is not string markdownContent)
 			return null;
 
-		string backgroundColor = GecoSettings.DarkMode ? "#1C1C1C" : "#FFFFFF";
+		string backgroundColor = GecoSettings.DarkMode ? "#1f1f1f" : "#FFFFFF";
 		string textColor = GecoSettings.DarkMode ? "#ffffff" : "#000000";
 
 		// override content if when we detect the weekly report header
