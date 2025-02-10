@@ -215,6 +215,8 @@ public static class MauiProgram
 		builder.Services.AddTransient<ReportsViewModel>();
 		builder.Services.AddTransient<WeeklyReportChatPage>();
 		builder.Services.AddTransient<WeeklyReportChatViewModel>();
+		builder.Services.AddSingleton<StartupPage>();
+		builder.Services.AddSingleton<StartupPageViewModel>();
 		return builder;
 	}
 

@@ -1,3 +1,7 @@
+#if ANDROID
+using Android.Content;
+#endif
+
 namespace Geco;
 
 internal class Utils
@@ -40,4 +44,14 @@ internal class Utils
 
 		await Browser.Default.OpenAsync(url, options);
 	}
+
+#if ANDROID
+	public static void OpenExternalBrowserView(string url)
+	{
+		var browserIntent = new Intent(Intent.ActionView, Android.Net.Uri.Parse(url));
+		browserIntent.SetFlags(ActivityFlags.NewTask);
+		Platform.AppContext.StartActivity(browserIntent);
+	}
+#endif
+
 }

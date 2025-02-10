@@ -20,6 +20,12 @@ public static class GecoSettings
 		set => Preferences.Default.Set(nameof(Notifications), value);
 	}
 
+	public static bool AcceptedTermsAndPolicy
+	{
+		get => Preferences.Default.Get(nameof(AcceptedTermsAndPolicy), false);
+		set => Preferences.Default.Set(nameof(AcceptedTermsAndPolicy), value);
+	}
+
 	public static DateTime WeeklyReportDateTime
 	{
 		get => Preferences.Default.Get(nameof(WeeklyReportDateTime), DateTime.UnixEpoch);

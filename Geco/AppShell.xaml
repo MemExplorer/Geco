@@ -41,6 +41,12 @@
 
     <!-- Default flyout Items (Chat, Search, Reports)-->
     <FlyoutItem x:Name="MainFlyout" FlyoutDisplayOptions="AsMultipleItems">
+        <ShellContent ContentTemplate="{DataTemplate local:StartupPage}"
+                      Title="Startup Page"
+                      ClassId="StartupPage"
+                      Route="StartupPage"
+                      FlyoutItemIsVisible="False">
+        </ShellContent>
         <ShellContent ContentTemplate="{DataTemplate local:ChatPage}"
                       Title="Chat"
                       ClassId="ChatPage"

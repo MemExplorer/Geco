@@ -14,6 +14,11 @@ public partial class AppShell : Shell
 	public AppShell()
 	{
 		InitializeComponent();
+
+		// If the user accepts the terms and policy, navigate to the chat page.  
+		// Otherwise, display the terms and policy page.  
+		MainFlyout.CurrentItem = MainFlyout.Items[!GecoSettings.AcceptedTermsAndPolicy ? 0 : 1];
+
 		Context = (AppShellViewModel)BindingContext;
 		Context.ChatHistoryList.CollectionChanged += ChatHistoryList_CollectionChanged;
 		Navigated += AppShell_Navigated;
