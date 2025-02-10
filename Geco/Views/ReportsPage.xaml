@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -30,7 +30,7 @@
                             StrokeThickness="1"
                             Padding="5"
                             StrokeShape="RoundRectangle 10"
-                            BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}">
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Quinary}, Dark={StaticResource QuinaryDark}}">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped"
                                                   CommandParameter="{Binding .}" />
@@ -49,7 +49,8 @@
                                         FontSize="12"
                                         FontFamily="Poppins"
                                         VerticalTextAlignment="Center"
-                                        LineBreakMode="TailTruncation" />
+                                        LineBreakMode="TailTruncation" 
+                                        TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}"/>
                                 </VerticalStackLayout>
                                 <Label Grid.Column="2"
                                        HorizontalOptions="End"
@@ -57,7 +58,8 @@
                                        FontFamily="FontAwesome"
                                        FontSize="20"
                                        Margin="0,6,5,0"
-                                       Text="{x:Static helpers:IconFont.TrashCan}">
+                                       Text="{x:Static helpers:IconFont.TrashCan}"
+                                       TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}">
                                     <Label.GestureRecognizers>
                                         <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped"
                                                               CommandParameter="{Binding .}" />
@@ -70,7 +72,7 @@
                                     Margin="0,0,0,3">
                                     <WebView.Source>
                                         <HtmlWebViewSource
-                                            Html="{Binding FullContent, Converter={StaticResource HtmlConverter}}" />
+                                            Html="{Binding FullContent, Converter={StaticResource HtmlConverter}, ConverterParameter={x:Type vm:ReportsViewModel}}" />
                                     </WebView.Source>
                                 </WebView>
                                 <Border Stroke="transparent">
@@ -78,7 +80,7 @@
                                         <LinearGradientBrush EndPoint="0,1">
                                             <GradientStop Color="Transparent"
                                                           Offset="0.1" />
-                                            <GradientStop Color="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
+                                            <GradientStop Color="{AppThemeBinding Light={StaticResource Quinary}, Dark={StaticResource QuinaryDark}}"
                                                           Offset="1.0" />
                                         </LinearGradientBrush>
                                     </Border.Background>

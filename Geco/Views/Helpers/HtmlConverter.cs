@@ -1,5 +1,7 @@
 using System.Globalization;
 using Geco.Core;
+using Geco.Core.Models.Chat;
+using Geco.ViewModels;
 using Markdig;
 
 namespace Geco.Views.Helpers;
@@ -12,7 +14,10 @@ public class HtmlConverter : IValueConverter
 		if (value is not string markdownContent)
 			return null;
 
-		string backgroundColor = GecoSettings.DarkMode ? "#1f1f1f" : "#FFFFFF";
+		string? backgroundColor;
+		if (parameter is Type vmType && vmType == typeof(ReportsViewModel)) backgroundColor = GecoSettings.DarkMode ? "#191919" : "#e3e3e3";
+		else backgroundColor = GecoSettings.DarkMode ? "#1f1f1f" : "#FFFFFF";
+
 		string textColor = GecoSettings.DarkMode ? "#ffffff" : "#000000";
 
 		// override content if when we detect the weekly report header

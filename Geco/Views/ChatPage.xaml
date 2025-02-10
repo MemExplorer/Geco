@@ -90,8 +90,8 @@
                             <Border Margin="2"
                                     Grid.Column="1"
                                     StrokeShape="{Binding Role, Converter={StaticResource IsModelToShapeConverter}}"
-                                    BackgroundColor="{AppThemeBinding Light=#e3e3e3,
-                                                  Dark=#191919}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Quinary},
+                                                  Dark={StaticResource QuinaryDark}}"
                                     HorizontalOptions="{Binding Role, Converter={StaticResource ChatAlignmentConverter}}"
                                     IsVisible="{Binding Role, Converter={StaticResource IsUserToBooleanConverter}}">
 
@@ -112,22 +112,24 @@
                                 <Label FontFamily="FontAwesome"
                                        FontSize="16"
                                        Padding="10,0,0,0"
-                                       Text="{x:Static helpers:IconFont.Copy}">
+                                       Text="{x:Static helpers:IconFont.Copy}"
+                                       TextColor="{AppThemeBinding Light={StaticResource Quaternary}, 
+                                                                   Dark={StaticResource QuaternaryDark}}">
                                     <Label.GestureRecognizers>
                                         <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped"
                                                               CommandParameter="{x:Reference LLMChatWv}" />
                                     </Label.GestureRecognizers>
                                 </Label>
-                            </StackLayout>
+                            </StackLayout>  
                         </Grid>
                     </Border>
                 </DataTemplate>
-            </CollectionView.ItemTemplate>
+            </CollectionView.ItemTemplate>          
         </CollectionView>
 
         <Border Padding="5"
-                BackgroundColor="{AppThemeBinding Light=#e3e3e3,
-                                                  Dark=#191919}"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Quinary},
+                                                  Dark={StaticResource QuinaryDark}}"
                 HorizontalOptions="FillAndExpand"
                 Stroke="Transparent"
                 StrokeShape="RoundRectangle 30,30,30,30">
