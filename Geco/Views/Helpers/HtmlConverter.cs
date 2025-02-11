@@ -14,7 +14,7 @@ public class HtmlConverter : IValueConverter
 		if (value is not string markdownContent)
 			return null;
 
-		string? backgroundColor;
+		string backgroundColor;
 		if (parameter is Type vmType && vmType == typeof(ReportsViewModel)) backgroundColor = GecoSettings.DarkMode ? "#191919" : "#e3e3e3";
 		else backgroundColor = GecoSettings.DarkMode ? "#1f1f1f" : "#FFFFFF";
 

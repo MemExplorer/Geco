@@ -15,7 +15,9 @@
         <helpers:HtmlConverter x:Key="HtmlConverter" />
         <DataTemplate x:Key="UserDataTemplate"
                       x:DataType="mai:ChatMessage">
-            <mpowerkit:VirtualizeListViewCell Padding="0,10">
+            <mpowerkit:VirtualizeListViewCell Padding="0,10"
+                                              BackgroundColor="{AppThemeBinding Light={StaticResource White}, 
+                                                            Dark={StaticResource OffBlack}}">
                 <Border Margin="2"
                         Grid.Column="1"
                         StrokeShape="RoundRectangle 34, 34, 34, 8"
@@ -29,7 +31,9 @@
         </DataTemplate>
         <DataTemplate x:Key="ModelDataTemplate"
                       x:DataType="mai:ChatMessage">
-            <mpowerkit:VirtualizeListViewCell Padding="0,10">
+            <mpowerkit:VirtualizeListViewCell Padding="0,10"
+                                              BackgroundColor="{AppThemeBinding Light={StaticResource White}, 
+                                              Dark={StaticResource OffBlack}}">
                 <Grid ColumnDefinitions="auto, *"
                       RowDefinitions="auto, auto">
                     <Image Grid.Column="0"
@@ -40,9 +44,9 @@
                            Margin="5,0,3,0"
                            VerticalOptions="Start" />
                     <helpers:ContentSizedWebView  Grid.Column="1"
-                              Grid.Row="0"
-                              x:Name="LLMChatWv"
-                              Navigating="WebView_OnNavigating">
+                                                  Grid.Row="0"
+                                                  x:Name="LLMChatWv"
+                                                  Navigating="WebView_OnNavigating">
                         <helpers:ContentSizedWebView.Source>
                             <HtmlWebViewSource Html="{Binding Text, 
                                 Converter={StaticResource HtmlConverter}}" />
