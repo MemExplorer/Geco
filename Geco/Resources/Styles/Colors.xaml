@@ -13,6 +13,10 @@
     <Color x:Key="Secondary">#4a6362</Color>
     <Color x:Key="SecondaryDarkText">#b0ccca</Color>
     <Color x:Key="Tertiary">#4a607c</Color>
+    <Color x:Key="Quaternary">#666565</Color>
+    <Color x:Key="QuaternaryDark">#c0c0c0</Color>
+    <Color x:Key="Quinary">#e3e3e3</Color>
+    <Color x:Key="QuinaryDark">#191919</Color>
 
     <Color x:Key="ContainerLight">#e1edec</Color>
     <Color x:Key="ContainerDark">#324b4a</Color>

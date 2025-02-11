@@ -73,7 +73,7 @@ public partial class AppShell : Shell
 			// only one item is added at a time
 			var firstItem = (GecoConversation)e.NewItems[0]!;
 			var iconSrc = new FontImageSource { FontFamily = "FontAwesome", Glyph = IconFont.MessageLines };
-			iconSrc.SetAppThemeColor(FontImageSource.ColorProperty, Color.Parse("#262626"), Color.Parse("#D3D3D3"));
+			iconSrc.SetAppThemeColor(FontImageSource.ColorProperty, Color.Parse("#403f3f"), Color.Parse("#c0c0c0"));
 
 			var chatPageTransient = GlobalContext.Services.GetRequiredService<ChatPage>();
 			var newChatPage = new ShellContent

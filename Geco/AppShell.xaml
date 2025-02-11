@@ -52,7 +52,7 @@
                       ClassId="ChatPage"
                       Route="ChatPage">
             <ShellContent.Icon>
-                <FontImageSource Color="{AppThemeBinding Light=#262626, Dark=#D3D3D3}"
+                <FontImageSource Color="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}"
                                  FontFamily="FontAwesome"
                                  Glyph="{x:Static helpers:IconFont.MessagePlus}" />
             </ShellContent.Icon>
@@ -62,7 +62,7 @@
                       ClassId="SearchPage"
                       Route="SearchPage">
             <ShellContent.Icon>
-                <FontImageSource Color="{AppThemeBinding Light=#262626, Dark=#D3D3D3}"
+                <FontImageSource Color="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}"
                                  FontFamily="FontAwesome"
                                  Glyph="{x:Static helpers:IconFont.MagnifyingGlass}" />
             </ShellContent.Icon>
@@ -72,7 +72,7 @@
                       ClassId="ReportsPage"
                       Route="ReportsPage">
             <ShellContent.Icon>
-                <FontImageSource Color="{AppThemeBinding Light=#262626, Dark=#D3D3D3}"
+                <FontImageSource Color="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}"
                                  FontFamily="FontAwesome"
                                  Glyph="{x:Static helpers:IconFont.Memo}" />
             </ShellContent.Icon>
@@ -96,7 +96,7 @@
                 <Border HorizontalOptions="End">
                     <Button x:DataType="vm:AppShellViewModel"
                             BackgroundColor="Transparent"
-                            TextColor="{AppThemeBinding Light={StaticResource ContainerTextLight}, Dark={StaticResource ContainerTextDark}}"
+                            TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}"
                             FontFamily="FontAwesome"
                             FontSize="20"
                             Text="{x:Static helpers:IconFont.Gear}">

@@ -21,7 +21,8 @@
                     <Label FontSize="18"
                            Text="Clear History" />
                     <Label FontSize="Caption"
-                           Text="Clears all your conversation" />
+                           Text="Clears all your conversation" 
+                           TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}"/>
                 </StackLayout>
             </StackLayout>
             <Border.GestureRecognizers>
@@ -37,7 +38,8 @@
                     <Label FontSize="18"
                            Text="Clear Weekly Reports" />
                     <Label FontSize="Caption"
-                           Text="Clears your weekly reports" />
+                           Text="Clears your weekly reports" 
+                           TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}"/>
                 </StackLayout>
             </StackLayout>
             <Border.GestureRecognizers>
@@ -54,9 +56,10 @@
                     <Label FontSize="18"
                            Text="Dark Mode" />
                     <Label FontSize="Caption"
-                           Text="Changes the user interface to a darker color scheme" />
+                           Text="Changes the user interface to a darker color scheme" 
+                           TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}"/>
                 </StackLayout>
-                <Switch x:Name="DarkModeSwt" HorizontalOptions="End">
+                <Switch x:Name="DarkModeSwt" HorizontalOptions="End" ThumbColor="{AppThemeBinding Light=#403f3f,  Dark=#dedcdc}" >
                     <Switch.Behaviors>
                         <toolkit:EventToCommandBehavior EventName="Toggled"
                                                         x:TypeArguments="ToggledEventArgs"
@@ -75,9 +78,10 @@
                     <Label FontSize="18"
                            Text="Monitor Habits" />
                     <Label FontSize="Caption"
-                           Text="GECO will monitor and give insights about your habits" />
+                           Text="GECO will monitor and give insights about your habits"
+                           TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}"/>
                 </StackLayout>
-                <Switch x:Name="MonitorSwt" HorizontalOptions="End" Toggled="MonitorSwt_Toggled" />
+                <Switch x:Name="MonitorSwt" HorizontalOptions="End" Toggled="MonitorSwt_Toggled" ThumbColor="{AppThemeBinding Light=#403f3f,  Dark=#dedcdc}" />
 
             </StackLayout>
         </Border>
@@ -91,9 +95,10 @@
                     <Label FontSize="18"
                            Text="Notifications" />
                     <Label FontSize="Caption"
-                           Text="GECO will notify you about your habits" />
+                           Text="GECO will notify you about your habits" 
+                           TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}"/>
                 </StackLayout>
-                <Switch x:Name="NotificationSwt" HorizontalOptions="End" Toggled="NotificationToggle_Toggled" />
+                <Switch x:Name="NotificationSwt" HorizontalOptions="End" Toggled="NotificationToggle_Toggled" ThumbColor="{AppThemeBinding Light=#403f3f,  Dark=#dedcdc}" />
             </StackLayout>
         </Border>
     </VerticalStackLayout>
