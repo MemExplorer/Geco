@@ -5,6 +5,7 @@
              xmlns:vm="clr-namespace:Geco.ViewModels"
              xmlns:chat="clr-namespace:Geco.Core.Models.Chat;assembly=Geco.Core"
              xmlns:helpers="clr-namespace:Geco.Views.Helpers"
+             xmlns:mpowerkit="clr-namespace:MPowerKit.VirtualizeListView;assembly=MPowerKit.VirtualizeListView"
              x:Class="Geco.Views.ReportsPage"
              x:DataType="vm:ReportsViewModel"
              Title="Weekly Report">
@@ -15,85 +16,94 @@
     <ContentPage.BindingContext>
         <vm:ReportsViewModel />
     </ContentPage.BindingContext>
-    <ScrollView Orientation="Vertical" Padding="0,10,0,0">
-        <CollectionView ItemsSource="{Binding WeeklyReportHistory}">
-            <CollectionView.EmptyView>
-                <Label Padding="0,300,0,0" Text="Currently, you have no weekly reports."
-                       HorizontalOptions="Center" />
-            </CollectionView.EmptyView>
-            <CollectionView.ItemsLayout>
-                <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
-            </CollectionView.ItemsLayout>
-            <CollectionView.ItemTemplate>
+    <Grid RowDefinitions="auto, *">
+        <Label Padding="0,300,0,0"
+               Grid.Row="0"
+               Text="Currently, you have no weekly reports."
+               HorizontalOptions="Center"
+               IsVisible="False">
+            <Label.Triggers>
+                <DataTrigger Binding="{Binding WeeklyReportHistory.Count}"
+                             TargetType="Label"
+                             Value="0">
+                    <Setter Property="IsVisible"
+                            Value="True" />
+                </DataTrigger>
+            </Label.Triggers>
+        </Label>
+        <mpowerkit:VirtualizeListView Grid.Row="1" ItemsSource="{Binding WeeklyReportHistory}">
+            <mpowerkit:VirtualizeListView.ItemsLayout>
+                <mpowerkit:LinearLayout ItemSpacing="5" />
+            </mpowerkit:VirtualizeListView.ItemsLayout>
+            <mpowerkit:VirtualizeListView.ItemTemplate>
                 <DataTemplate x:DataType="chat:GecoConversation">
-                    <Border Stroke="transparent"
-                            StrokeThickness="1"
-                            Padding="5"
-                            StrokeShape="RoundRectangle 10"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource Quinary}, Dark={StaticResource QuinaryDark}}">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped"
-                                                  CommandParameter="{Binding .}" />
-                        </Border.GestureRecognizers>
-                        <StackLayout Padding="10">
-                            <Grid Padding="0,0,0,5" ColumnDefinitions="40*, 30*, auto">
-                                <VerticalStackLayout Grid.Column="0">
-                                    <Label
-                                        Text="{Binding Title}"
-                                        FontAttributes="Bold"
-                                        FontSize="25"
-                                        FontFamily="Poppins"
-                                        LineBreakMode="TailTruncation" />
-                                    <Label
-                                        Text="{Binding DateCreated, Converter={StaticResource UnixTimeStampToStringConverter}}"
-                                        FontSize="12"
-                                        FontFamily="Poppins"
-                                        VerticalTextAlignment="Center"
-                                        LineBreakMode="TailTruncation" 
-                                        TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}"/>
-                                </VerticalStackLayout>
-                                <Label Grid.Column="2"
-                                       HorizontalOptions="End"
-                                       VerticalOptions="Start"
-                                       FontFamily="FontAwesome"
-                                       FontSize="20"
-                                       Margin="0,6,5,0"
-                                       Text="{x:Static helpers:IconFont.TrashCan}"
-                                       TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}">
-                                    <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped"
-                                                              CommandParameter="{Binding .}" />
-                                    </Label.GestureRecognizers>
-                                </Label>
-                            </Grid>
-                            <Grid>
-                                <WebView
-                                    MaximumHeightRequest="150"
-                                    Margin="0,0,0,3">
-                                    <WebView.Source>
-                                        <HtmlWebViewSource
-                                            Html="{Binding FullContent, Converter={StaticResource HtmlConverter}, ConverterParameter={x:Type vm:ReportsViewModel}}" />
-                                    </WebView.Source>
-                                </WebView>
-                                <Border Stroke="transparent">
-                                    <Border.Background>
-                                        <LinearGradientBrush EndPoint="0,1">
-                                            <GradientStop Color="Transparent"
-                                                          Offset="0.1" />
-                                            <GradientStop Color="{AppThemeBinding Light={StaticResource Quinary}, Dark={StaticResource QuinaryDark}}"
-                                                          Offset="1.0" />
-                                        </LinearGradientBrush>
-                                    </Border.Background>
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped"
-                                                              CommandParameter="{Binding .}" />
-                                    </Border.GestureRecognizers>
-                                </Border>
-                            </Grid>
-                        </StackLayout>
-                    </Border>
+                    <mpowerkit:VirtualizeListViewCell>
+                        <Border Stroke="transparent"
+                                StrokeThickness="1"
+                                Padding="5"
+                                StrokeShape="RoundRectangle 10"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Quinary}, Dark={StaticResource QuinaryDark}}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped"
+                                                      CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+                            <StackLayout Padding="10">
+                                <Grid Padding="0,0,0,5"
+                                      ColumnDefinitions="40*, 30*, auto">
+                                    <VerticalStackLayout Grid.Column="0">
+                                        <Label Text="{Binding Title}"
+                                               FontAttributes="Bold"
+                                               FontSize="25"
+                                               FontFamily="Poppins"
+                                               LineBreakMode="TailTruncation" />
+                                        <Label Text="{Binding DateCreated, Converter={StaticResource UnixTimeStampToStringConverter}}"
+                                               FontSize="12"
+                                               FontFamily="Poppins"
+                                               VerticalTextAlignment="Center"
+                                               LineBreakMode="TailTruncation"
+                                               TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}" />
+                                    </VerticalStackLayout>
+                                    <Label Grid.Column="2"
+                                           HorizontalOptions="End"
+                                           VerticalOptions="Start"
+                                           FontFamily="FontAwesome"
+                                           FontSize="20"
+                                           Margin="0,6,5,0"
+                                           Text="{x:Static helpers:IconFont.TrashCan}"
+                                           TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped"
+                                                                  CommandParameter="{Binding .}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                </Grid>
+                                <Grid>
+                                    <WebView MaximumHeightRequest="150"
+                                             Margin="0,0,0,3">
+                                        <WebView.Source>
+                                            <HtmlWebViewSource Html="{Binding FullContent, Converter={StaticResource HtmlConverter}, ConverterParameter={x:Type vm:ReportsViewModel}}" />
+                                        </WebView.Source>
+                                    </WebView>
+                                    <Border Stroke="transparent">
+                                        <Border.Background>
+                                            <LinearGradientBrush EndPoint="0,1">
+                                                <GradientStop Color="Transparent"
+                                                              Offset="0.1" />
+                                                <GradientStop Color="{AppThemeBinding Light={StaticResource Quinary}, Dark={StaticResource QuinaryDark}}"
+                                                              Offset="1.0" />
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped"
+                                                                  CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                </Grid>
+                            </StackLayout>
+                        </Border>
+                    </mpowerkit:VirtualizeListViewCell>
                 </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-    </ScrollView>
+            </mpowerkit:VirtualizeListView.ItemTemplate>
+        </mpowerkit:VirtualizeListView>
+    </Grid>
 </ContentPage>
