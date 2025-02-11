@@ -11,6 +11,7 @@ using Geco.Views;
 using Geco.Views.Helpers;
 using GoogleGeminiSDK;
 using Microsoft.Extensions.AI;
+using MPowerKit.VirtualizeListView;
 using Syncfusion.Maui.Toolkit.Chips;
 
 namespace Geco.ViewModels;
@@ -33,6 +34,7 @@ public partial class ChatViewModel : ObservableObject
 	[ObservableProperty] string _editorPlaceHolder = DefaultEditorPlaceholder;
 	[ObservableProperty] bool _isChatEnabled;
 	[ObservableProperty] bool _isAutoCompleteVisible = true;
+	internal VirtualizeListView? ListViewComponent { get; set; }
 	bool IsWaitingForResponse { get; set; }
 	Queue<Delegate> NavigationQueue { get; }
 
@@ -131,6 +133,13 @@ public partial class ChatViewModel : ObservableObject
 		// save chat message to database
 		if (HistoryId != null)
 			await chatRepo.AppendChat(HistoryId, e.Message);
+		
+		// Scroll to bottom effect after sending a message
+		if (ListViewComponent != null)
+		{
+			var scrollComponentItems = ListViewComponent.LayoutManager.ReadOnlyLaidOutItems.Last();
+			await ListViewComponent.ScrollToAsync(0, scrollComponentItems.LeftTop.Y, true);
+		}
 	}
 
 	internal void ChatTextChanged(string newText)

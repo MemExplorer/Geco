@@ -10,6 +10,7 @@ using Geco.Views;
 using Geco.Views.Helpers;
 using GoogleGeminiSDK;
 using Microsoft.Extensions.AI;
+using MPowerKit.VirtualizeListView;
 
 namespace Geco.ViewModels;
 
@@ -30,6 +31,7 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 	[ObservableProperty] ObservableCollection<ChatMessage> _chatMessages = [];
 	[ObservableProperty] string _editorPlaceHolder = DefaultEditorPlaceholder;
 	[ObservableProperty] bool _isChatEnabled;
+	internal VirtualizeListView? ListViewComponent { get; set; }
 	bool IsWaitingForResponse { get; set; }
 	Queue<Delegate> NavigationQueue { get; }
 
@@ -137,6 +139,13 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 		// save chat message to database
 		if (HistoryId != null)
 			await chatRepo.AppendChat(HistoryId, e.Message);
+		
+		// Scroll to bottom effect after sending a message
+		if (ListViewComponent != null)
+		{
+			var scrollComponentItems = ListViewComponent.LayoutManager.ReadOnlyLaidOutItems.Last();
+			await ListViewComponent.ScrollToAsync(0, scrollComponentItems.LeftTop.Y, true);
+		}
 	}
 
 	[RelayCommand]

@@ -1,6 +1,7 @@
 using CommunityToolkit.Maui.Alerts;
 using Geco.Core.Database;
 using Geco.ViewModels;
+using Geco.Views.Helpers;
 using Syncfusion.Maui.Toolkit.Chips;
 
 namespace Geco.Views;
@@ -16,16 +17,18 @@ public partial class ChatPage : ContentPage
 		InitializeComponent();
 
 		// Create new instance of chat page every time page is loaded
-		vList.Adapter.ItemRangeInserted += Adapter_ItemRangeInserted;
+		CurrentViewModel.ListViewComponent = vList;
+		var layoutMgr = (LinearItemsLayoutManager2)vList.LayoutManager;
+		layoutMgr.OnFinishedLoadingItems += async (s, e) => 
+			await OnFinishedLoadingItems(s, e);
 		Appearing += async (_, _) =>
 			await InitializeChat();
 	}
 
-	private void Adapter_ItemRangeInserted(object? sender, (int startingIndex, int totalCount) e)
+	async Task OnFinishedLoadingItems(object? sender, EventArgs e)
 	{
-		// Scroll to bottom effect after sending a message
 		var scrollComponentItems = vList.LayoutManager.ReadOnlyLaidOutItems.Last();
-		vList.ScrollToAsync(0, scrollComponentItems.LeftTop.Y, true);
+		await vList.ScrollToAsync(0, scrollComponentItems.LeftTop.Y, true);
 	}
 
 	internal async Task InitializeChat()
@@ -49,6 +52,7 @@ public partial class ChatPage : ContentPage
 			var currentHistory = appShellCtx.ChatHistoryList.First(x => x.Id == Parent.ClassId);
 
 			// load conversation data
+			vList.LayoutManager.InvalidateLayout();
 			await chatRepo.LoadChats(currentHistory);
 			ctx.LoadHistory(currentHistory);
 		}

@@ -142,6 +142,9 @@
                                       ItemsSource="{Binding ChatMessages}"
                                       VerticalOptions="EndAndExpand"
                                       ItemTemplate="{StaticResource ChatTemplateSelector}">
+            <mpowerkit:VirtualizeListView.LayoutManager>
+                <helpers:LinearItemsLayoutManager2/>
+            </mpowerkit:VirtualizeListView.LayoutManager>
         </mpowerkit:VirtualizeListView>
 
         <Border Padding="5"
