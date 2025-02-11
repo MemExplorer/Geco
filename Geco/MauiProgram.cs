@@ -10,13 +10,17 @@ using GoogleGeminiSDK;
 using GoogleGeminiSDK.Models.Components;
 using GoogleGeminiSDK.Models.ContentGeneration;
 using Markdig;
+using MPowerKit.VirtualizeListView;
 using Syncfusion.Maui.Toolkit.Hosting;
+using Geco.Views.Helpers;
+
 #if ANDROID
 using Application = Android.App.Application;
 using Geco.Triggers.ActionObservers;
 using Geco.Notifications;
 using Microsoft.Maui.Handlers;
 using Microsoft.Maui.Platform;
+using Geco.Platforms.Android.Handlers;
 using Android.Content.Res;
 #endif
 
@@ -32,6 +36,8 @@ public static class MauiProgram
 			.UseMauiApp<App>()
 			.UseMauiCommunityToolkit()
 			.ConfigureSyncfusionToolkit()
+			.UseMPowerKitListView()
+			.UseContentSizedWebview()
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -49,6 +55,19 @@ public static class MauiProgram
 		ApplyAndroidUiModifications();
 
 		return builder.Build();
+	}
+
+	// Reference: https://github.com/albyrock87/maui-content-sized-webview
+	static MauiAppBuilder UseContentSizedWebview(this MauiAppBuilder builder)
+	{
+		builder.ConfigureMauiHandlers(handlers =>
+		{
+#if ANDROID
+			handlers.AddHandler<ContentSizedWebView, ContentSizedWebViewHandler>();
+#endif
+		});
+
+		return builder;
 	}
 
 	static MauiAppBuilder InitializeBackendServices(this MauiAppBuilder builder)

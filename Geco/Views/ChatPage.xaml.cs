@@ -16,8 +16,16 @@ public partial class ChatPage : ContentPage
 		InitializeComponent();
 
 		// Create new instance of chat page every time page is loaded
+		vList.Adapter.ItemRangeInserted += Adapter_ItemRangeInserted;
 		Appearing += async (_, _) =>
 			await InitializeChat();
+	}
+
+	private void Adapter_ItemRangeInserted(object? sender, (int startingIndex, int totalCount) e)
+	{
+		// Scroll to bottom effect after sending a message
+		var scrollComponentItems = vList.LayoutManager.ReadOnlyLaidOutItems.Last();
+		vList.ScrollToAsync(0, scrollComponentItems.LeftTop.Y, true);
 	}
 
 	internal async Task InitializeChat()

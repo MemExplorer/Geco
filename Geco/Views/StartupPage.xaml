@@ -6,7 +6,8 @@
              xmlns:vm="clr-namespace:Geco.ViewModels"
              Title="StartupPage"
              Shell.FlyoutBehavior="Disabled"
-             Shell.NavBarIsVisible="False">
+             Shell.NavBarIsVisible="False"
+             x:DataType="vm:StartupPageViewModel">
     <ContentPage.BindingContext>
         <vm:StartupPageViewModel />
     </ContentPage.BindingContext>

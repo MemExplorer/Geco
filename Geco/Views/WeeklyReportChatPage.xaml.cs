@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Alerts;
 using Geco.ViewModels;
 
 namespace Geco.Views;
@@ -12,6 +12,15 @@ public partial class WeeklyReportChatPage : ContentPage
 		BindingContext = vm;
 		CurrentViewModel = vm;
 		InitializeComponent();
+
+		vList.Adapter.ItemRangeInserted += Adapter_ItemRangeInserted;
+	}
+
+	private void Adapter_ItemRangeInserted(object? sender, (int startingIndex, int totalCount) e)
+	{
+		// Scroll to bottom effect after sending a message
+		var scrollComponentItems = vList.LayoutManager.ReadOnlyLaidOutItems.Last();
+		vList.ScrollToAsync(0, scrollComponentItems.LeftTop.Y, true);
 	}
 
 	void WebView_OnNavigating(object? sender, WebNavigatingEventArgs e)
