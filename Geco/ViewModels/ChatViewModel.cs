@@ -32,6 +32,7 @@ public partial class ChatViewModel : ObservableObject
 	// Chat properties
 	[ObservableProperty] ObservableCollection<ChatMessage> _chatMessages = [];
 	[ObservableProperty] string _editorPlaceHolder = DefaultEditorPlaceholder;
+	[ObservableProperty] string _editorTextContent = string.Empty;
 	[ObservableProperty] bool _isChatEnabled;
 	[ObservableProperty] bool _isAutoCompleteVisible = true;
 	internal VirtualizeListView? ListViewComponent { get; set; }
@@ -52,6 +53,7 @@ public partial class ChatViewModel : ObservableObject
 	{
 		GeminiClient = GlobalContext.Services.GetRequiredService<GeminiChat>();
 		SpeechToText = GlobalContext.Services.GetRequiredService<ISpeechToText>();
+		SpeechToText.RecognitionResultCompleted += SpeechToTextOnRecognitionResultCompleted;
 		SpeechToText.RecognitionResultUpdated += SpeechToTextOnRecognitionResultUpdated;
 		GeminiClient.OnChatReceive += async (_, e) =>
 			await GeminiClientOnChatReceive(e);
@@ -75,6 +77,19 @@ public partial class ChatViewModel : ObservableObject
 	#endregion
 
 	#region Controllers
+
+	async Task MicrophoneStopListening(bool delay = false)
+	{
+		// Update UI state
+		EditorPlaceHolder = DefaultEditorPlaceholder;
+		IsMicrophoneEnabled = false;
+		if (delay)
+			await Task.Delay(2000);
+		await SpeechToText.StopListenAsync();
+		if (_speechToTextResultHolder.Length > 0)
+			EditorTextContent = _speechToTextResultHolder;
+		IsChatEnabled = true;
+	}
 
 	/// <summary>
 	///     Loads chat history into the ChatViewModel instance
@@ -115,9 +130,6 @@ public partial class ChatViewModel : ObservableObject
 
 	#region Event Handlers
 
-	void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e) =>
-		_speechToTextResultHolder = e.RecognitionResult;
-
 	/// <summary>
 	///     Handles chat send and receive events from Gemini
 	/// </summary>
@@ -151,8 +163,25 @@ public partial class ChatViewModel : ObservableObject
 			IsChatEnabled = newText.Length != 0;
 	}
 
+	private void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e)
+	{
+		_speechToTextResultHolder = e.RecognitionResult;
+	}
+
+	private async void SpeechToTextOnRecognitionResultCompleted(object? sender, SpeechToTextRecognitionResultCompletedEventArgs e)
+	{
+		_speechToTextResultHolder = string.Empty;
+		MicrophoneMargin = new Thickness(0, 0, 10, 0);
+		MicrophoneIcon = IconFont.Microphone;
+		await MicrophoneStopListening();
+		if (e.RecognitionResult.IsSuccessful)
+			EditorTextContent += e.RecognitionResult.Text;
+
+		IsMicrophoneEnabled = true;
+	}
+
 	[RelayCommand]
-	async Task MicrophoneClick(Editor chatEditor)
+	async Task MicrophoneClick()
 	{
 		bool isUseMicrophone = MicrophoneIcon == IconFont.Microphone;
 		MicrophoneMargin = new Thickness(0, 0, (int)MicrophoneMargin.Right == 10 ? 5.5 : 10, 0);
@@ -176,20 +205,15 @@ public partial class ChatViewModel : ObservableObject
 			IsMicrophoneEnabled = false;
 			IsChatEnabled = false;
 			_speechToTextResultHolder = string.Empty;
-			await SpeechToText.StartListenAsync(CultureInfo.CurrentCulture);
-			await Task.Delay(1000);
+			await SpeechToText.StartListenAsync(new SpeechToTextOptions()
+			{
+				Culture = CultureInfo.CurrentCulture,
+				ShouldReportPartialResults = true
+			});
 			EditorPlaceHolder = ListeningMessagePlaceholder;
 		}
 		else
-		{
-			// Update UI state
-			EditorPlaceHolder = DefaultEditorPlaceholder;
-			IsMicrophoneEnabled = false;
-			await Task.Delay(3000);
-			await SpeechToText.StopListenAsync();
-			chatEditor.Text += _speechToTextResultHolder;
-			IsChatEnabled = true;
-		}
+			await MicrophoneStopListening(true);
 
 		IsMicrophoneEnabled = true;
 	}

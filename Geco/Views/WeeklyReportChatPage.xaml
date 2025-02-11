@@ -101,6 +101,7 @@
                         AutoSize="TextChanges"
                         MaximumHeightRequest="100"
                         HorizontalOptions="FillAndExpand"
+                        Text="{Binding EditorTextContent}"
                         TextChanged="ChatEntry_OnTextChanged"
                         Placeholder="{Binding EditorPlaceHolder}" />
 
@@ -112,8 +113,7 @@
                        FontFamily="FontAwesome"
                        Text="{Binding MicrophoneIcon}">
                     <Label.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding MicrophoneClickCommand}"
-                                              CommandParameter="{x:Reference ChatEntry}" />
+                        <TapGestureRecognizer Command="{Binding MicrophoneClickCommand}" />
                     </Label.GestureRecognizers>
                 </Label>
 

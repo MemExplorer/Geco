@@ -28,14 +28,41 @@ public partial class SearchViewModel : ObservableObject
 	public SearchViewModel()
 	{
 		SpeechToText = GlobalContext.Services.GetRequiredService<ISpeechToText>();
+		SpeechToText.RecognitionResultCompleted += SpeechToTextOnRecognitionResultCompleted;
 		SpeechToText.RecognitionResultUpdated += SpeechToTextOnRecognitionResultUpdated;
 	}
 
-	void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e) =>
+	async Task MicrophoneStopListening(bool delay = false)
+	{
+		// Update UI state
+		SearchPlaceholder = DefaultEditorPlaceholder;
+		IsMicrophoneEnabled = false;
+		if (delay)
+			await Task.Delay(2000);
+		await SpeechToText.StopListenAsync();
+		if (_speechToTextResultHolder.Length > 0)
+			SearchQuery = _speechToTextResultHolder;
+	}
+
+	private void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e)
+	{
 		_speechToTextResultHolder = e.RecognitionResult;
+	}
+
+	private async void SpeechToTextOnRecognitionResultCompleted(object? sender, SpeechToTextRecognitionResultCompletedEventArgs e)
+	{
+		_speechToTextResultHolder = string.Empty;
+		MicrophoneMargin = new Thickness(0, 0, 10, 0);
+		MicrophoneIcon = IconFont.Microphone;
+		await MicrophoneStopListening();
+		if (e.RecognitionResult.IsSuccessful)
+			SearchQuery += e.RecognitionResult.Text;
+
+		IsMicrophoneEnabled = true;
+	}
 
 	[RelayCommand]
-	async Task MicrophoneClick(Entry searchEntry)
+	async Task MicrophoneClick()
 	{
 		bool isUseMicrophone = MicrophoneIcon == IconFont.Microphone;
 		MicrophoneMargin = new Thickness(0, 0, (int)MicrophoneMargin.Right == 10 ? 5.5 : 10, 0);
@@ -57,22 +84,16 @@ public partial class SearchViewModel : ObservableObject
 
 			// Update UI state
 			IsMicrophoneEnabled = false;
-			IsSearchButtonEnabled = false;
 			_speechToTextResultHolder = string.Empty;
-			await SpeechToText.StartListenAsync(CultureInfo.CurrentCulture);
-			await Task.Delay(1000);
+			await SpeechToText.StartListenAsync(new SpeechToTextOptions()
+			{
+				Culture = CultureInfo.CurrentCulture,
+				ShouldReportPartialResults = true
+			});
 			SearchPlaceholder = ListeningMessagePlaceholder;
 		}
 		else
-		{
-			// Update UI state
-			SearchPlaceholder = DefaultEditorPlaceholder;
-			IsMicrophoneEnabled = false;
-			await Task.Delay(3000);
-			await SpeechToText.StopListenAsync();
-			searchEntry.Text += _speechToTextResultHolder;
-			IsSearchButtonEnabled = true;
-		}
+			await MicrophoneStopListening(true);
 
 		IsMicrophoneEnabled = true;
 	}
