@@ -59,12 +59,10 @@
                            Text="Changes the user interface to a darker color scheme" 
                            TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}"/>
                 </StackLayout>
-                <Switch x:Name="DarkModeSwt" HorizontalOptions="End" ThumbColor="{AppThemeBinding Light=#403f3f,  Dark=#dedcdc}" >
-                    <Switch.Behaviors>
-                        <toolkit:EventToCommandBehavior EventName="Toggled"
-                                                        x:TypeArguments="ToggledEventArgs"
-                                                        Command="{Binding ToggleDarkModeCommand}" />
-                    </Switch.Behaviors>
+                <Switch x:Name="DarkModeSwt"
+                        HorizontalOptions="End"
+                        Toggled="DarkModeSwt_Toggled"
+                        ThumbColor="{AppThemeBinding Light=#403f3f,  Dark=#dedcdc}">
                 </Switch>
             </StackLayout>
         </Border>

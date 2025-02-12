@@ -53,8 +53,7 @@ public partial class SettingsViewModel : ObservableObject
 		await chatRepo.DeleteAllHistory(HistoryType.WeeklyReportConversation);
 	}
 
-	[RelayCommand]
-	void ToggleDarkMode(ToggledEventArgs e)
+	public void ToggleDarkMode(ToggledEventArgs e)
 	{
 		bool isDark = e.Value;
 		Application.Current!.UserAppTheme = isDark ? AppTheme.Dark : AppTheme.Light;

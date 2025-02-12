@@ -31,4 +31,10 @@ public partial class SettingsPage : ContentPage
 		var bindingCtx = (SettingsViewModel)BindingContext;
 		bindingCtx.ToggleMonitor((Switch)sender, e, _monitorService);
 	}
+
+	private void DarkModeSwt_Toggled(object sender, ToggledEventArgs e)
+	{
+		var bindingCtx = (SettingsViewModel)BindingContext;
+		bindingCtx.ToggleDarkMode(e);
+	}
 }
