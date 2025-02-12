@@ -29,9 +29,8 @@
                 StrokeShape="RoundRectangle 30,30,30,30"
                 Margin="0,10,0,20">
 
-            <StackLayout
-                Orientation="Horizontal"
-                Spacing="5">
+            <StackLayout Orientation="Horizontal"
+                         Spacing="5">
                 <!--  Search Entry/Input  -->
                 <Entry x:Name="SearchEntry"
                        Margin="20,0,7,0"
@@ -78,118 +77,85 @@
             </StackLayout>
         </Border>
 
-        <!-- AI summary shimmer -->
-        <shimmer:SfShimmer
-            IsVisible="{Binding AiSummaryVisible, Converter={StaticResource InvertedBoolConverter}}"
-            Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
-            WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
-            BackgroundColor="Transparent"
-            HeightRequest="160">
-            <shimmer:SfShimmer.CustomView>
-                <VerticalStackLayout Padding="5" Spacing="5">
-
-                    <HorizontalStackLayout>
-                        <shimmer:ShimmerView HeightRequest="35"
-                                             Margin="1,5,5,5"
-                                             HorizontalOptions="Start"
-                                             ShapeType="Circle"
-                                             WidthRequest="28" />
-                        <shimmer:ShimmerView HeightRequest="15"
-                                             HorizontalOptions="Start"
-                                             ShapeType="RoundedRectangle"
-                                             WidthRequest="90" />
-                    </HorizontalStackLayout>
-
-                    <StackLayout Spacing="5" Margin="0, -3,0,0">
-                        <shimmer:ShimmerView HeightRequest="10"
-                                             HorizontalOptions="Start"
-                                             ShapeType="RoundedRectangle"
-                                             WidthRequest="360" />
-                        <shimmer:ShimmerView HeightRequest="10"
-                                             HorizontalOptions="Start"
-                                             ShapeType="RoundedRectangle"
-                                             WidthRequest="360" />
-                        <shimmer:ShimmerView HeightRequest="10"
-                                             HorizontalOptions="Start"
-                                             ShapeType="RoundedRectangle"
-                                             WidthRequest="360" />
-                        <shimmer:ShimmerView HeightRequest="10"
-                                             HorizontalOptions="Start"
-                                             ShapeType="RoundedRectangle"
-                                             WidthRequest="360" />
-                        <shimmer:ShimmerView HeightRequest="10"
-                                             HorizontalOptions="Start"
-                                             ShapeType="RoundedRectangle"
-                                             WidthRequest="360" />
-                        <shimmer:ShimmerView HeightRequest="10"
-                                             HorizontalOptions="Start"
-                                             ShapeType="RoundedRectangle"
-                                             WidthRequest="360" />
-                    </StackLayout>
-                </VerticalStackLayout>
-            </shimmer:SfShimmer.CustomView>
-        </shimmer:SfShimmer>
-
         <!-- Shimmer -->
-        <StackLayout Orientation="Vertical" Spacing="10" IsVisible="{Binding IsSearching}">
+        <StackLayout Orientation="Vertical"
+                     IsVisible="{Binding IsSearching}"
+                     MaximumWidthRequest="600">
             <Border Stroke="Transparent"
                     StrokeThickness="1"
                     Padding="5,5,20,5"
                     StrokeShape="RoundRectangle 10,10,10,10"
                     MaximumHeightRequest="160"
                     BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}">
-                <shimmer:SfShimmer
-                    Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
-                    WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
-                    BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
-                    HeightRequest="160">
+                <shimmer:SfShimmer Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
+                                   WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
+                                   BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
+                                   HeightRequest="160">
                     <shimmer:SfShimmer.CustomView>
-                        <VerticalStackLayout Padding="5" Spacing="5">
+                        <VerticalStackLayout Padding="5"
+                                             Spacing="5">
 
-                            <HorizontalStackLayout>
-                                <shimmer:ShimmerView HeightRequest="35"
+                            <Grid ColumnDefinitions="35, *">
+                                <shimmer:ShimmerView Grid.Column="0"
+                                                     Grid.ColumnSpan="1"
+                                                     HeightRequest="35"
                                                      Margin="1,5,5,5"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="Circle"
-                                                     WidthRequest="35" />
-                                <VerticalStackLayout Padding="5,10,0,0" Spacing="5">
-                                    <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="Circle" />
+                                <Grid Grid.Column="1"
+                                      Grid.ColumnSpan="2"
+                                      RowDefinitions="auto, auto"
+                                      ColumnDefinitions="12*, 18*, 50*"
+                                      Padding="5,10,0,0"
+                                      RowSpacing="5">
+                                    <shimmer:ShimmerView Grid.Row="0"
+                                                         Grid.ColumnSpan="1"
+                                                         HeightRequest="10"
                                                          HorizontalOptions="Start"
-                                                         ShapeType="RoundedRectangle"
-                                                         WidthRequest="100" />
-                                    <shimmer:ShimmerView HeightRequest="10"
+                                                         ShapeType="RoundedRectangle" />
+                                    <shimmer:ShimmerView Grid.Row="1"
+                                                         Grid.ColumnSpan="2"
+                                                         HeightRequest="10"
                                                          HorizontalOptions="Start"
-                                                         ShapeType="RoundedRectangle"
-                                                         WidthRequest="180" />
-                                </VerticalStackLayout>
-                            </HorizontalStackLayout>
+                                                         ShapeType="RoundedRectangle" />
+                                </Grid>
+                            </Grid>
 
-                            <StackLayout Spacing="5" Margin="0, -3,0,0">
-                                <shimmer:ShimmerView HeightRequest="18"
+                            <Grid RowDefinitions="auto, auto, auto, auto, auto, auto"
+                                  ColumnDefinitions="30*, 70*"
+                                  RowSpacing="5"
+                                  Margin="0, -3,0,0">
+                                <shimmer:ShimmerView Grid.Row="0"
+                                                     Grid.ColumnSpan="1"
+                                                     HeightRequest="18"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="180" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="1"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="2"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="3"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="4"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="5"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                            </StackLayout>
+                                                     ShapeType="RoundedRectangle" />
+                            </Grid>
                         </VerticalStackLayout>
                     </shimmer:SfShimmer.CustomView>
                 </shimmer:SfShimmer>
@@ -200,58 +166,75 @@
                     StrokeShape="RoundRectangle 10,10,10,10"
                     MaximumHeightRequest="160"
                     BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}">
-                <shimmer:SfShimmer
-                    Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
-                    WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
-                    BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
-                    HeightRequest="160">
+                <shimmer:SfShimmer Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
+                                   WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
+                                   BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
+                                   HeightRequest="160">
                     <shimmer:SfShimmer.CustomView>
-                        <VerticalStackLayout Padding="5" Spacing="5">
+                        <VerticalStackLayout Padding="5"
+                                             Spacing="5">
 
-                            <HorizontalStackLayout>
-                                <shimmer:ShimmerView HeightRequest="35"
+                            <Grid ColumnDefinitions="35, *">
+                                <shimmer:ShimmerView Grid.Column="0"
+                                                     Grid.ColumnSpan="1"
+                                                     HeightRequest="35"
                                                      Margin="1,5,5,5"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="Circle"
-                                                     WidthRequest="35" />
-                                <VerticalStackLayout Padding="5,10,0,0" Spacing="5">
-                                    <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="Circle" />
+                                <Grid Grid.Column="1"
+                                      Grid.ColumnSpan="2"
+                                      RowDefinitions="auto, auto"
+                                      ColumnDefinitions="12*, 18*, 50*"
+                                      Padding="5,10,0,0"
+                                      RowSpacing="5">
+                                    <shimmer:ShimmerView Grid.Row="0"
+                                                         Grid.ColumnSpan="1"
+                                                         HeightRequest="10"
                                                          HorizontalOptions="Start"
-                                                         ShapeType="RoundedRectangle"
-                                                         WidthRequest="100" />
-                                    <shimmer:ShimmerView HeightRequest="10"
+                                                         ShapeType="RoundedRectangle" />
+                                    <shimmer:ShimmerView Grid.Row="1"
+                                                         Grid.ColumnSpan="2"
+                                                         HeightRequest="10"
                                                          HorizontalOptions="Start"
-                                                         ShapeType="RoundedRectangle"
-                                                         WidthRequest="180" />
-                                </VerticalStackLayout>
-                            </HorizontalStackLayout>
+                                                         ShapeType="RoundedRectangle" />
+                                </Grid>
+                            </Grid>
 
-                            <StackLayout Spacing="5" Margin="0, -3,0,0">
-                                <shimmer:ShimmerView HeightRequest="18"
+                            <Grid RowDefinitions="auto, auto, auto, auto, auto, auto"
+                                  ColumnDefinitions="30*, 70*"
+                                  RowSpacing="5"
+                                  Margin="0, -3,0,0">
+                                <shimmer:ShimmerView Grid.Row="0"
+                                                     Grid.ColumnSpan="1"
+                                                     HeightRequest="18"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="180" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="1"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="2"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="3"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="4"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="5"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                            </StackLayout>
+                                                     ShapeType="RoundedRectangle" />
+                            </Grid>
                         </VerticalStackLayout>
                     </shimmer:SfShimmer.CustomView>
                 </shimmer:SfShimmer>
@@ -262,58 +245,75 @@
                     StrokeShape="RoundRectangle 10,10,10,10"
                     MaximumHeightRequest="160"
                     BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}">
-                <shimmer:SfShimmer
-                    Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
-                    WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
-                    BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
-                    HeightRequest="160">
+                <shimmer:SfShimmer Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
+                                   WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
+                                   BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
+                                   HeightRequest="160">
                     <shimmer:SfShimmer.CustomView>
-                        <VerticalStackLayout Padding="5" Spacing="5">
+                        <VerticalStackLayout Padding="5"
+                                             Spacing="5">
 
-                            <HorizontalStackLayout>
-                                <shimmer:ShimmerView HeightRequest="35"
+                            <Grid ColumnDefinitions="35, *">
+                                <shimmer:ShimmerView Grid.Column="0"
+                                                     Grid.ColumnSpan="1"
+                                                     HeightRequest="35"
                                                      Margin="1,5,5,5"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="Circle"
-                                                     WidthRequest="35" />
-                                <VerticalStackLayout Padding="5,10,0,0" Spacing="5">
-                                    <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="Circle" />
+                                <Grid Grid.Column="1"
+                                      Grid.ColumnSpan="2"
+                                      RowDefinitions="auto, auto"
+                                      ColumnDefinitions="12*, 18*, 50*"
+                                      Padding="5,10,0,0"
+                                      RowSpacing="5">
+                                    <shimmer:ShimmerView Grid.Row="0"
+                                                         Grid.ColumnSpan="1"
+                                                         HeightRequest="10"
                                                          HorizontalOptions="Start"
-                                                         ShapeType="RoundedRectangle"
-                                                         WidthRequest="100" />
-                                    <shimmer:ShimmerView HeightRequest="10"
+                                                         ShapeType="RoundedRectangle" />
+                                    <shimmer:ShimmerView Grid.Row="1"
+                                                         Grid.ColumnSpan="2"
+                                                         HeightRequest="10"
                                                          HorizontalOptions="Start"
-                                                         ShapeType="RoundedRectangle"
-                                                         WidthRequest="180" />
-                                </VerticalStackLayout>
-                            </HorizontalStackLayout>
+                                                         ShapeType="RoundedRectangle" />
+                                </Grid>
+                            </Grid>
 
-                            <StackLayout Spacing="5" Margin="0, -3,0,0">
-                                <shimmer:ShimmerView HeightRequest="18"
+                            <Grid RowDefinitions="auto, auto, auto, auto, auto, auto"
+                                  ColumnDefinitions="30*, 70*"
+                                  RowSpacing="5"
+                                  Margin="0, -3,0,0">
+                                <shimmer:ShimmerView Grid.Row="0"
+                                                     Grid.ColumnSpan="1"
+                                                     HeightRequest="18"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="180" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="1"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="2"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="3"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="4"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="5"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                            </StackLayout>
+                                                     ShapeType="RoundedRectangle" />
+                            </Grid>
                         </VerticalStackLayout>
                     </shimmer:SfShimmer.CustomView>
                 </shimmer:SfShimmer>
@@ -324,58 +324,75 @@
                     StrokeShape="RoundRectangle 10,10,10,10"
                     MaximumHeightRequest="160"
                     BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}">
-                <shimmer:SfShimmer
-                    Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
-                    WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
-                    BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
-                    HeightRequest="160">
+                <shimmer:SfShimmer Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
+                                   WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
+                                   BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
+                                   HeightRequest="160">
                     <shimmer:SfShimmer.CustomView>
-                        <VerticalStackLayout Padding="5" Spacing="5">
+                        <VerticalStackLayout Padding="5"
+                                             Spacing="5">
 
-                            <HorizontalStackLayout>
-                                <shimmer:ShimmerView HeightRequest="35"
+                            <Grid ColumnDefinitions="35, *">
+                                <shimmer:ShimmerView Grid.Column="0"
+                                                     Grid.ColumnSpan="1"
+                                                     HeightRequest="35"
                                                      Margin="1,5,5,5"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="Circle"
-                                                     WidthRequest="35" />
-                                <VerticalStackLayout Padding="5,10,0,0" Spacing="5">
-                                    <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="Circle" />
+                                <Grid Grid.Column="1"
+                                      Grid.ColumnSpan="2"
+                                      RowDefinitions="auto, auto"
+                                      ColumnDefinitions="12*, 18*, 50*"
+                                      Padding="5,10,0,0"
+                                      RowSpacing="5">
+                                    <shimmer:ShimmerView Grid.Row="0"
+                                                         Grid.ColumnSpan="1"
+                                                         HeightRequest="10"
                                                          HorizontalOptions="Start"
-                                                         ShapeType="RoundedRectangle"
-                                                         WidthRequest="100" />
-                                    <shimmer:ShimmerView HeightRequest="10"
+                                                         ShapeType="RoundedRectangle" />
+                                    <shimmer:ShimmerView Grid.Row="1"
+                                                         Grid.ColumnSpan="2"
+                                                         HeightRequest="10"
                                                          HorizontalOptions="Start"
-                                                         ShapeType="RoundedRectangle"
-                                                         WidthRequest="180" />
-                                </VerticalStackLayout>
-                            </HorizontalStackLayout>
+                                                         ShapeType="RoundedRectangle" />
+                                </Grid>
+                            </Grid>
 
-                            <StackLayout Spacing="5" Margin="0, -3,0,0">
-                                <shimmer:ShimmerView HeightRequest="18"
+                            <Grid RowDefinitions="auto, auto, auto, auto, auto, auto"
+                                  ColumnDefinitions="30*, 70*"
+                                  RowSpacing="5"
+                                  Margin="0, -3,0,0">
+                                <shimmer:ShimmerView Grid.Row="0"
+                                                     Grid.ColumnSpan="1"
+                                                     HeightRequest="18"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="180" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="1"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="2"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="3"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="4"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="5"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                            </StackLayout>
+                                                     ShapeType="RoundedRectangle" />
+                            </Grid>
                         </VerticalStackLayout>
                     </shimmer:SfShimmer.CustomView>
                 </shimmer:SfShimmer>
@@ -386,58 +403,154 @@
                     StrokeShape="RoundRectangle 10,10,10,10"
                     MaximumHeightRequest="160"
                     BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}">
-                <shimmer:SfShimmer
-                    Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
-                    WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
-                    BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
-                    HeightRequest="160">
+                <shimmer:SfShimmer Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
+                                   WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
+                                   BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
+                                   HeightRequest="160">
                     <shimmer:SfShimmer.CustomView>
-                        <VerticalStackLayout Padding="5" Spacing="5">
+                        <VerticalStackLayout Padding="5"
+                                             Spacing="5">
 
-                            <HorizontalStackLayout>
-                                <shimmer:ShimmerView HeightRequest="35"
+                            <Grid ColumnDefinitions="35, *">
+                                <shimmer:ShimmerView Grid.Column="0"
+                                                     Grid.ColumnSpan="1"
+                                                     HeightRequest="35"
                                                      Margin="1,5,5,5"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="Circle"
-                                                     WidthRequest="35" />
-                                <VerticalStackLayout Padding="5,10,0,0" Spacing="5">
-                                    <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="Circle" />
+                                <Grid Grid.Column="1"
+                                      Grid.ColumnSpan="2"
+                                      RowDefinitions="auto, auto"
+                                      ColumnDefinitions="12*, 18*, 50*"
+                                      Padding="5,10,0,0"
+                                      RowSpacing="5">
+                                    <shimmer:ShimmerView Grid.Row="0"
+                                                         Grid.ColumnSpan="1"
+                                                         HeightRequest="10"
                                                          HorizontalOptions="Start"
-                                                         ShapeType="RoundedRectangle"
-                                                         WidthRequest="100" />
-                                    <shimmer:ShimmerView HeightRequest="10"
+                                                         ShapeType="RoundedRectangle" />
+                                    <shimmer:ShimmerView Grid.Row="1"
+                                                         Grid.ColumnSpan="2"
+                                                         HeightRequest="10"
                                                          HorizontalOptions="Start"
-                                                         ShapeType="RoundedRectangle"
-                                                         WidthRequest="180" />
-                                </VerticalStackLayout>
-                            </HorizontalStackLayout>
+                                                         ShapeType="RoundedRectangle" />
+                                </Grid>
+                            </Grid>
 
-                            <StackLayout Spacing="5" Margin="0, -3,0,0">
-                                <shimmer:ShimmerView HeightRequest="18"
+                            <Grid RowDefinitions="auto, auto, auto, auto, auto, auto"
+                                  ColumnDefinitions="30*, 70*"
+                                  RowSpacing="5"
+                                  Margin="0, -3,0,0">
+                                <shimmer:ShimmerView Grid.Row="0"
+                                                     Grid.ColumnSpan="1"
+                                                     HeightRequest="18"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="180" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="1"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="2"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="3"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="4"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                                <shimmer:ShimmerView HeightRequest="10"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="5"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
                                                      HorizontalOptions="Start"
-                                                     ShapeType="RoundedRectangle"
-                                                     WidthRequest="360" />
-                            </StackLayout>
+                                                     ShapeType="RoundedRectangle" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </shimmer:SfShimmer.CustomView>
+                </shimmer:SfShimmer>
+            </Border>
+            <Border Stroke="Transparent"
+                    StrokeThickness="1"
+                    Padding="5,5,20,5"
+                    StrokeShape="RoundRectangle 10,10,10,10"
+                    MaximumHeightRequest="160"
+                    BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}">
+                <shimmer:SfShimmer Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
+                                   WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
+                                   BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}"
+                                   HeightRequest="160">
+                    <shimmer:SfShimmer.CustomView>
+                        <VerticalStackLayout Padding="5"
+                                             Spacing="5">
+
+                            <Grid ColumnDefinitions="35, *">
+                                <shimmer:ShimmerView Grid.Column="0"
+                                                     Grid.ColumnSpan="1"
+                                                     HeightRequest="35"
+                                                     Margin="1,5,5,5"
+                                                     HorizontalOptions="Start"
+                                                     ShapeType="Circle" />
+                                <Grid Grid.Column="1"
+                                      Grid.ColumnSpan="2"
+                                      RowDefinitions="auto, auto"
+                                      ColumnDefinitions="12*, 18*, 50*"
+                                      Padding="5,10,0,0"
+                                      RowSpacing="5">
+                                    <shimmer:ShimmerView Grid.Row="0"
+                                                         Grid.ColumnSpan="1"
+                                                         HeightRequest="10"
+                                                         HorizontalOptions="Start"
+                                                         ShapeType="RoundedRectangle" />
+                                    <shimmer:ShimmerView Grid.Row="1"
+                                                         Grid.ColumnSpan="2"
+                                                         HeightRequest="10"
+                                                         HorizontalOptions="Start"
+                                                         ShapeType="RoundedRectangle" />
+                                </Grid>
+                            </Grid>
+
+                            <Grid RowDefinitions="auto, auto, auto, auto, auto, auto"
+                                  ColumnDefinitions="30*, 70*"
+                                  RowSpacing="5"
+                                  Margin="0, -3,0,0">
+                                <shimmer:ShimmerView Grid.Row="0"
+                                                     Grid.ColumnSpan="1"
+                                                     HeightRequest="18"
+                                                     HorizontalOptions="Start"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="1"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
+                                                     HorizontalOptions="Start"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="2"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
+                                                     HorizontalOptions="Start"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="3"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
+                                                     HorizontalOptions="Start"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="4"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
+                                                     HorizontalOptions="Start"
+                                                     ShapeType="RoundedRectangle" />
+                                <shimmer:ShimmerView Grid.Row="5"
+                                                     Grid.ColumnSpan="2"
+                                                     HeightRequest="10"
+                                                     HorizontalOptions="Start"
+                                                     ShapeType="RoundedRectangle" />
+                            </Grid>
                         </VerticalStackLayout>
                     </shimmer:SfShimmer.CustomView>
                 </shimmer:SfShimmer>
@@ -451,7 +564,54 @@
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
             </CollectionView.ItemsLayout>
             <CollectionView.Header>
-                <StackLayout>
+                <StackLayout MaximumWidthRequest="600">
+                    <!-- AI summary shimmer -->
+                    <shimmer:SfShimmer IsVisible="{Binding AiSummaryVisible, Converter={StaticResource InvertedBoolConverter}}"
+                                       Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
+                                       WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
+                                       BackgroundColor="Transparent"
+                                       HeightRequest="160">
+                        <shimmer:SfShimmer.CustomView>
+                            <VerticalStackLayout Padding="5"
+                                                 Spacing="5">
+
+                                <Grid ColumnDefinitions="50, 40*, 50*"
+                                      ColumnSpacing="0">
+                                    <shimmer:ShimmerView Grid.Column="0"
+                                                         HeightRequest="35"
+                                                         Margin="1,5,5,5"
+                                                         HorizontalOptions="Start"
+                                                         ShapeType="Circle" />
+                                    <shimmer:ShimmerView Grid.Column="1"
+                                                         HeightRequest="15"
+                                                         HorizontalOptions="Start"
+                                                         ShapeType="RoundedRectangle" />
+                                </Grid>
+
+                                <StackLayout Spacing="5"
+                                             Margin="0, -3,0,0">
+                                    <shimmer:ShimmerView HeightRequest="10"
+                                                         HorizontalOptions="Start"
+                                                         ShapeType="RoundedRectangle" />
+                                    <shimmer:ShimmerView HeightRequest="10"
+                                                         HorizontalOptions="Start"
+                                                         ShapeType="RoundedRectangle" />
+                                    <shimmer:ShimmerView HeightRequest="10"
+                                                         HorizontalOptions="Start"
+                                                         ShapeType="RoundedRectangle" />
+                                    <shimmer:ShimmerView HeightRequest="10"
+                                                         HorizontalOptions="Start"
+                                                         ShapeType="RoundedRectangle" />
+                                    <shimmer:ShimmerView HeightRequest="10"
+                                                         HorizontalOptions="Start"
+                                                         ShapeType="RoundedRectangle" />
+                                    <shimmer:ShimmerView HeightRequest="10"
+                                                         HorizontalOptions="Start"
+                                                         ShapeType="RoundedRectangle" />
+                                </StackLayout>
+                            </VerticalStackLayout>
+                        </shimmer:SfShimmer.CustomView>
+                    </shimmer:SfShimmer>
                     <Grid MaximumHeightRequest="{Binding MaxAiSummaryHeight}">
                         <Border Padding="3"
                                 StrokeShape="RoundRectangle 10"
@@ -508,7 +668,12 @@
                 </StackLayout>
             </CollectionView.Header>
             <CollectionView.EmptyView>
-                <Label HorizontalTextAlignment="Center" VerticalTextAlignment="Center" Text="No results found" />
+                <Label 
+                    HorizontalTextAlignment="Center" 
+                    VerticalTextAlignment="Center" 
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    Text="No results found" />
             </CollectionView.EmptyView>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="braveModel:WebResultEntry">
@@ -517,6 +682,7 @@
                             Padding="5,5,20,5"
                             StrokeShape="RoundRectangle 10,10,10,10"
                             MaximumHeightRequest="160"
+                            MaximumWidthRequest="600"
                             BackgroundColor="{AppThemeBinding Light=#e3e3e3, Dark=#191919}">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped"
@@ -569,9 +735,12 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
             <CollectionView.Footer>
-                <Button Text="Load more..."
-                        IsVisible="{Binding FinalPageReached, Converter={StaticResource InvertedBoolConverter}}"
-                        Command="{Binding LoadMoreCommand}" />
+                <StackLayout MaximumWidthRequest="600">
+                    <Button Text="Load more..."
+                            IsVisible="{Binding FinalPageReached, Converter={StaticResource InvertedBoolConverter}}"
+                            Command="{Binding LoadMoreCommand}" 
+                            HorizontalOptions="FillAndExpand"/>
+                </StackLayout>
             </CollectionView.Footer>
         </CollectionView>
     </StackLayout>
