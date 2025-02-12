@@ -80,7 +80,16 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 		IsMicrophoneEnabled = false;
 		if (delay)
 			await Task.Delay(2000);
-		await SpeechToText.StopListenAsync();
+
+		try
+		{
+			await SpeechToText.StopListenAsync();
+		}
+		catch
+		{
+			// handle unsupported error
+		}
+
 		if (_speechToTextResultHolder.Length > 0)
 			EditorTextContent = _speechToTextResultHolder;
 		IsChatEnabled = true;
@@ -109,37 +118,51 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 	[RelayCommand]
 	async Task MicrophoneClick()
 	{
-		bool isUseMicrophone = MicrophoneIcon == IconFont.Microphone;
-		MicrophoneMargin = new Thickness(0, 0, (int)MicrophoneMargin.Right == 10 ? 5.5 : 10, 0);
-		MicrophoneIcon = isUseMicrophone ? IconFont.MicrophoneSlash : IconFont.Microphone;
-		if (isUseMicrophone)
+		try
 		{
-			bool isAllowed = await SpeechToText.RequestPermissions();
-			if (!isAllowed)
+			bool isUseMicrophone = MicrophoneIcon == IconFont.Microphone;
+			MicrophoneMargin = new Thickness(0, 0, (int)MicrophoneMargin.Right == 10 ? 5.5 : 10, 0);
+			MicrophoneIcon = isUseMicrophone ? IconFont.MicrophoneSlash : IconFont.Microphone;
+			if (isUseMicrophone)
 			{
-				await Toast.Make("Please grant microphone permission.").Show();
-				return;
-			}
+				bool isAllowed = await SpeechToText.RequestPermissions();
+				if (!isAllowed)
+				{
+					await Toast.Make("Please grant microphone permission.").Show();
+					return;
+				}
 
-			if (Connectivity.NetworkAccess != NetworkAccess.Internet)
-			{
-				await Toast.Make("Internet connection is required").Show();
-				return;
-			}
+				if (Connectivity.NetworkAccess != NetworkAccess.Internet)
+				{
+					await Toast.Make("Internet connection is required").Show();
+					return;
+				}
 
-			// Update UI state
-			IsMicrophoneEnabled = false;
-			IsChatEnabled = false;
-			_speechToTextResultHolder = string.Empty;
-			await SpeechToText.StartListenAsync(new SpeechToTextOptions()
-			{
-				Culture = CultureInfo.CurrentCulture,
-				ShouldReportPartialResults = true
-			});
-			EditorPlaceHolder = ListeningMessagePlaceholder;
+				// Update UI state
+				IsMicrophoneEnabled = false;
+				IsChatEnabled = false;
+				_speechToTextResultHolder = string.Empty;
+				await SpeechToText.StartListenAsync(new SpeechToTextOptions()
+				{
+					Culture = CultureInfo.CurrentCulture,
+					ShouldReportPartialResults = true
+				});
+				EditorPlaceHolder = ListeningMessagePlaceholder;
+			}
+			else
+				await MicrophoneStopListening(true);
 		}
-		else
-			await MicrophoneStopListening(true);
+		catch (FeatureNotSupportedException)
+		{
+			MicrophoneMargin = new Thickness(0, 0,  10, 0);
+			MicrophoneIcon = IconFont.Microphone;
+			await MicrophoneStopListening();
+			await Toast.Make("This device does not support the speech-to-text feature.").Show();
+		}
+		catch (Exception ex)
+		{
+			GlobalContext.Logger.Error<ChatViewModel>(ex);
+		}
 
 		IsMicrophoneEnabled = true;
 	}
