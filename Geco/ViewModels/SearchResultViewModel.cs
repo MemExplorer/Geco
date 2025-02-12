@@ -35,7 +35,6 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 	[ObservableProperty] bool _isMicrophoneEnabled = true;
 	[ObservableProperty] Thickness _microphoneMargin = new(0, 0, 10, 0);
 
-	bool _isPredefined;
 	SearchAPI BraveSearchApi { get; }
 	GeminiChat ChatClient { get; }
 	uint CurrentPageOffset { get; set; } = 1;
@@ -157,10 +156,10 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 
 		// hide keyboard after sending a message
 		await searchEntry.HideSoftInputAsync(CancellationToken.None);
-		SendSearch(false);
+		SendSearch();
 	}
 
-	async void SendSearch(bool isPredefined)
+	async void SendSearch()
 	{
 		try
 		{
@@ -178,9 +177,11 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 			try
 			{
 				// Search result settings
+				SearchResults.Clear();
 				CurrentPageOffset = 1;
 				CurrentSearchQuery = unescapeDataString;
 				FinalPageReached = true;
+				IsSearching = true;
 
 				// AI Overview settings
 				AiOverview = null;
@@ -191,33 +192,50 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 				await triggerRepo.LogTrigger(DeviceInteractionTrigger.BrowserUsageSustainable, 0);
 
 				// run search task on a separate thread
-				_ = Task.Run(async () =>
+				var dispatcher = Dispatcher.GetForCurrentThread();
+				if (dispatcher == null)
+					throw new Exception("Dispatcher is null!");
+
+				dispatcher.Dispatch(async () =>
 				{
-					var braveSearchResult = await BraveSearchApi.Search(unescapeDataString, CurrentPageOffset);
-
-					// Run AI Summary task on a separate thread
-					_ = Task.Run(async () =>
+					try
 					{
-						string jsonContent = JsonSerializer.Serialize(braveSearchResult);
-						var chatSummaryResponse =
-							await ChatClient.SendMessage($"Topic: {unescapeDataString}\nSearch Result: {jsonContent}",
-								settings: geminiSearchConfig);
-						AiOverview = chatSummaryResponse.Text;
-						AiSummaryVisible = true;
-						ShowMoreButtonVisibility = true;
-					});
-					foreach (var searchResult in braveSearchResult)
-						SearchResults.Add(searchResult);
+						var braveSearchResult = await BraveSearchApi.Search(unescapeDataString, CurrentPageOffset);
+						// Run AI Summary task on a separate thread
+						dispatcher.Dispatch(async () =>
+						{
+							try
+							{
+								string jsonContent = JsonSerializer.Serialize(braveSearchResult);
+								var chatSummaryResponse =
+									await ChatClient.SendMessage($"Topic: {unescapeDataString}\nSearch Result: {jsonContent}",
+										settings: geminiSearchConfig);
+								AiOverview = chatSummaryResponse.Text;
+								AiSummaryVisible = true;
+								ShowMoreButtonVisibility = true;
+							}
+							catch (Exception ex)
+							{
+								GlobalContext.Logger.Error<SearchViewModel>(ex);
+							}
+						});
 
-					FinalPageReached = false;
+						foreach (var searchResult in braveSearchResult)
+							SearchResults.Add(searchResult);
+
+						IsSearching = false;
+						FinalPageReached = false;
+					}
+					catch (Exception ex)
+					{
+						GlobalContext.Logger.Error<SearchViewModel>(ex);
+					}
 				});
 			}
 			catch (Exception searchEx)
 			{
 				GlobalContext.Logger.Error<SearchViewModel>(searchEx);
 			}
-
-			IsSearching = false;
 		}
 		catch (Exception ex)
 		{
@@ -261,9 +279,6 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 	public void ApplyQueryAttributes(IDictionary<string, object> query)
 	{
 		SearchInput = Uri.UnescapeDataString(query["query"].ToString()!);
-		string isPredefinedString = query["isPredefined"].ToString()!;
-		_isPredefined = bool.TryParse(isPredefinedString, out bool result) && result;
-		IsSearching = true;
-		SendSearch(_isPredefined);
+		SendSearch();
 	}
 }
