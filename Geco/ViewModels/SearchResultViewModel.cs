@@ -78,14 +78,21 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 
 	private async void SpeechToTextOnRecognitionResultCompleted(object? sender, SpeechToTextRecognitionResultCompletedEventArgs e)
 	{
-		_speechToTextResultHolder = string.Empty;
-		MicrophoneMargin = new Thickness(0, 0, 10, 0);
-		MicrophoneIcon = IconFont.Microphone;
-		await MicrophoneStopListening();
-		if (e.RecognitionResult.IsSuccessful)
-			SearchInput += e.RecognitionResult.Text;
+		try
+		{
+			_speechToTextResultHolder = string.Empty;
+			MicrophoneMargin = new Thickness(0, 0, 10, 0);
+			MicrophoneIcon = IconFont.Microphone;
+			await MicrophoneStopListening();
+			if (e.RecognitionResult.IsSuccessful)
+				SearchInput += e.RecognitionResult.Text;
 
-		IsMicrophoneEnabled = true;
+			IsMicrophoneEnabled = true;
+		}
+		catch (Exception ex)
+		{
+			GlobalContext.Logger.Error<SearchResultViewModel>(ex);
+		}
 	}
 
 	[RelayCommand]
@@ -196,13 +203,13 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 				if (dispatcher == null)
 					throw new Exception("Dispatcher is null!");
 
-				dispatcher.Dispatch(async () =>
+				dispatcher.Dispatch(async void () =>
 				{
 					try
 					{
 						var braveSearchResult = await BraveSearchApi.Search(unescapeDataString, CurrentPageOffset);
 						// Run AI Summary task on a separate thread
-						dispatcher.Dispatch(async () =>
+						dispatcher.Dispatch(async void () =>
 						{
 							try
 							{

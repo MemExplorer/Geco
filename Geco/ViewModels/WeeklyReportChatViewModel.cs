@@ -105,14 +105,21 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 
 	private async void SpeechToTextOnRecognitionResultCompleted(object? sender, SpeechToTextRecognitionResultCompletedEventArgs e)
 	{
-		_speechToTextResultHolder = string.Empty;
-		MicrophoneMargin = new Thickness(0, 0, 10, 0);
-		MicrophoneIcon = IconFont.Microphone;
-		await MicrophoneStopListening();
-		if (e.RecognitionResult.IsSuccessful)
-			EditorTextContent += e.RecognitionResult.Text;
+		try
+		{
+			_speechToTextResultHolder = string.Empty;
+			MicrophoneMargin = new Thickness(0, 0, 10, 0);
+			MicrophoneIcon = IconFont.Microphone;
+			await MicrophoneStopListening();
+			if (e.RecognitionResult.IsSuccessful)
+				EditorTextContent += e.RecognitionResult.Text;
 
-		IsMicrophoneEnabled = true;
+			IsMicrophoneEnabled = true;
+		}
+		catch (Exception ex)
+		{
+			GlobalContext.Logger.Error<WeeklyReportChatViewModel>(ex);
+		}
 	}
 
 	[RelayCommand]
