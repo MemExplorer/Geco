@@ -1,3 +1,58 @@
 # GECO
+GECO, a mobile sustainability companion that uses Gemini to provide tailored recommendations and foster eco-friendly habits.
 
-An LLM-based Companion Application in Adapting Sustainable Habits
+## Features
+- **Chat**: Communicate with a sustainability-tuned Gemini for your sustainability-related troubles.
+- **Search**: Find topics while incorporating sustainability into the search using Brave Search and Gemini.
+- **Habit Tracking**: Track your mobile phone habits, you will receive notifications when you've been doing unsustainable actions. Once a week has passed, you will receive a weekly report showcasing your habits from the previous week.
+
+## Showcase
+| Chat | Search | 
+| :---: | :---: |
+| ![](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExaXVyOWczd2l1dnRzbnFvM3B3d2V4bHQ1Njl6a2g4bzNoc25xdXl4YiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/uj8XTgcF9nUgsBsHi6/giphy.gif) | ![](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGt4Nmx5dXA2N2Zwa25qMmFobXZmMmw5ZjVlb2N4djI5Z2FlOHZ2eiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/6BGc1mKM21dxaq5QrF/giphy.gif) |
+
+## Setup and Installation
+
+### Prerequisites
+- [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
+- [Gemini API Key](https://aistudio.google.com/apikey)
+- [Brave Search API Key (Data for AI)](https://brave.com/search/api)
+- Android SDK
+
+### .NET MAUI SDK Installation
+To install .NET MAUI SDK, run the following command:
+```
+> dotnet workload install maui
+```
+
+### Cloning the project
+You can either download the project or run the following command:
+```
+> git clone https://github.com/MemExplorer/Geco.git
+```
+After cloning, the project folder name should be `Geco`. If you downloaded it directly from github, the folder name should be `Geco-main`. Navigate to the project directory by running the following command.
+```
+> cd Geco
+```
+
+### Assets
+The font used in the application is not publicly available. You may visit the font's website for more information by clicking [here](https://fontawesome.com/). The font should be placed inside `Geco/Resources/Fonts`.
+
+### Replace API Keys
+Before compiling, create a file called `GecoSecrets.cs`. Place the file in the GECO folder that is inside the solution directory. The Contents of the file should look like this:
+```cs
+namespace Geco;
+
+internal partial class GecoSecrets
+{
+    internal static partial string GEMINI_API_KEY => "Your Gemini API key";
+    internal static partial string BRAVE_SEARCH_API_KEY => "Your Brave API Key";
+}
+```
+
+### Building
+To build the app, run the following command:
+```
+> dotnet build -c Release
+```
+After building the project, the generated apk file will be located at `Geco/bin/Release/net9.0-android/com.ssbois.geco-Signed.apk`.
