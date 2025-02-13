@@ -1,6 +1,5 @@
 using System.Globalization;
 using Geco.Core;
-using Geco.Core.Models.Chat;
 using Geco.ViewModels;
 using Markdig;
 
@@ -15,7 +14,8 @@ public class HtmlConverter : IValueConverter
 			return null;
 
 		string backgroundColor;
-		if (parameter is Type vmType && vmType == typeof(ReportsViewModel)) backgroundColor = GecoSettings.DarkMode ? "#191919" : "#e3e3e3";
+		if (parameter is Type vmType && vmType == typeof(ReportsViewModel))
+			backgroundColor = GecoSettings.DarkMode ? "#191919" : "#e3e3e3";
 		else backgroundColor = GecoSettings.DarkMode ? "#1f1f1f" : "#FFFFFF";
 
 		string textColor = GecoSettings.DarkMode ? "#ffffff" : "#000000";

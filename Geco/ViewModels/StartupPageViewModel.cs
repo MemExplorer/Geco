@@ -1,8 +1,8 @@
-
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 namespace Geco.ViewModels;
+
 public partial class StartupPageViewModel : ObservableObject
 {
 	[RelayCommand]
@@ -12,7 +12,7 @@ public partial class StartupPageViewModel : ObservableObject
 		await Shell.Current.GoToAsync("//ChatPage", true);
 	}
 
-	[RelayCommand]	
+	[RelayCommand]
 	void LearnMoreAboutReviewers()
 	{
 #if ANDROID

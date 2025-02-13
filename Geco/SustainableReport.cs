@@ -69,7 +69,8 @@ public class SustainableReport
 		var triggerRepo = GlobalContext.Services.GetRequiredService<TriggerRepository>();
 		var promptRepo = GlobalContext.Services.GetRequiredService<PromptRepository>();
 
-		await using var weeklyReportTemplateStream = await FileSystem.OpenAppPackageFileAsync("WeeklyReportTemplate.html");
+		await using var weeklyReportTemplateStream =
+			await FileSystem.OpenAppPackageFileAsync("WeeklyReportTemplate.html");
 		using var weeklyReportStreamReader = new StreamReader(weeklyReportTemplateStream);
 		string htmlTemplate = await weeklyReportStreamReader.ReadToEndAsync();
 
@@ -92,12 +93,12 @@ public class SustainableReport
 			>= 15 and < 30 => ("Unsustainable", "6_Unsustainable.png"),
 			_ => ("Crisis level", "7_CrisisLevel.png")
 		};
-		
+
 		await using var gecoEmoji = await FileSystem.OpenAppPackageFileAsync("GecoEmojis/" + gecoEmojiPath);
 		using var gecoEmojiStream = new MemoryStream();
 		await gecoEmoji.CopyToAsync(gecoEmojiStream);
 		byte[] gecoEmojiBytes = gecoEmojiStream.ToArray();
-		
+
 		// set values for current week data
 		string base64Image = "data:image/png;base64," + Convert.ToBase64String(gecoEmojiBytes);
 		htmlTemplate = StringHelpers.FormatString(htmlTemplate,

@@ -19,7 +19,6 @@
                                               BackgroundColor="{AppThemeBinding Light={StaticResource White}, 
                                                             Dark={StaticResource OffBlack}}">
                 <Border Margin="2"
-                        Grid.Column="1"
                         StrokeShape="RoundRectangle 34, 34, 34, 8"
                         BackgroundColor="{AppThemeBinding Light={StaticResource Quinary},
                                                   Dark={StaticResource QuinaryDark}}"
@@ -43,12 +42,13 @@
                            MaximumHeightRequest="50"
                            Margin="5,0,3,0"
                            VerticalOptions="Start" />
-                    <helpers:ContentSizedWebView  Grid.Column="1"
-                                                  Grid.Row="0"
-                                                  x:Name="LLMChatWv"
-                                                  Navigating="WebView_OnNavigating">
+                    <helpers:ContentSizedWebView Grid.Column="1"
+                                                 Grid.Row="0"
+                                                 x:Name="LLMChatWv"
+                                                 Navigating="WebView_OnNavigating">
                         <helpers:ContentSizedWebView.Source>
-                            <HtmlWebViewSource Html="{Binding Text, 
+                            <HtmlWebViewSource
+                                Html="{Binding Text, 
                                 Converter={StaticResource HtmlConverter}}" />
                         </helpers:ContentSizedWebView.Source>
                     </helpers:ContentSizedWebView>
@@ -74,14 +74,14 @@
     </ContentPage.Resources>
     <StackLayout Padding="10"
                  Spacing="10">
-        
+
         <!--  Chat View  -->
         <mpowerkit:VirtualizeListView x:Name="vList"
-                                ItemsSource="{Binding ChatMessages}"
-                                VerticalOptions="EndAndExpand"
-                                ItemTemplate="{StaticResource ChatTemplateSelector}">
+                                      ItemsSource="{Binding ChatMessages}"
+                                      VerticalOptions="EndAndExpand"
+                                      ItemTemplate="{StaticResource ChatTemplateSelector}">
             <mpowerkit:VirtualizeListView.LayoutManager>
-                <helpers:LinearItemsLayoutManager2/>
+                <helpers:LinearItemsLayoutManager2 />
             </mpowerkit:VirtualizeListView.LayoutManager>
         </mpowerkit:VirtualizeListView>
 

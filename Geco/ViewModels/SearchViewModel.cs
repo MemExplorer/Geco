@@ -53,12 +53,12 @@ public partial class SearchViewModel : ObservableObject
 			SearchQuery = _speechToTextResultHolder;
 	}
 
-	private void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e)
-	{
+	private void
+		SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e) =>
 		_speechToTextResultHolder = e.RecognitionResult;
-	}
 
-	private async void SpeechToTextOnRecognitionResultCompleted(object? sender, SpeechToTextRecognitionResultCompletedEventArgs e)
+	private async void SpeechToTextOnRecognitionResultCompleted(object? sender,
+		SpeechToTextRecognitionResultCompletedEventArgs e)
 	{
 		try
 		{
@@ -103,10 +103,9 @@ public partial class SearchViewModel : ObservableObject
 				// Update UI state
 				IsMicrophoneEnabled = false;
 				_speechToTextResultHolder = string.Empty;
-				await SpeechToText.StartListenAsync(new SpeechToTextOptions()
+				await SpeechToText.StartListenAsync(new SpeechToTextOptions
 				{
-					Culture = CultureInfo.CurrentCulture,
-					ShouldReportPartialResults = true
+					Culture = CultureInfo.CurrentCulture, ShouldReportPartialResults = true
 				});
 				SearchPlaceholder = ListeningMessagePlaceholder;
 			}

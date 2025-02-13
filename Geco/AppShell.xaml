@@ -45,8 +45,7 @@
                       Title="Startup Page"
                       ClassId="StartupPage"
                       Route="StartupPage"
-                      FlyoutItemIsVisible="False">
-        </ShellContent>
+                      FlyoutItemIsVisible="False" />
         <ShellContent ContentTemplate="{DataTemplate local:ChatPage}"
                       Title="Chat"
                       ClassId="ChatPage"

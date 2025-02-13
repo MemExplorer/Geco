@@ -1,7 +1,5 @@
+namespace Geco.Views.Helpers;
 
-namespace Geco.Views.Helpers
+public class ContentSizedWebView : WebView
 {
-	public class ContentSizedWebView : WebView
-    {
-    }
 }

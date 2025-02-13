@@ -1,4 +1,5 @@
 #if ANDROID
+using Uri = Android.Net.Uri;
 using Android.Content;
 #endif
 
@@ -48,10 +49,9 @@ internal class Utils
 #if ANDROID
 	public static void OpenExternalBrowserView(string url)
 	{
-		var browserIntent = new Intent(Intent.ActionView, Android.Net.Uri.Parse(url));
+		var browserIntent = new Intent(Intent.ActionView, Uri.Parse(url));
 		browserIntent.SetFlags(ActivityFlags.NewTask);
 		Platform.AppContext.StartActivity(browserIntent);
 	}
 #endif
-
 }

@@ -154,7 +154,7 @@ public partial class ChatViewModel : ObservableObject, IAsyncDisposable
 		// save chat message to database
 		if (HistoryId != null)
 			await chatRepo.AppendChat(HistoryId, e.Message);
-		
+
 		// Scroll to bottom effect after sending a message
 		if (ListViewComponent != null)
 		{
@@ -172,12 +172,12 @@ public partial class ChatViewModel : ObservableObject, IAsyncDisposable
 			IsChatEnabled = newText.Length != 0;
 	}
 
-	private void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e)
-	{
+	private void
+		SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e) =>
 		_speechToTextResultHolder = e.RecognitionResult;
-	}
 
-	private async void SpeechToTextOnRecognitionResultCompleted(object? sender, SpeechToTextRecognitionResultCompletedEventArgs e)
+	private async void SpeechToTextOnRecognitionResultCompleted(object? sender,
+		SpeechToTextRecognitionResultCompletedEventArgs e)
 	{
 		try
 		{
@@ -223,10 +223,9 @@ public partial class ChatViewModel : ObservableObject, IAsyncDisposable
 				IsMicrophoneEnabled = false;
 				IsChatEnabled = false;
 				_speechToTextResultHolder = string.Empty;
-				await SpeechToText.StartListenAsync(new SpeechToTextOptions()
+				await SpeechToText.StartListenAsync(new SpeechToTextOptions
 				{
-					Culture = CultureInfo.CurrentCulture,
-					ShouldReportPartialResults = true
+					Culture = CultureInfo.CurrentCulture, ShouldReportPartialResults = true
 				});
 				EditorPlaceHolder = ListeningMessagePlaceholder;
 			}

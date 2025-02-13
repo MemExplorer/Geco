@@ -6,7 +6,8 @@ using Geco.PermissionHelpers;
 
 namespace Geco;
 
-[Activity(Theme = "@style/Maui.SplashTheme", ScreenOrientation = ScreenOrientation.Nosensor, MainLauncher = true, LaunchMode = LaunchMode.SingleTop,
+[Activity(Theme = "@style/Maui.SplashTheme", ScreenOrientation = ScreenOrientation.Nosensor, MainLauncher = true,
+	LaunchMode = LaunchMode.SingleTop,
 	ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode |
 	                       ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.Density)]
 public class MainActivity : MauiAppCompatActivity

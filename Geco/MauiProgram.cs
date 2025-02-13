@@ -1,19 +1,17 @@
 using CommunityToolkit.Maui;
-using CommunityToolkit.Maui.Media;
 using Geco.Core.Brave;
 using Geco.Core.Database;
 using Geco.Core.Models.ActionObserver;
 using Geco.Core.Models.Notification;
 using Geco.ViewModels;
 using Geco.Views;
+using Geco.Views.Helpers;
 using GoogleGeminiSDK;
 using GoogleGeminiSDK.Models.Components;
 using GoogleGeminiSDK.Models.ContentGeneration;
 using Markdig;
 using MPowerKit.VirtualizeListView;
 using Syncfusion.Maui.Toolkit.Hosting;
-using Geco.Views.Helpers;
-
 #if ANDROID
 using Application = Android.App.Application;
 using Geco.Triggers.ActionObservers;

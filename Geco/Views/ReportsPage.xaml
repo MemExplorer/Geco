@@ -56,12 +56,13 @@
                                                FontSize="25"
                                                FontFamily="Poppins"
                                                LineBreakMode="TailTruncation" />
-                                        <Label Text="{Binding DateCreated, Converter={StaticResource UnixTimeStampToStringConverter}}"
-                                               FontSize="12"
-                                               FontFamily="Poppins"
-                                               VerticalTextAlignment="Center"
-                                               LineBreakMode="TailTruncation"
-                                               TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}" />
+                                        <Label
+                                            Text="{Binding DateCreated, Converter={StaticResource UnixTimeStampToStringConverter}}"
+                                            FontSize="12"
+                                            FontFamily="Poppins"
+                                            VerticalTextAlignment="Center"
+                                            LineBreakMode="TailTruncation"
+                                            TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}" />
                                     </VerticalStackLayout>
                                     <Label Grid.Column="2"
                                            HorizontalOptions="End"
@@ -81,7 +82,8 @@
                                     <WebView MaximumHeightRequest="150"
                                              Margin="0,0,0,3">
                                         <WebView.Source>
-                                            <HtmlWebViewSource Html="{Binding FullContent, Converter={StaticResource HtmlConverter}, ConverterParameter={x:Type vm:ReportsViewModel}}" />
+                                            <HtmlWebViewSource
+                                                Html="{Binding FullContent, Converter={StaticResource HtmlConverter}, ConverterParameter={x:Type vm:ReportsViewModel}}" />
                                         </WebView.Source>
                                     </WebView>
                                     <Border Stroke="transparent">
@@ -89,8 +91,9 @@
                                             <LinearGradientBrush EndPoint="0,1">
                                                 <GradientStop Color="Transparent"
                                                               Offset="0.1" />
-                                                <GradientStop Color="{AppThemeBinding Light={StaticResource Quinary}, Dark={StaticResource QuinaryDark}}"
-                                                              Offset="1.0" />
+                                                <GradientStop
+                                                    Color="{AppThemeBinding Light={StaticResource Quinary}, Dark={StaticResource QuinaryDark}}"
+                                                    Offset="1.0" />
                                             </LinearGradientBrush>
                                         </Border.Background>
                                         <Border.GestureRecognizers>

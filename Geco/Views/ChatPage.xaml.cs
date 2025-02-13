@@ -19,7 +19,7 @@ public partial class ChatPage : ContentPage
 		// Create new instance of chat page every time page is loaded
 		CurrentViewModel.ListViewComponent = vList;
 		var layoutMgr = (LinearItemsLayoutManager2)vList.LayoutManager;
-		layoutMgr.OnFinishedLoadingItems += async (s, e) => 
+		layoutMgr.OnFinishedLoadingItems += async (s, e) =>
 			await OnFinishedLoadingItems(s, e);
 		Appearing += async (_, _) =>
 			await InitializeChat();

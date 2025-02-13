@@ -566,11 +566,12 @@
             <CollectionView.Header>
                 <StackLayout MaximumWidthRequest="600">
                     <!-- AI summary shimmer -->
-                    <shimmer:SfShimmer IsVisible="{Binding AiSummaryVisible, Converter={StaticResource InvertedBoolConverter}}"
-                                       Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
-                                       WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
-                                       BackgroundColor="Transparent"
-                                       HeightRequest="160">
+                    <shimmer:SfShimmer
+                        IsVisible="{Binding AiSummaryVisible, Converter={StaticResource InvertedBoolConverter}}"
+                        Fill="{AppThemeBinding Light=#b5c2b0, Dark=#6e6d6d}"
+                        WaveColor="{AppThemeBinding Light=#98a694, Dark=#7d8a78}"
+                        BackgroundColor="Transparent"
+                        HeightRequest="160">
                         <shimmer:SfShimmer.CustomView>
                             <VerticalStackLayout Padding="5"
                                                  Spacing="5">
@@ -668,9 +669,9 @@
                 </StackLayout>
             </CollectionView.Header>
             <CollectionView.EmptyView>
-                <Label 
-                    HorizontalTextAlignment="Center" 
-                    VerticalTextAlignment="Center" 
+                <Label
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center"
                     HorizontalOptions="Center"
                     VerticalOptions="Center"
                     Text="No results found" />
@@ -738,8 +739,8 @@
                 <StackLayout MaximumWidthRequest="600">
                     <Button Text="Load more..."
                             IsVisible="{Binding FinalPageReached, Converter={StaticResource InvertedBoolConverter}}"
-                            Command="{Binding LoadMoreCommand}" 
-                            HorizontalOptions="FillAndExpand"/>
+                            Command="{Binding LoadMoreCommand}"
+                            HorizontalOptions="FillAndExpand" />
                 </StackLayout>
             </CollectionView.Footer>
         </CollectionView>

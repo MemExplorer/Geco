@@ -71,12 +71,12 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 			SearchInput = _speechToTextResultHolder;
 	}
 
-	private void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e)
-	{
+	private void
+		SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e) =>
 		_speechToTextResultHolder = e.RecognitionResult;
-	}
 
-	private async void SpeechToTextOnRecognitionResultCompleted(object? sender, SpeechToTextRecognitionResultCompletedEventArgs e)
+	private async void SpeechToTextOnRecognitionResultCompleted(object? sender,
+		SpeechToTextRecognitionResultCompletedEventArgs e)
 	{
 		try
 		{
@@ -121,10 +121,9 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 				// Update UI state
 				IsMicrophoneEnabled = false;
 				_speechToTextResultHolder = string.Empty;
-				await SpeechToText.StartListenAsync(new SpeechToTextOptions()
+				await SpeechToText.StartListenAsync(new SpeechToTextOptions
 				{
-					Culture = CultureInfo.CurrentCulture,
-					ShouldReportPartialResults = true
+					Culture = CultureInfo.CurrentCulture, ShouldReportPartialResults = true
 				});
 				SearchPlaceholder = ListeningMessagePlaceholder;
 			}
@@ -215,7 +214,8 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 							{
 								string jsonContent = JsonSerializer.Serialize(braveSearchResult);
 								var chatSummaryResponse =
-									await ChatClient.SendMessage($"Topic: {unescapeDataString}\nSearch Result: {jsonContent}",
+									await ChatClient.SendMessage(
+										$"Topic: {unescapeDataString}\nSearch Result: {jsonContent}",
 										settings: geminiSearchConfig);
 								AiOverview = chatSummaryResponse.Text;
 								AiSummaryVisible = true;

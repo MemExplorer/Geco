@@ -16,7 +16,7 @@ public partial class WeeklyReportChatPage : ContentPage
 
 		CurrentViewModel.ListViewComponent = vList;
 		var layoutMgr = (LinearItemsLayoutManager2)vList.LayoutManager;
-		layoutMgr.OnFinishedLoadingItems += async (s, e) => 
+		layoutMgr.OnFinishedLoadingItems += async (s, e) =>
 			await OnFinishedLoadingItems(s, e);
 		Unloaded += OnUnloaded;
 	}

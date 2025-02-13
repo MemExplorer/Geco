@@ -73,6 +73,7 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 	#endregion
 
 	#region Controllers
+
 	async Task MicrophoneStopListening(bool delay = false)
 	{
 		// Update UI state
@@ -94,16 +95,17 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 			EditorTextContent = _speechToTextResultHolder;
 		IsChatEnabled = true;
 	}
+
 	#endregion
 
 	#region Event Handlers
 
-	private void SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e)
-	{
+	private void
+		SpeechToTextOnRecognitionResultUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs e) =>
 		_speechToTextResultHolder = e.RecognitionResult;
-	}
 
-	private async void SpeechToTextOnRecognitionResultCompleted(object? sender, SpeechToTextRecognitionResultCompletedEventArgs e)
+	private async void SpeechToTextOnRecognitionResultCompleted(object? sender,
+		SpeechToTextRecognitionResultCompletedEventArgs e)
 	{
 		try
 		{
@@ -149,10 +151,9 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 				IsMicrophoneEnabled = false;
 				IsChatEnabled = false;
 				_speechToTextResultHolder = string.Empty;
-				await SpeechToText.StartListenAsync(new SpeechToTextOptions()
+				await SpeechToText.StartListenAsync(new SpeechToTextOptions
 				{
-					Culture = CultureInfo.CurrentCulture,
-					ShouldReportPartialResults = true
+					Culture = CultureInfo.CurrentCulture, ShouldReportPartialResults = true
 				});
 				EditorPlaceHolder = ListeningMessagePlaceholder;
 			}
@@ -161,7 +162,7 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 		}
 		catch (FeatureNotSupportedException)
 		{
-			MicrophoneMargin = new Thickness(0, 0,  10, 0);
+			MicrophoneMargin = new Thickness(0, 0, 10, 0);
 			MicrophoneIcon = IconFont.Microphone;
 			await MicrophoneStopListening();
 			await Toast.Make("This device does not support the speech-to-text feature.").Show();
@@ -195,7 +196,7 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 		// save chat message to database
 		if (HistoryId != null)
 			await chatRepo.AppendChat(HistoryId, e.Message);
-		
+
 		// Scroll to bottom effect after sending a message
 		if (ListViewComponent != null)
 		{
