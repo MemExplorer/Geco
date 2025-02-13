@@ -27,7 +27,7 @@ public partial class SearchViewModel : ObservableObject
 
 	public SearchViewModel()
 	{
-		SpeechToText = GlobalContext.Services.GetRequiredService<ISpeechToText>();
+		SpeechToText = new SpeechToTextImplementation();
 		SpeechToText.RecognitionResultCompleted += SpeechToTextOnRecognitionResultCompleted;
 		SpeechToText.RecognitionResultUpdated += SpeechToTextOnRecognitionResultUpdated;
 	}

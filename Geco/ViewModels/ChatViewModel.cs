@@ -52,7 +52,7 @@ public partial class ChatViewModel : ObservableObject
 	public ChatViewModel()
 	{
 		GeminiClient = GlobalContext.Services.GetRequiredService<GeminiChat>();
-		SpeechToText = GlobalContext.Services.GetRequiredService<ISpeechToText>();
+		SpeechToText = new SpeechToTextImplementation();
 		SpeechToText.RecognitionResultCompleted += SpeechToTextOnRecognitionResultCompleted;
 		SpeechToText.RecognitionResultUpdated += SpeechToTextOnRecognitionResultUpdated;
 		GeminiClient.OnChatReceive += async (_, e) =>

@@ -45,7 +45,7 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 	{
 		BraveSearchApi = GlobalContext.Services.GetRequiredService<SearchAPI>();
 		ChatClient = GlobalContext.Services.GetRequiredService<GeminiChat>();
-		SpeechToText = GlobalContext.Services.GetRequiredService<ISpeechToText>();
+		SpeechToText = new SpeechToTextImplementation();
 		SpeechToText.RecognitionResultCompleted += SpeechToTextOnRecognitionResultCompleted;
 		SpeechToText.RecognitionResultUpdated += SpeechToTextOnRecognitionResultUpdated;
 	}

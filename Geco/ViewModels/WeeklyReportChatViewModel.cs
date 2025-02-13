@@ -50,7 +50,7 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 		GeminiClient = GlobalContext.Services.GetRequiredService<GeminiChat>();
 		GeminiClient.OnChatReceive += async (_, e) =>
 			await GeminiClientOnChatReceive(e);
-		SpeechToText = GlobalContext.Services.GetRequiredService<ISpeechToText>();
+		SpeechToText = new SpeechToTextImplementation();
 		SpeechToText.RecognitionResultCompleted += SpeechToTextOnRecognitionResultCompleted;
 		SpeechToText.RecognitionResultUpdated += SpeechToTextOnRecognitionResultUpdated;
 		NavigationQueue = new Queue<Delegate>();
