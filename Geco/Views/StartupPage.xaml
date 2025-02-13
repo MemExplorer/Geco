@@ -26,7 +26,7 @@
                    FontSize="36"
                    FontFamily="Poppins" />
             <Label FontSize="18"
-                   Text="GECO is your personalized sustainability assistant designed to help you adopt eco-friendly habits and practices."
+                   Text="GECO, your mobile personalized sustainability companion, uses Gemini to provide tailored recommendations and support for adopting eco-friendly habits."
                    LineBreakMode="CharacterWrap" />
 
             <Grid ColumnDefinitions="auto, *"
@@ -92,18 +92,25 @@
                        LineBreakMode="WordWrap">
                     <Label.FormattedText>
                         <FormattedString>
-                            <Span Text="By continuing, you agree to Google's " />
+                            <Span Text="By continuing, you agree to " />
                             <Span TextDecorations="Underline"
-                                  Text="Terms">
+                                  Text="Google's Terms">
                                 <Span.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding OpenGoogleTermsCommand}" />
                                 </Span.GestureRecognizers>
                             </Span>
-                            <Span Text=" and have read their " />
+                            <Span Text=" and " />
                             <Span TextDecorations="Underline"
                                   Text="Privacy Policy">
                                 <Span.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding OpenGooglePrivacyCommand}" />
+                                </Span.GestureRecognizers>
+                            </Span>
+                            <Span Text=", as well as " />
+                            <Span TextDecorations="Underline"
+                                  Text="Brave Search's Privacy Policy">
+                                <Span.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenBraveSearchPrivacyCommand}" />
                                 </Span.GestureRecognizers>
                             </Span>
                             <Span Text="." />

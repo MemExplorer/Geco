@@ -36,4 +36,12 @@ public partial class StartupPageViewModel : ObservableObject
 		Utils.OpenExternalBrowserView("https://support.google.com/gemini?p=privacy_help#reviewers");
 #endif
 	}
+
+	[RelayCommand]
+	void OpenBraveSearchPrivacy()
+	{
+#if ANDROID
+		Utils.OpenExternalBrowserView("https://search.brave.com/help/privacy-policy");
+#endif
+	}
 }
