@@ -18,8 +18,15 @@ public partial class WeeklyReportChatPage : ContentPage
 		var layoutMgr = (LinearItemsLayoutManager2)vList.LayoutManager;
 		layoutMgr.OnFinishedLoadingItems += async (s, e) => 
 			await OnFinishedLoadingItems(s, e);
+		Unloaded += OnUnloaded;
 	}
-	
+
+	private async void OnUnloaded(object? sender, EventArgs e)
+	{
+		if (BindingContext is IAsyncDisposable ad)
+			await ad.DisposeAsync();
+	}
+
 	async Task OnFinishedLoadingItems(object? sender, EventArgs e)
 	{
 		var scrollComponentItems = vList.LayoutManager.ReadOnlyLaidOutItems.Last();

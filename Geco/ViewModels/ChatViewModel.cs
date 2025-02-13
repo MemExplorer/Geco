@@ -16,7 +16,7 @@ using Syncfusion.Maui.Toolkit.Chips;
 
 namespace Geco.ViewModels;
 
-public partial class ChatViewModel : ObservableObject
+public partial class ChatViewModel : ObservableObject, IAsyncDisposable
 {
 	#region Fields
 
@@ -346,6 +346,9 @@ public partial class ChatViewModel : ObservableObject
 			return message.Trim() + "...";
 		return message[..17].Trim() + "...";
 	}
+
+	public async ValueTask DisposeAsync() =>
+		await SpeechToText.DisposeAsync();
 
 	#endregion
 }

@@ -23,6 +23,13 @@ public partial class ChatPage : ContentPage
 			await OnFinishedLoadingItems(s, e);
 		Appearing += async (_, _) =>
 			await InitializeChat();
+		Unloaded += OnUnloaded;
+	}
+
+	private async void OnUnloaded(object? sender, EventArgs e)
+	{
+		if (BindingContext is IAsyncDisposable ad)
+			await ad.DisposeAsync();
 	}
 
 	async Task OnFinishedLoadingItems(object? sender, EventArgs e)

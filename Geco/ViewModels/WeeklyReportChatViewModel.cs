@@ -14,7 +14,7 @@ using MPowerKit.VirtualizeListView;
 
 namespace Geco.ViewModels;
 
-public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttributable
+public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttributable, IAsyncDisposable
 {
 	#region Fields
 
@@ -273,4 +273,7 @@ public partial class WeeklyReportChatViewModel : ObservableObject, IQueryAttribu
 			GlobalContext.Logger.Error<WeeklyReportChatViewModel>(e);
 		}
 	}
+
+	public async ValueTask DisposeAsync() =>
+		await SpeechToText.DisposeAsync();
 }
