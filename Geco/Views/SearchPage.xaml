@@ -11,12 +11,18 @@
     <Grid Padding="10"
           ColumnSpacing="10"
           RowSpacing="10"
-          RowDefinitions="*, auto, auto, *">
+          RowDefinitions="*, auto, auto, auto, *">
 
         <!-- Geco Logo and Title -->
-        <StackLayout Grid.Row="0" Orientation="Vertical" VerticalOptions="Center">
-            <Image MaximumHeightRequest="100" MaximumWidthRequest="100" Source="geco_logo.png" />
-            <Label HorizontalTextAlignment="Center" FontFamily="Poppins" FontSize="Title"
+        <StackLayout Grid.Row="0"
+                     Orientation="Vertical"
+                     VerticalOptions="Center">
+            <Image MaximumHeightRequest="100"
+                   MaximumWidthRequest="100"
+                   Source="geco_logo.png" />
+            <Label HorizontalTextAlignment="Center"
+                   FontFamily="Poppins"
+                   FontSize="Title"
                    TextColor="{AppThemeBinding Light={StaticResource ContainerTextLight}, Dark={StaticResource ContainerTextDark}}"
                    Text="GECO" />
         </StackLayout>
@@ -78,8 +84,17 @@
             </StackLayout>
         </Border>
 
+        <!-- Brave Search Attribution Badge -->
+        <HorizontalStackLayout Grid.Row="2"
+                               HorizontalOptions="Center">
+            <Label Text="Powered By  " />
+            <Image Source="{AppThemeBinding Light=brave_logo_light.svg, Dark=brave_logo_dark.svg}"
+                   HeightRequest="20" />
+        </HorizontalStackLayout>
+
         <!-- Sustainable Chips (TODO: Disappear after chatting) -->
-        <Grid Grid.Row="2"
+        <Grid Grid.Row="3"
+              Padding="0,20,0,0"
               RowDefinitions="auto, auto"
               ColumnDefinitions="*, auto, auto, *"
               RowSpacing="5"
