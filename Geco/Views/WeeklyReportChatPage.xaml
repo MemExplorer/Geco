@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Geco.Views.WeeklyReportChatPage"
+             x:DataType="vm:WeeklyReportChatViewModel"
+             xmlns:mai="clr-namespace:Microsoft.Extensions.AI;assembly=Microsoft.Extensions.AI.Abstractions"
+             xmlns:helpers="clr-namespace:Geco.Views.Helpers"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:vm="clr-namespace:Geco.ViewModels"
+             xmlns:mpowerkit="clr-namespace:MPowerKit.VirtualizeListView;assembly=MPowerKit.VirtualizeListView"
+             Title="Chat"
+             Shell.FlyoutBehavior="Disabled">
+    <ContentPage.Resources>
+        <helpers:HtmlConverter x:Key="HtmlConverter" />
+        <DataTemplate x:Key="UserDataTemplate"
+                      x:DataType="mai:ChatMessage">
+            <mpowerkit:VirtualizeListViewCell Padding="0,10"
+                                              BackgroundColor="{AppThemeBinding Light={StaticResource White}, 
+                                                            Dark={StaticResource OffBlack}}">
+                <Border Margin="2"
+                        StrokeShape="RoundRectangle 34, 34, 34, 8"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Quinary},
+                                                  Dark={StaticResource QuinaryDark}}"
+                        HorizontalOptions="End">
+                    <Label Padding="15"
+                           Text="{Binding Text}" />
+                </Border>
+            </mpowerkit:VirtualizeListViewCell>
+        </DataTemplate>
+        <DataTemplate x:Key="ModelDataTemplate"
+                      x:DataType="mai:ChatMessage">
+            <mpowerkit:VirtualizeListViewCell Padding="0,10"
+                                              BackgroundColor="{AppThemeBinding Light={StaticResource White}, 
+                                              Dark={StaticResource OffBlack}}">
+                <Grid ColumnDefinitions="auto, *"
+                      RowDefinitions="auto, auto">
+                    <Image Grid.Column="0"
+                           Grid.Row="0"
+                           Source="geco_logo.png"
+                           MaximumWidthRequest="50"
+                           MaximumHeightRequest="50"
+                           Margin="5,0,3,0"
+                           VerticalOptions="Start" />
+                    <helpers:ContentSizedWebView Grid.Column="1"
+                                                 Grid.Row="0"
+                                                 x:Name="LLMChatWv"
+                                                 Navigating="WebView_OnNavigating">
+                        <helpers:ContentSizedWebView.Source>
+                            <HtmlWebViewSource
+                                Html="{Binding Text, 
+                                Converter={StaticResource HtmlConverter}}" />
+                        </helpers:ContentSizedWebView.Source>
+                    </helpers:ContentSizedWebView>
+                    <Label Grid.Column="1"
+                           Grid.Row="1"
+                           FontFamily="FontAwesome"
+                           FontSize="16"
+                           Padding="10,0,0,0"
+                           Text="{x:Static helpers:IconFont.Copy}"
+                           TextColor="{AppThemeBinding Light={StaticResource Quaternary}, 
+                                                            Dark={StaticResource QuaternaryDark}}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped"
+                                                  CommandParameter="{x:Reference LLMChatWv}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Grid>
+            </mpowerkit:VirtualizeListViewCell>
+        </DataTemplate>
+        <helpers:ChatTemplateSelector x:Key="ChatTemplateSelector"
+                                      ModelChatTemplate="{StaticResource ModelDataTemplate}"
+                                      UserChatTemplate="{StaticResource UserDataTemplate}" />
+    </ContentPage.Resources>
+    <StackLayout Padding="10"
+                 Spacing="10">
+
+        <!--  Chat View  -->
+        <mpowerkit:VirtualizeListView x:Name="vList"
+                                      ItemsSource="{Binding ChatMessages}"
+                                      VerticalOptions="EndAndExpand"
+                                      ItemTemplate="{StaticResource ChatTemplateSelector}">
+            <mpowerkit:VirtualizeListView.LayoutManager>
+                <helpers:LinearItemsLayoutManager2 />
+            </mpowerkit:VirtualizeListView.LayoutManager>
+        </mpowerkit:VirtualizeListView>
+
+        <Border Padding="5"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Quinary},
+                                                  Dark={StaticResource QuinaryDark}}"
+                HorizontalOptions="FillAndExpand"
+                Stroke="Transparent"
+                StrokeShape="RoundRectangle 30,30,30,30">
+            <StackLayout
+                Orientation="Horizontal"
+                Spacing="5">
+                <!--  Chat Entry/Input  -->
+                <Editor x:Name="ChatEntry"
+                        Margin="20,0,7,0"
+                        FontSize="18"
+                        AutoSize="TextChanges"
+                        MaximumHeightRequest="100"
+                        HorizontalOptions="FillAndExpand"
+                        Text="{Binding EditorTextContent}"
+                        TextChanged="ChatEntry_OnTextChanged"
+                        Placeholder="{Binding EditorPlaceHolder}" />
+
+                <Label VerticalOptions="Center"
+                       HorizontalTextAlignment="Center"
+                       FontSize="20"
+                       Margin="{Binding MicrophoneMargin}"
+                       IsEnabled="{Binding IsMicrophoneEnabled}"
+                       FontFamily="FontAwesome"
+                       Text="{Binding MicrophoneIcon}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding MicrophoneClickCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+                <!--  Chat Send Button  -->
+                <Button CornerRadius="30"
+                        HorizontalOptions="Center"
+                        FontFamily="FontAwesome"
+                        Text="{x:Static helpers:IconFont.PaperPlaneTop}"
+                        Margin="3"
+                        VerticalOptions="Center"
+                        IsEnabled="{Binding IsChatEnabled}">
+                    <Button.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ChatSendCommand}"
+                                              CommandParameter="{x:Reference ChatEntry}" />
+                    </Button.GestureRecognizers>
+                    <Button.Behaviors>
+
+                        <toolkit:AnimationBehavior>
+                            <toolkit:AnimationBehavior.AnimationType>
+                                <toolkit:FadeAnimation Opacity="0.5" />
+                            </toolkit:AnimationBehavior.AnimationType>
+                        </toolkit:AnimationBehavior>
+                    </Button.Behaviors>
+                </Button>
+            </StackLayout>
+        </Border>
+    </StackLayout>
+</ContentPage>

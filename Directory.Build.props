@@ -1,7 +1,5 @@
 <Project>
   <PropertyGroup>
-    <TargetFrameworks>net8.0-android</TargetFrameworks>
-    <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <ApplicationId>com.ssbois.geco</ApplicationId>

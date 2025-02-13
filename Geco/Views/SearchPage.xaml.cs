@@ -1,27 +1,18 @@
-using InputKit.Shared.Controls;
+using Geco.ViewModels;
 
 namespace Geco.Views;
 
 public partial class SearchPage : ContentPage
 {
-	public SearchPage()
+	SearchViewModel CurrentViewModel { get; }
+
+	public SearchPage(SearchViewModel vm)
 	{
+		BindingContext = vm;
+		CurrentViewModel = vm;
 		InitializeComponent();
-
-		Appearing += OnAppearing;
 	}
 
-	void OnAppearing(object? sender, EventArgs e)
-	{
-		// temporary solution for theme bug
-		bool isDarkTheme = Application.Current!.RequestedTheme == AppTheme.Dark;
-		foreach (var currentBtn in BtnSelection.Children)
-		{
-			if (currentBtn is not SelectionView.SelectableButton sb)
-				continue;
-
-			sb.UnselectedColor = isDarkTheme ? Color.FromArgb("#FF262626") : Colors.LightGray;
-			sb.SelectedColor = isDarkTheme ? Color.FromArgb("#FF141414") : Color.FromArgb("#FFb5b5b5");
-		}
-	}
+	void SearchEntry_OnTextChanged(object? sender, TextChangedEventArgs e) =>
+		CurrentViewModel.SearchTextChanged(e.NewTextValue);
 }

@@ -5,19 +5,26 @@
              x:Class="Geco.Views.SearchPage"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:helpers="clr-namespace:Geco.Views.Helpers"
-             xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
+             xmlns:vm="clr-namespace:Geco.ViewModels"
+             x:DataType="vm:SearchViewModel"
              Title="Search">
     <Grid Padding="10"
           ColumnSpacing="10"
           RowSpacing="10"
-          RowDefinitions="*, auto, auto, *">
+          RowDefinitions="*, auto, auto, auto, *">
 
         <!-- Geco Logo and Title -->
-        <StackLayout Grid.Row="0" Orientation="Vertical" VerticalOptions="Center">
-            <Image MaximumHeightRequest="100" MaximumWidthRequest="100" Source="geco_logo.png" />
-            <Label HorizontalTextAlignment="Center" FontFamily="Poppins" FontSize="Title"
+        <StackLayout Grid.Row="0"
+                     Orientation="Vertical"
+                     VerticalOptions="Center">
+            <Image MaximumHeightRequest="100"
+                   MaximumWidthRequest="100"
+                   Source="geco_logo.png" />
+            <Label HorizontalTextAlignment="Center"
+                   FontFamily="Poppins"
+                   FontSize="Title"
                    TextColor="{AppThemeBinding Light={StaticResource ContainerTextLight}, Dark={StaticResource ContainerTextDark}}"
-                   Text="Geco" />
+                   Text="GECO" />
         </StackLayout>
 
         <!-- Search Bar -->
@@ -35,12 +42,29 @@
                 <Entry x:Name="SearchEntry"
                        Margin="20,0,7,0"
                        FontSize="18"
-                       HorizontalOptions="FillAndExpand" />
+                       HorizontalOptions="FillAndExpand"
+                       Placeholder="{Binding SearchPlaceholder}"
+                       TextChanged="SearchEntry_OnTextChanged"
+                       Text="{Binding SearchQuery}" />
+
+                <Label VerticalOptions="Center"
+                       HorizontalTextAlignment="Center"
+                       FontSize="20"
+                       Margin="{Binding MicrophoneMargin}"
+                       IsEnabled="{Binding IsMicrophoneEnabled}"
+                       FontFamily="FontAwesome"
+                       Text="{Binding MicrophoneIcon}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding MicrophoneClickCommand}"
+                                              CommandParameter="{x:Reference SearchEntry}" />
+                    </Label.GestureRecognizers>
+                </Label>
 
                 <!--  Search Send Button  -->
                 <Button CornerRadius="30"
                         HorizontalOptions="Center"
                         FontFamily="FontAwesome"
+                        IsEnabled="{Binding IsSearchButtonEnabled}"
                         Text="{x:Static helpers:IconFont.MagnifyingGlass}"
                         Margin="3"
                         VerticalOptions="Center">
@@ -60,23 +84,41 @@
             </StackLayout>
         </Border>
 
+        <!-- Brave Search Attribution Badge -->
+        <HorizontalStackLayout Grid.Row="2"
+                               HorizontalOptions="Center">
+            <Label Text="Powered By  " />
+            <Image Source="{AppThemeBinding Light=brave_logo_light.svg, Dark=brave_logo_dark.svg}"
+                   HeightRequest="20" />
+        </HorizontalStackLayout>
+
         <!-- Sustainable Chips (TODO: Disappear after chatting) -->
-        <input:SelectionView x:Name="BtnSelection"
-                             Grid.Row="2"
-                             ColumnNumber="2"
-                             ColumnSpacing="5"
-                             RowSpacing="5"
-                             Padding="50,20,50,50"
-                             BackgroundColor="{AppThemeBinding Light=#D3D3D3, Dark=#262626}"
-                             Color="{AppThemeBinding Light=#b5b5b5, Dark=#141414}">
-            <input:SelectionView.ItemsSource>
-                <x:Array Type="{x:Type x:String}">
-                    <x:String>⚡ Energy</x:String>
-                    <x:String>🗑 Waste</x:String>
-                    <x:String>👗 Fashion</x:String>
-                    <x:String>🚗 Transport</x:String>
-                </x:Array>
-            </input:SelectionView.ItemsSource>
-        </input:SelectionView>
+        <Grid Grid.Row="3"
+              Padding="0,20,0,0"
+              RowDefinitions="auto, auto"
+              ColumnDefinitions="*, auto, auto, *"
+              RowSpacing="5"
+              ColumnSpacing="5">
+            <Button x:Name="energyBtn" Grid.Row="0" Grid.Column="1" Text="⚡ Energy"
+                    BackgroundColor="{AppThemeBinding Light=#D3D3D3, Dark=#262626}"
+                    TextColor="{AppThemeBinding Light=#141414, Dark=#b5b5b5}"
+                    Command="{Binding ChipClickCommand}"
+                    CommandParameter="{x:Reference energyBtn}" />
+            <Button x:Name="wasteBtn" Grid.Row="0" Grid.Column="2" Text="🗑 Waste"
+                    BackgroundColor="{AppThemeBinding Light=#D3D3D3, Dark=#262626}"
+                    TextColor="{AppThemeBinding Light=#141414, Dark=#b5b5b5}"
+                    Command="{Binding ChipClickCommand}"
+                    CommandParameter="{x:Reference wasteBtn}" />
+            <Button x:Name="fashionBtn" Grid.Row="1" Grid.Column="1" Text="👗 Fashion"
+                    BackgroundColor="{AppThemeBinding Light=#D3D3D3, Dark=#262626}"
+                    TextColor="{AppThemeBinding Light=#141414, Dark=#b5b5b5}"
+                    Command="{Binding ChipClickCommand}"
+                    CommandParameter="{x:Reference fashionBtn}" />
+            <Button x:Name="transportBtn" Grid.Row="1" Grid.Column="2" Text="🚗 Transport"
+                    BackgroundColor="{AppThemeBinding Light=#D3D3D3, Dark=#262626}"
+                    TextColor="{AppThemeBinding Light=#141414, Dark=#b5b5b5}"
+                    Command="{Binding ChipClickCommand}"
+                    CommandParameter="{x:Reference transportBtn}" />
+        </Grid>
     </Grid>
 </ContentPage>

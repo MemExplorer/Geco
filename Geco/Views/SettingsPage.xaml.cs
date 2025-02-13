@@ -1,13 +1,17 @@
+using Geco.Core.Models.ActionObserver;
 using Geco.ViewModels;
 
 namespace Geco.Views;
 
 public partial class SettingsPage : ContentPage
 {
-	public SettingsPage()
+	readonly IPlatformActionObserver _monitorService;
+
+	public SettingsPage(IPlatformActionObserver platformActionObserver)
 	{
 		InitializeComponent();
 		Appearing += SettingsPage_Appearing;
+		_monitorService = platformActionObserver;
 	}
 
 	void SettingsPage_Appearing(object? sender, EventArgs e)
@@ -20,5 +24,17 @@ public partial class SettingsPage : ContentPage
 	{
 		var bindingCtx = (SettingsViewModel)BindingContext;
 		bindingCtx.ToggleNotifications((Switch)sender, e);
+	}
+
+	void MonitorSwt_Toggled(object sender, ToggledEventArgs e)
+	{
+		var bindingCtx = (SettingsViewModel)BindingContext;
+		bindingCtx.ToggleMonitor((Switch)sender, e, _monitorService);
+	}
+
+	private void DarkModeSwt_Toggled(object sender, ToggledEventArgs e)
+	{
+		var bindingCtx = (SettingsViewModel)BindingContext;
+		bindingCtx.ToggleDarkMode(e);
 	}
 }

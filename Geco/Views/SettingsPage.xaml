@@ -4,7 +4,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Geco.Views.SettingsPage"
              xmlns:vm="clr-namespace:Geco.ViewModels"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:DataType="vm:SettingsViewModel"
              Title="Settings"
              Shell.FlyoutBehavior="Disabled">
     <ContentPage.BindingContext>
@@ -20,11 +20,29 @@
                     <Label FontSize="18"
                            Text="Clear History" />
                     <Label FontSize="Caption"
-                           Text="Clears all your conversation" />
+                           Text="Clears all your conversation"
+                           TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}" />
                 </StackLayout>
             </StackLayout>
             <Border.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding ClearHistoryCommand}" />
+            </Border.GestureRecognizers>
+        </Border>
+
+        <!-- Clear Weekly Reports -->
+        <Border Stroke="Black">
+            <StackLayout Orientation="Horizontal"
+                         Padding="10">
+                <StackLayout Orientation="Vertical">
+                    <Label FontSize="18"
+                           Text="Clear Weekly Reports" />
+                    <Label FontSize="Caption"
+                           Text="Clears your weekly reports"
+                           TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}" />
+                </StackLayout>
+            </StackLayout>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ClearWeeklyReportsCommand}" />
             </Border.GestureRecognizers>
         </Border>
 
@@ -37,15 +55,13 @@
                     <Label FontSize="18"
                            Text="Dark Mode" />
                     <Label FontSize="Caption"
-                           Text="Changes the user interface to a darker color scheme" />
+                           Text="Changes the user interface to a darker color scheme"
+                           TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}" />
                 </StackLayout>
-                <Switch x:Name="DarkModeSwt" HorizontalOptions="End">
-                    <Switch.Behaviors>
-                        <toolkit:EventToCommandBehavior EventName="Toggled"
-                                                        x:TypeArguments="ToggledEventArgs"
-                                                        Command="{Binding ToggleDarkModeCommand}" />
-                    </Switch.Behaviors>
-                </Switch>
+                <Switch x:Name="DarkModeSwt"
+                        HorizontalOptions="End"
+                        Toggled="DarkModeSwt_Toggled"
+                        ThumbColor="{AppThemeBinding Light=#403f3f,  Dark=#dedcdc}" />
             </StackLayout>
         </Border>
 
@@ -58,15 +74,12 @@
                     <Label FontSize="18"
                            Text="Monitor Habits" />
                     <Label FontSize="Caption"
-                           Text="Geco will monitor and give insights about your habits" />
+                           Text="GECO will monitor and give insights about your habits"
+                           TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}" />
                 </StackLayout>
-                <Switch x:Name="MonitorSwt" HorizontalOptions="End">
-                    <Switch.Behaviors>
-                        <toolkit:EventToCommandBehavior EventName="Toggled"
-                                                        x:TypeArguments="ToggledEventArgs"
-                                                        Command="{Binding ToggleMonitorCommand}" />
-                    </Switch.Behaviors>
-                </Switch>
+                <Switch x:Name="MonitorSwt" HorizontalOptions="End" Toggled="MonitorSwt_Toggled"
+                        ThumbColor="{AppThemeBinding Light=#403f3f,  Dark=#dedcdc}" />
+
             </StackLayout>
         </Border>
 
@@ -79,9 +92,11 @@
                     <Label FontSize="18"
                            Text="Notifications" />
                     <Label FontSize="Caption"
-                           Text="Geco will notify you about your habits" />
+                           Text="GECO will notify you about your habits"
+                           TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}" />
                 </StackLayout>
-                <Switch x:Name="NotificationSwt" HorizontalOptions="End" Toggled="NotificationToggle_Toggled" />
+                <Switch x:Name="NotificationSwt" HorizontalOptions="End" Toggled="NotificationToggle_Toggled"
+                        ThumbColor="{AppThemeBinding Light=#403f3f,  Dark=#dedcdc}" />
             </StackLayout>
         </Border>
     </VerticalStackLayout>

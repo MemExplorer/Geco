@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <Shell x:Class="Geco.AppShell"
+       x:DataType="vm:AppShellViewModel"
        xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
        xmlns:local="clr-namespace:Geco.Views"
@@ -8,7 +9,7 @@
        xmlns:helpers="clr-namespace:Geco.Views.Helpers"
        Shell.TabBarIsVisible="False"
        BackgroundColor="{AppThemeBinding Light={StaticResource ContainerLight}, Dark={StaticResource ContainerDark}}"
-       Title="Geco">
+       Title="GECO">
     <Shell.BindingContext>
         <vm:AppShellViewModel />
     </Shell.BindingContext>
@@ -38,14 +39,19 @@
         </StackLayout>
     </Shell.TitleView>
 
-    <!-- Default flyout Items (Chat, Search)-->
+    <!-- Default flyout Items (Chat, Search, Reports)-->
     <FlyoutItem x:Name="MainFlyout" FlyoutDisplayOptions="AsMultipleItems">
+        <ShellContent ContentTemplate="{DataTemplate local:StartupPage}"
+                      Title="Startup Page"
+                      ClassId="StartupPage"
+                      Route="StartupPage"
+                      FlyoutItemIsVisible="False" />
         <ShellContent ContentTemplate="{DataTemplate local:ChatPage}"
                       Title="Chat"
                       ClassId="ChatPage"
                       Route="ChatPage">
             <ShellContent.Icon>
-                <FontImageSource Color="{AppThemeBinding Light=#262626, Dark=#D3D3D3}"
+                <FontImageSource Color="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}"
                                  FontFamily="FontAwesome"
                                  Glyph="{x:Static helpers:IconFont.MessagePlus}" />
             </ShellContent.Icon>
@@ -55,9 +61,19 @@
                       ClassId="SearchPage"
                       Route="SearchPage">
             <ShellContent.Icon>
-                <FontImageSource Color="{AppThemeBinding Light=#262626, Dark=#D3D3D3}"
+                <FontImageSource Color="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}"
                                  FontFamily="FontAwesome"
                                  Glyph="{x:Static helpers:IconFont.MagnifyingGlass}" />
+            </ShellContent.Icon>
+        </ShellContent>
+        <ShellContent ContentTemplate="{DataTemplate local:ReportsPage}"
+                      Title="Weekly Report"
+                      ClassId="ReportsPage"
+                      Route="ReportsPage">
+            <ShellContent.Icon>
+                <FontImageSource Color="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}"
+                                 FontFamily="FontAwesome"
+                                 Glyph="{x:Static helpers:IconFont.Memo}" />
             </ShellContent.Icon>
         </ShellContent>
     </FlyoutItem>
@@ -67,18 +83,19 @@
                 FlyoutDisplayOptions="AsMultipleItems">
         <!-- Chat History gets added inside here -->
     </FlyoutItem>
-    
+
     <Shell.FlyoutFooterTemplate>
         <DataTemplate>
             <StackLayout Orientation="Horizontal">
                 <Border HorizontalOptions="FillAndExpand">
                     <Label HorizontalTextAlignment="Center"
                            VerticalTextAlignment="Center"
-                           Text="Add something here..." />
+                           Text="© SS Bois 2024" />
                 </Border>
                 <Border HorizontalOptions="End">
-                    <Button BackgroundColor="Transparent"
-                            TextColor="{AppThemeBinding Light={StaticResource ContainerTextLight}, Dark={StaticResource ContainerTextDark}}"
+                    <Button x:DataType="vm:AppShellViewModel"
+                            BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light=#403f3f,  Dark=#c0c0c0}"
                             FontFamily="FontAwesome"
                             FontSize="20"
                             Text="{x:Static helpers:IconFont.Gear}">

@@ -2,13 +2,13 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Geco.Core.Database;
-using Geco.Core.Gemini;
+using Geco.Core.Models.Chat;
 
 namespace Geco.ViewModels;
 
 public partial class AppShellViewModel : ObservableObject
 {
-	[ObservableProperty] ObservableCollection<ChatHistory> _chatHistoryList;
+	[ObservableProperty] ObservableCollection<GecoConversation> _chatHistoryList;
 
 	[ObservableProperty] bool _isChatInstance;
 
@@ -21,7 +21,7 @@ public partial class AppShellViewModel : ObservableObject
 		ChatHistoryList = [];
 		IsChatPage = false;
 		IsChatInstance = false;
-		PageTitle = "Geco";
+		PageTitle = "GECO";
 	}
 
 	[RelayCommand]
@@ -36,6 +36,9 @@ public partial class AppShellViewModel : ObservableObject
 		await Shell.Current.GoToAsync("SettingsPage");
 	}
 
+	/// <summary>
+	///     Deletes selected conversation
+	/// </summary>
 	[RelayCommand]
 	async Task DeleteChat()
 	{
@@ -49,7 +52,7 @@ public partial class AppShellViewModel : ObservableObject
 			return;
 
 		// get selected chat
-		var chatRepo = currentShell.SvcProvider.GetService<ChatRepository>();
+		var chatRepo = GlobalContext.Services.GetRequiredService<ChatRepository>();
 		string? currentPageId = currentShell.CurrentPage.Parent.ClassId;
 		var selectedChat = ChatHistoryList.First(x => x.Id == currentPageId);
 
@@ -57,7 +60,7 @@ public partial class AppShellViewModel : ObservableObject
 		ChatHistoryList.Remove(selectedChat);
 
 		// delete history in database
-		await chatRepo!.DeleteHistory(currentPageId);
+		await chatRepo.DeleteHistory(currentPageId);
 
 		// go to new chat page
 		await currentShell.GoToAsync("//ChatPage");

@@ -398,3 +398,6 @@ FodyWeavers.xsd
 *.sln.iml
 .idea/
 Geco.Core.Test/Secrets.cs
+Geco/Properties/launchSettings.json
+Geco/GecoSecrets.cs
+Geco/Resources/Fonts/FontAwesome6DuotoneNew-Solid.ttf
