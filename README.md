@@ -7,9 +7,9 @@ GECO, a mobile sustainability companion that uses Gemini to provide tailored rec
 - **Habit Tracking**: Track your mobile phone habits, you will receive notifications when you've been doing unsustainable actions. Once a week has passed, you will receive a weekly report showcasing your habits from the previous week.
 
 ## Showcase
-| Chat | Search | 
-| :---: | :---: |
-| ![](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExaXVyOWczd2l1dnRzbnFvM3B3d2V4bHQ1Njl6a2g4bzNoc25xdXl4YiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/uj8XTgcF9nUgsBsHi6/giphy.gif) | ![](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGt4Nmx5dXA2N2Zwa25qMmFobXZmMmw5ZjVlb2N4djI5Z2FlOHZ2eiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/6BGc1mKM21dxaq5QrF/giphy.gif) |
+| Chat | Search | Weekly Report
+| :---: | :---: | :---: |
+| ![](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExaXVyOWczd2l1dnRzbnFvM3B3d2V4bHQ1Njl6a2g4bzNoc25xdXl4YiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/uj8XTgcF9nUgsBsHi6/giphy.gif) | ![](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGt4Nmx5dXA2N2Zwa25qMmFobXZmMmw5ZjVlb2N4djI5Z2FlOHZ2eiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/6BGc1mKM21dxaq5QrF/giphy.gif) | ![](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHg5N2dlOXF0c2U5aDlvYTh4YnNrY3lqNjBtZDhubnBueGVqZHRidCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/aqntn5A20nx9fT6tnR/giphy.gif) |
 
 ## Setup and Installation
 
