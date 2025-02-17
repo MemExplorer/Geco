@@ -17,21 +17,21 @@ GECO, a mobile sustainability companion that uses Gemini to provide tailored rec
 - [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 - [Gemini API Key](https://aistudio.google.com/apikey)
 - [Brave Search API Key (Data for AI)](https://brave.com/search/api)
-- Android SDK
+- [JDK 11 or above](https://www.oracle.com/java/technologies/downloads/)
 
-### .NET MAUI SDK Installation
+### .NET MAUI SDK Installation (Skip if Already Installed)
 To install .NET MAUI SDK, run the following command:
-```
+```sh
 > dotnet workload install maui
 ```
 
 ### Cloning the project
 You can either download the project or run the following command:
-```
+```sh
 > git clone https://github.com/MemExplorer/Geco.git
 ```
 After cloning, the project folder name should be `Geco`. If you downloaded it directly from github, the folder name should be `Geco-main`. Navigate to the project directory by running the following command.
-```
+```sh
 > cd Geco
 ```
 
@@ -51,8 +51,24 @@ internal partial class GecoSecrets
 ```
 
 ### Building
-To build the app, run the following command:
-```
-> dotnet build -c Release
-```
-After building the project, the generated apk file will be located at `Geco/bin/Release/net9.0-android/com.ssbois.geco-Signed.apk`.
+Before proceeding, replace `"Your JDK folder path"` with your actual JDK installation path. Ensure the path is enclosed in double quotes.  
+
+#### 1. Installing Android SDK (Skip if Already Installed)  
+
+If you haven't installed the Android SDK, you need to do so before building the app. Run the following command:  
+
+```sh
+> dotnet build -c Release -t:InstallAndroidDependencies -p:AndroidSdkDirectory="C:\android\android-sdk" -p:JavaSdkDirectory="Your JDK folder path" -p:AcceptAndroidSdkLicenses=True
+```  
+
+After execution, an error may appear. You can safely ignore it and proceed to the next step.  
+
+#### 2. Building the App  
+
+If the Android SDK is already installed, update the command with your actual Android SDK path. Then, run:  
+
+```sh
+> dotnet build -c Release -p:AndroidSdkDirectory="C:\android\android-sdk" -p:JavaSdkDirectory="Your JDK folder path"
+```  
+
+Once the build is complete, the generated APK file will be located at `Geco/bin/Release/net9.0-android/com.ssbois.geco-Signed.apk`.
