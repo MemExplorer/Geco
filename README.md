@@ -14,10 +14,10 @@ GECO, a mobile sustainability companion that uses Gemini to provide tailored rec
 ## Setup and Installation
 
 ### Prerequisites
+- [JDK 11 or above](https://www.oracle.com/java/technologies/downloads/)
 - [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 - [Gemini API Key](https://aistudio.google.com/apikey)
 - [Brave Search API Key (Data for AI)](https://brave.com/search/api)
-- [JDK 11 or above](https://www.oracle.com/java/technologies/downloads/)
 
 ### .NET MAUI SDK Installation (Skip if Already Installed)
 To install .NET MAUI SDK, run the following command:
