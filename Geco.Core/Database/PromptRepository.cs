@@ -20,21 +20,6 @@ public class PromptRepository : DbRepositoryBase
 	{
 	}
 
-	public async Task<string> GetPrompt(string userTopic) =>
-		await BuildPrompt(PromptCategory.SearchUserBasedTemp, new { UserTopic = userTopic });
-
-	public async Task<string> GetPrompt(SearchPredefinedTopic predefinedTopic)
-	{
-		var promptCategory = GetPromptCategory(predefinedTopic);
-		string randomPromptRefinement = await FetchRandPromptRefinement(promptCategory);
-
-		return await BuildPrompt(PromptCategory.SearchCtgBasedTemp,
-			new
-			{
-				PredefinedTopic = $"Sustainable {predefinedTopic}", StoredPromptRefinement = randomPromptRefinement
-			});
-	}
-
 	public async Task<string> GetPrompt(DeviceInteractionTrigger interactionTrigger)
 	{
 		var promptCategory = GetPromptCategory(interactionTrigger);
@@ -88,10 +73,6 @@ public class PromptRepository : DbRepositoryBase
 		using var db = await SqliteDb.GetTransient(DatabaseDir);
 		var prompts = new List<(int Category, string Content)>
 		{
-			((int)PromptCategory.SearchUserBasedTemp,
-				"Based on the {UserTopic}, generate three (3) responses and use a tone like that of a search engine."),
-			((int)PromptCategory.SearchCtgBasedTemp,
-				"Using the tone of a search engine and based on the topic of {PredefinedTopic}, generate three responses focusing on the {StoredPromptRefinement}."),
 			((int)PromptCategory.TriggerNotifTemp,
 				"""
 				**Purpose:** Create a notification and an analytical overview based on detected unsustainable actions, using provided placeholders for contextual adaptability.  

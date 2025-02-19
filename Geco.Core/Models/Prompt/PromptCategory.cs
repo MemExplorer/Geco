@@ -5,8 +5,6 @@ namespace Geco.Core.Models.Prompt;
 /// </summary>
 public enum PromptCategory
 {
-	SearchUserBasedTemp,
-	SearchCtgBasedTemp,
 	TriggerNotifTemp,
 	LikelihoodWithPrevDataTemp,
 	LikelihoodNoPrevDataTemp,
