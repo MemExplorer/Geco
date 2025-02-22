@@ -125,9 +125,21 @@ public partial class SettingsViewModel : ObservableObject
 
 			if (!checkUsageStatusPermissionFunc())
 			{
-				bool reqUsageStats =
-					await new SpecialPermissionWatcher(checkUsageStatusPermissionFunc,
-						Settings.ActionUsageAccessSettings, currentAppPackageName).RequestAsync();
+				bool reqUsageStats;
+				try
+				{
+					reqUsageStats =
+						await new SpecialPermissionWatcher(checkUsageStatusPermissionFunc,
+							Settings.ActionUsageAccessSettings, currentAppPackageName).RequestAsync();
+				}
+				catch (ActivityNotFoundException)
+				{
+					// Some android versions do not support this intent with args
+					reqUsageStats =
+						await new SpecialPermissionWatcher(checkUsageStatusPermissionFunc,
+							Settings.ActionUsageAccessSettings).RequestAsync();
+				}
+
 				if (!reqUsageStats)
 				{
 					sender.IsToggled = false;
