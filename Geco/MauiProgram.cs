@@ -93,8 +93,8 @@ public static class MauiProgram
 		builder.Services.AddKeyedSingleton(GlobalContext.GeminiChat, new GeminiSettings
 		{
 			Temperature = 0.2f,
-			TopP = 0.85f,
-			TopK = 50,
+			TopP = 0.80f,
+			TopK = 40,
 			SafetySettings = new List<SafetySetting>
 			{
 				new(HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, HarmBlockThreshold.BLOCK_LOW_AND_ABOVE),
