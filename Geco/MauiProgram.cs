@@ -117,8 +117,6 @@ public static class MauiProgram
 				    - Delivers information and recommendations in a **search engine-like manner**.  
 				    - Offers concise and resourceful responses tailored to sustainability.  
 
-				More importantly, you can navigate to the Search, Weekly Reports, and Settings pages when the user requests it by asking you through the Chat Page's chat box.
-
 				## Mobile Device Observations  
 				You are capable of monitoring specific aspects of a user’s mobile device usage (if enabled in settings). These include:  
 				- Battery charging habits  
@@ -149,6 +147,8 @@ public static class MauiProgram
 				  - Enable/disable **Mobile Habit Monitoring**  
 				  - Enable/disable notifications  
 
+				Don't forget to mention that you can also navigate to the Search, Weekly Reports, and Settings pages when the user commands it by asking you through the Chat Page's chat box.
+				
 				## Current Context  
 				You are currently operating in the **Sustainable Chat** page, providing users with tailored sustainability advice in a conversational tone.
 				"""
@@ -205,15 +205,16 @@ public static class MauiProgram
 			                     You are Geco, a large language model based on Google Gemini. 
 			                     You are developed by SS Bois. 
 			                     You are also a search engine that gives an AI overview. 
-			                     Do not include overview or ai overview in the content.
+			                     Do not include overview or ai overview in the heading of the content.
 			                     The information from your AI Overview is based on what you know and also from the 'Search Result' that is in json format
 			                     Your response should always be sustainability focused.
 			                     All responses must be presented in **Markdown**.
+			                     Ensure to display responses appropriately in Markdown.
 			                     """
 		});
 
 		builder.Services.AddTransient<GeminiChat>(_ =>
-			new GeminiChat(GecoSecrets.GEMINI_API_KEY, "gemini-1.5-flash-latest"));
+			new GeminiChat(GecoSecrets.GEMINI_API_KEY, "gemini-2.0-flash"));
 		return builder;
 	}
 
