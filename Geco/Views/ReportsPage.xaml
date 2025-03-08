@@ -16,9 +16,51 @@
     <ContentPage.BindingContext>
         <vm:ReportsViewModel />
     </ContentPage.BindingContext>
-    <Grid RowDefinitions="auto, *">
+    <Grid RowDefinitions="auto, auto, *">
+        <Border StrokeShape="RoundRectangle 5"
+                Margin="5"
+                BackgroundColor="{AppThemeBinding Light=#CFE2FF, Dark=#031633}"
+                Stroke="{AppThemeBinding Light=#9EC5FE, Dark=#084298}"
+                Grid.Row="0" 
+                Padding="15"
+                IsVisible="{Binding IsTipVisible}">
+            <Grid ColumnDefinitions="*, auto"
+                  RowDefinitions="auto, auto">
+                <Border Padding="1,0,5,0" Stroke="transparent" Grid.Column="0" Grid.Row="0">
+                    <Label FontSize="20">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span FontFamily="FontAwesome"
+                                      TextColor="{AppThemeBinding Light=#052C65, Dark=#6EA8FE}"
+                                      Text="{x:Static helpers:IconFont.CircleInfo}" />
+                                <Span FontAttributes="Bold" 
+                                      TextColor="{AppThemeBinding Light=#052C65, Dark=#6EA8FE}"
+                                      Text=" Info"></Span>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                </Border>
+
+                <Border Stroke="transparent" Grid.Column="0" Grid.Row="1">
+                    <Label TextColor="{AppThemeBinding Light=#052C65, Dark=#6EA8FE}" Padding="0,2,0,0"
+                           Text="Mobile Habit Sustainable Level corresponds to your level of sustainability based on your actions on your mobile phone."
+                           LineBreakMode="WordWrap"/>
+                </Border>
+                <Border Stroke="transparent" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2">
+                    <Label HorizontalOptions="Center"
+                           VerticalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Dark=LightGray, Light=Gray}"
+                           FontSize="22"
+                           FontFamily="FontAwesome" Text="{x:Static helpers:IconFont.Xmark}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding DismissTipCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Border>
+            </Grid>
+        </Border>
         <Label Padding="0,300,0,0"
-               Grid.Row="0"
+               Grid.Row="1"
                Text="Currently, you have no weekly reports."
                HorizontalOptions="Center"
                IsVisible="False">
@@ -31,7 +73,7 @@
                 </DataTrigger>
             </Label.Triggers>
         </Label>
-        <mpowerkit:VirtualizeListView Grid.Row="1" ItemsSource="{Binding WeeklyReportHistory}">
+        <mpowerkit:VirtualizeListView Grid.Row="2" ItemsSource="{Binding WeeklyReportHistory}">
             <mpowerkit:VirtualizeListView.ItemsLayout>
                 <mpowerkit:LinearLayout ItemSpacing="5" />
             </mpowerkit:VirtualizeListView.ItemsLayout>

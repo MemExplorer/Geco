@@ -37,4 +37,10 @@ public static class GecoSettings
 		get => Preferences.Default.Get(nameof(DailyReportDateTime), DateTime.UnixEpoch);
 		set => Preferences.Default.Set(nameof(DailyReportDateTime), value);
 	}
+	
+	public static bool WeeklyReportTipVisible
+	{
+		get => Preferences.Default.Get(nameof(WeeklyReportTipVisible), true);
+		set => Preferences.Default.Set(nameof(WeeklyReportTipVisible), value);
+	}
 }
