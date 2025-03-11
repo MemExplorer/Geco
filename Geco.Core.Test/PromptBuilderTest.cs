@@ -90,18 +90,9 @@ public class PromptBuilderTest
 		};
 		SearchConfig = new GeminiSettings
 		{
-			Conversational = false,
-			SystemInstructions = """
-			                     You are Geco, a large language model based on Google Gemini. 
-			                     You are developed by SS Bois. 
-			                     You are also a search engine that gives an AI overview. 
-			                     Do not include overview or ai overview in the content.
-			                     The information from your AI Overview is based on what you know and also from the 'Search Result' that is in json format
-			                     Your response should always be sustainability focused.
-			                     All responses must be presented in **Markdown**.
-			                     """
+			Conversational = false
 		};
-		ChatClient = new GeminiChat(GEMINI_API_KEY, "gemini-1.5-flash-latest");
+		ChatClient = new GeminiChat(GEMINI_API_KEY, "gemini-2.0-flash-001");
 	}
 
 	string GetSustainabilityLevel(double probability) => probability switch
@@ -271,7 +262,23 @@ public class PromptBuilderTest
 		                                      ]
 		                                      """;
 
-		const string searchPrompt = $"Topic: {searchTopic}\nSearch Result: {searchResultSampleData}";
+		const string searchPrompt = $"""
+		                             ## Instructions
+		                             - You are Geco, a large language model based on Google Gemini. 
+		                             - You are developed by SS Bois. 
+		                             - You are a search engine that gives an AI overview. 
+		                             - Do not include overview or ai overview in the content.
+		                             - Your response should always be sustainability focused.
+		                             - All responses must be presented in **Markdown**.
+		                             
+		                             ## Task
+		                             Generate an overview based on your knowledge and the JSON data provided in the 'Search Data' section. Ensure the response aligns with the topic {searchTopic} and integrates relevant information. Format the response using Markdown for clear readability and structured presentation. Append a hyperlink at the end, in paragraphs or statements that uses data from 'Search Data' section where the format is (**[`Profile.Name`](`Url`)**)
+		                             
+		                             ## Search Data
+		                             ```
+		                             {searchResultSampleData}
+		                             ```
+		                             """;
 		var searchAiOverview = await ChatClient.SendMessage(searchPrompt, settings: SearchConfig);
 		_output.WriteLine($"Constructed Prompt:\n {searchPrompt}");
 		_output.WriteLine($"Generated Output:\n {searchAiOverview}");

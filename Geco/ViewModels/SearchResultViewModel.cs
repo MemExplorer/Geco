@@ -215,7 +215,23 @@ public partial class SearchResultViewModel : ObservableObject, IQueryAttributabl
 								string jsonContent = JsonSerializer.Serialize(braveSearchResult);
 								var chatSummaryResponse =
 									await ChatClient.SendMessage(
-										$"Topic: {unescapeDataString}\nSearch Result: {jsonContent}",
+										$"""
+										 ## Instructions
+										 - You are Geco, a large language model based on Google Gemini. 
+										 - You are developed by SS Bois. 
+										 - You are a search engine that gives an AI overview. 
+										 - Do not include overview or ai overview in the content.
+										 - Your response should always be sustainability focused.
+										 - All responses must be presented in **Markdown**.
+										 
+										 ## Task
+										 Generate an overview based on your knowledge and the JSON data provided in the 'Search Data' section. Ensure the response aligns with the topic {unescapeDataString} and integrates relevant information. Format the response using Markdown for clear readability and structured presentation. Append a hyperlink at the end, in paragraphs or statements that uses data from 'Search Data' section where the format is (**[`Profile.Name`](`Url`)**)
+										 
+										 ## Search Data
+										 ```
+										 {jsonContent}
+										 ```
+										 """,
 										settings: geminiSearchConfig);
 								AiOverview = chatSummaryResponse.Text;
 								AiSummaryVisible = true;
