@@ -88,10 +88,7 @@ public class PromptBuilderTest
 				)
 			)
 		};
-		SearchConfig = new GeminiSettings
-		{
-			Conversational = false
-		};
+		SearchConfig = new GeminiSettings { Conversational = false };
 		ChatClient = new GeminiChat(GEMINI_API_KEY, "gemini-2.0-flash-001");
 	}
 
@@ -270,18 +267,21 @@ public class PromptBuilderTest
 		                             - Do not include overview or ai overview in the content.
 		                             - Your response should always be sustainability focused.
 		                             - All responses must be presented in **Markdown**.
-		                             
+
 		                             ## Task
 		                             Generate an overview based on your knowledge and the JSON data provided in the 'Search Data' section. Ensure the response aligns with the topic {searchTopic} and integrates relevant information. Format the response using Markdown for clear readability and structured presentation. Append a hyperlink at the end, in paragraphs or statements that uses data from 'Search Data' section where the format is (**[`Profile.Name`](`Url`)**)
-		                             
+
 		                             ## Search Data
 		                             ```
 		                             {searchResultSampleData}
 		                             ```
 		                             """;
 		var searchAiOverview = await ChatClient.SendMessage(searchPrompt, settings: SearchConfig);
+		var normalOutput =
+			await ChatClient.SendMessage($"{searchTopic}\n{searchResultSampleData}", settings: SearchConfig);
 		_output.WriteLine($"Constructed Prompt:\n {searchPrompt}");
-		_output.WriteLine($"Generated Output:\n {searchAiOverview}");
+		_output.WriteLine($"Generated Output Without Prompt:\n {normalOutput}");
+		_output.WriteLine($"Generated Output With Prompt:\n {searchAiOverview}");
 	}
 
 	[Fact]
@@ -293,7 +293,11 @@ public class PromptBuilderTest
 		Debug.Assert(!NotificationPromptPlaceholders.All(x => triggerNotifPrompt.Contains($"{{{x}}}")));
 
 		var triggerNotifResult = await ChatClient.SendMessage(triggerNotifPrompt, settings: NotificationConfig);
+		var normalOutput = await ChatClient.SendMessage(
+			"Mobile charging\nLet your battery naturally deplete to around 20% before charging to about 80%\nBattery Life Preservation",
+			settings: NotificationConfig);
 		_output.WriteLine($"Constructed Prompt:\n {triggerNotifPrompt}");
+		_output.WriteLine($"Generated Output Without Prompt:\n {normalOutput}");
 		_output.WriteLine($"Generated Output:\n {triggerNotifResult}");
 	}
 
@@ -357,7 +361,12 @@ public class PromptBuilderTest
 
 		var weeklyReportWithPrevResult =
 			await ChatClient.SendMessage(weeklyReportWithPrevPrompt, settings: WeeklyReportConfig);
+
+		var normalOutput = await ChatClient.SendMessage(
+			$"{currSustainableProportionalProbability}\n{currWeekComputationStr.PositiveComputation}\n{prevSustainableProportionalProbability}\n{prevWeekComputationStr.PositiveComputation}\n{prevWeekSusLvl}",
+			settings: WeeklyReportConfig);
 		_output.WriteLine($"Constructed Prompt:\n {weeklyReportWithPrevPrompt}");
+		_output.WriteLine($"Generated Output Without Prompt:\n {normalOutput}");
 		_output.WriteLine($"Generated Output:\n {weeklyReportWithPrevResult}");
 	}
 }
