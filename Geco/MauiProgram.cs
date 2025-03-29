@@ -92,8 +92,8 @@ public static class MauiProgram
 	{
 		builder.Services.AddKeyedSingleton(GlobalContext.GeminiChat, new GeminiSettings
 		{
-			Temperature = 0.2f,
-			TopP = 0.80f,
+			Temperature = 1,
+			TopP = 1,
 			TopK = 40,
 			SafetySettings = new List<SafetySetting>
 			{
