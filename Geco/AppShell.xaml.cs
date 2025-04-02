@@ -28,6 +28,21 @@ public partial class AppShell : Shell
 		InitializeRoutes();
 	}
 
+	protected override bool OnBackButtonPressed()
+	{
+		if (this.Navigation.NavigationStack.Count != 1)
+			return base.OnBackButtonPressed();
+
+		var dispatchTask = Dispatcher.Dispatch(async () =>
+		{
+			bool exitApp = await this.DisplayAlert("", "Are you sure you want to exit the application?", "Yes", "No");
+			if (exitApp)
+				Application.Current?.Quit();
+		});
+
+		return true;
+	}
+
 	void InitializeRoutes()
 	{
 		// register routes
