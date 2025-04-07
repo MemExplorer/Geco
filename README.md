@@ -28,7 +28,7 @@ To install .NET MAUI SDK, run the following command:
 ### Cloning the project
 You can either download the project or run the following command:
 ```sh
-> git clone https://github.com/MemExplorer/Geco.git
+> git clone https://github.com/MemDbg/Geco.git
 ```
 After cloning, the project folder name should be `Geco`. If you downloaded it directly from github, the folder name should be `Geco-main`. Navigate to the project directory by running the following command.
 ```sh
